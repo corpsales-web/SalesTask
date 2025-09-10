@@ -130,7 +130,7 @@ const App = () => {
         space_size: "",
         location: "",
         notes: "",
-        tags: [],
+        tags: "",
         assigned_to: ""
       });
       
