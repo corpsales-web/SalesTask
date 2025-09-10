@@ -130,21 +130,51 @@ class AIService:
             Voice Input: "{voice_request.voice_input}"
             Context: {json.dumps(voice_request.context) if voice_request.context else "None"}
             
-            Please provide:
-            1. Task breakdown with title, description, priority, due date
-            2. Suggested actions to complete the task
-            3. Calendar event details if meeting/appointment mentioned
-            4. Follow-up tasks if applicable
+            Please provide a response with:
+            1. task_breakdown: object with title, description, priority, due_date
+            2. suggested_actions: array of strings
+            3. calendar_event: object or null
+            4. follow_up_tasks: array of strings (not objects)
             
-            Format response as JSON with keys: task_breakdown, suggested_actions, calendar_event, follow_up_tasks
+            Respond in this exact JSON format:
+            {{
+                "task_breakdown": {{
+                    "title": "Task title",
+                    "description": "Task description", 
+                    "priority": "High/Medium/Low",
+                    "due_date": "ISO date or null"
+                }},
+                "suggested_actions": ["action1", "action2"],
+                "calendar_event": null,
+                "follow_up_tasks": ["follow up task 1", "follow up task 2"]
+            }}
             """
             
             response = await self.orchestrator.route_task("automation", context_str)
             
-            # Parse AI response and structure it
+            # Parse AI response and structure it properly
             try:
-                parsed_response = json.loads(response)
-            except:
+                # Try to extract JSON from the response
+                if '{' in response and '}' in response:
+                    json_start = response.find('{')
+                    json_end = response.rfind('}') + 1
+                    json_str = response[json_start:json_end]
+                    parsed_response = json.loads(json_str)
+                else:
+                    raise ValueError("No JSON found in response")
+                
+                # Ensure follow_up_tasks are strings, not objects
+                if 'follow_up_tasks' in parsed_response:
+                    follow_up_tasks = []
+                    for task in parsed_response['follow_up_tasks']:
+                        if isinstance(task, dict):
+                            follow_up_tasks.append(task.get('title', 'Follow-up task'))
+                        else:
+                            follow_up_tasks.append(str(task))
+                    parsed_response['follow_up_tasks'] = follow_up_tasks
+                
+            except Exception as parse_error:
+                print(f"JSON parsing error: {parse_error}")
                 # Fallback parsing if AI doesn't return valid JSON
                 parsed_response = {
                     "task_breakdown": {
@@ -159,12 +189,16 @@ class AIService:
                         "Schedule reminder"
                     ],
                     "calendar_event": None,
-                    "follow_up_tasks": []
+                    "follow_up_tasks": [
+                        "Send confirmation email",
+                        "Update CRM with visit details"
+                    ]
                 }
             
             return VoiceTaskResponse(**parsed_response)
             
         except Exception as e:
+            print(f"Voice processing error: {e}")
             raise HTTPException(status_code=500, detail=f"Voice processing error: {str(e)}")
 
     async def generate_ai_insights(self, insight_request: AIInsightRequest) -> AIInsightResponse:
