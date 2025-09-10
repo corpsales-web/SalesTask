@@ -6,11 +6,21 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
 
+# Import AI service
+from ai_service import (
+    ai_service, 
+    VoiceTaskRequest, 
+    VoiceTaskResponse,
+    AIInsightRequest,
+    AIInsightResponse,
+    ContentGenerationRequest,
+    ContentGenerationResponse
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -99,6 +109,7 @@ class Task(BaseModel):
     due_date: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     completed_at: Optional[datetime] = None
+    ai_generated: bool = False  # Flag for AI-generated tasks
 
 class TaskCreate(BaseModel):
     title: str
@@ -107,6 +118,7 @@ class TaskCreate(BaseModel):
     assigned_to: Optional[str] = None
     lead_id: Optional[str] = None
     due_date: Optional[datetime] = None
+    ai_generated: bool = False
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = None
@@ -125,6 +137,7 @@ class DashboardStats(BaseModel):
     total_revenue: float
     pending_tasks: int
     conversion_rate: float
+    ai_tasks_generated: int = 0
 
 # Helper functions
 def prepare_for_mongo(data):
@@ -147,7 +160,7 @@ def parse_from_mongo(item):
 # Routes
 @api_router.get("/")
 async def root():
-    return {"message": "Aavana Greens CRM API"}
+    return {"message": "Aavana Greens CRM API with AI Integration"}
 
 # Lead Management Routes
 @api_router.post("/leads", response_model=Lead)
@@ -250,6 +263,9 @@ async def get_dashboard_stats():
     # Get pending tasks
     pending_tasks = await db.tasks.count_documents({"status": "Pending"})
     
+    # Get AI-generated tasks count
+    ai_tasks_generated = await db.tasks.count_documents({"ai_generated": True})
+    
     # Calculate conversion rate
     conversion_rate = (won_deals / total_leads * 100) if total_leads > 0 else 0
     
@@ -261,8 +277,89 @@ async def get_dashboard_stats():
         lost_deals=lost_deals,
         total_revenue=total_revenue,
         pending_tasks=pending_tasks,
-        conversion_rate=round(conversion_rate, 2)
+        conversion_rate=round(conversion_rate, 2),
+        ai_tasks_generated=ai_tasks_generated
     )
+
+# AI Integration Routes
+@api_router.post("/ai/voice-to-task", response_model=VoiceTaskResponse)
+async def voice_to_task(request: VoiceTaskRequest):
+    """Convert voice input to structured task using AI"""
+    try:
+        result = await ai_service.process_voice_to_task(request)
+        
+        # Automatically create the task in the database
+        if result.task_breakdown:
+            task_data = TaskCreate(
+                title=result.task_breakdown.get("title", "AI Generated Task"),
+                description=result.task_breakdown.get("description", request.voice_input),
+                priority=Priority(result.task_breakdown.get("priority", "Medium")),
+                due_date=result.task_breakdown.get("due_date"),
+                ai_generated=True
+            )
+            
+            # Create the task
+            task_dict = task_data.dict()
+            task = Task(**task_dict)
+            task_dict = prepare_for_mongo(task.dict())
+            await db.tasks.insert_one(task_dict)
+            
+            result.task_breakdown["task_id"] = task.id
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Voice processing failed: {str(e)}")
+
+@api_router.post("/ai/insights", response_model=AIInsightResponse)
+async def get_ai_insights(request: AIInsightRequest):
+    """Generate AI insights for business operations"""
+    try:
+        # Add current CRM data as context
+        if request.type == "leads":
+            leads_count = await db.leads.count_documents({})
+            won_count = await db.leads.count_documents({"status": "Won"})
+            request.data = {
+                "total_leads": leads_count,
+                "won_deals": won_count,
+                "conversion_rate": (won_count / leads_count * 100) if leads_count > 0 else 0
+            }
+        
+        result = await ai_service.generate_ai_insights(request)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Insight generation failed: {str(e)}")
+
+@api_router.post("/ai/generate-content", response_model=ContentGenerationResponse)
+async def generate_content(request: ContentGenerationRequest):
+    """Generate marketing content using AI"""
+    try:
+        result = await ai_service.generate_content(request)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Content generation failed: {str(e)}")
+
+@api_router.get("/ai/recall-context/{client_id}")
+async def recall_client_context(client_id: str, query: str = ""):
+    """Recall client context using AI memory layer"""
+    try:
+        # Get client data from database
+        lead = await db.leads.find_one({"id": client_id})
+        if not lead:
+            raise HTTPException(status_code=404, detail="Client not found")
+        
+        # Get related tasks
+        tasks = await db.tasks.find({"lead_id": client_id}).to_list(length=10)
+        
+        context = {
+            "client_data": lead,
+            "related_tasks": tasks,
+            "query": query or "Provide complete client context"
+        }
+        
+        result = await ai_service.recall_client_context(client_id, json.dumps(context))
+        return {"context": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Context recall failed: {str(e)}")
 
 # Include the router in the main app
 app.include_router(api_router)
