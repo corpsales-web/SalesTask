@@ -198,6 +198,63 @@ const App = () => {
     }
   };
 
+  // ERP Data Fetching
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`${API}/erp/products`);
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  const fetchInventoryAlerts = async () => {
+    try {
+      const response = await axios.get(`${API}/erp/inventory-alerts`);
+      setInventoryAlerts(response.data);
+    } catch (error) {
+      console.error("Error fetching inventory alerts:", error);
+    }
+  };
+
+  const fetchInvoices = async () => {
+    try {
+      const response = await axios.get(`${API}/erp/invoices`);
+      setInvoices(response.data);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get(`${API}/erp/projects`);
+      setProjects(response.data);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
+
+  const fetchExecutiveDashboard = async () => {
+    try {
+      const response = await axios.get(`${API}/analytics/executive-dashboard`);
+      setExecutiveDashboard(response.data);
+    } catch (error) {
+      console.error("Error fetching executive dashboard:", error);
+    }
+  };
+
+  // HRMS Data Fetching
+  const fetchPayrollReport = async () => {
+    try {
+      const currentDate = new Date();
+      const response = await axios.get(`${API}/hrms/payroll-report?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}`);
+      setPayrollReport(response.data);
+    } catch (error) {
+      console.error("Error fetching payroll report:", error);
+    }
+  };
+
   // Create lead function
   const createLead = async (e) => {
     e.preventDefault();
