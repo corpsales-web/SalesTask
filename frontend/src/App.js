@@ -1271,6 +1271,387 @@ const App = () => {
             </div>
           </TabsContent>
 
+          {/* ERP Tab */}
+          <TabsContent value="erp" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Package className="h-8 w-8 mr-3 text-emerald-600" />
+                ERP Management
+              </h2>
+              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                Inventory • Invoicing • Projects
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Inventory Management */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Package className="h-5 w-5 mr-2" />
+                    Inventory Management
+                  </CardTitle>
+                  <CardDescription>Products, stock levels, and alerts</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <p className="text-sm text-blue-600">Total Products</p>
+                      <p className="text-2xl font-bold text-blue-800">{products.length}</p>
+                    </div>
+                    <div className="bg-red-50 p-3 rounded-lg">
+                      <p className="text-sm text-red-600">Low Stock</p>
+                      <p className="text-2xl font-bold text-red-800">{inventoryAlerts.length}</p>
+                    </div>
+                  </div>
+
+                  {inventoryAlerts.length > 0 && (
+                    <div className="bg-red-50 p-3 rounded-lg border border-red-200">
+                      <div className="flex items-center mb-2">
+                        <AlertTriangle className="h-4 w-4 text-red-600 mr-2" />
+                        <span className="font-medium text-red-800">Stock Alerts</span>
+                      </div>
+                      {inventoryAlerts.slice(0, 3).map((alert, index) => (
+                        <div key={index} className="text-sm text-red-700 mb-1">
+                          • {alert.message}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Product
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Invoice Management */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Invoice Management
+                  </CardTitle>
+                  <CardDescription>Billing, payments, and receipts</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <p className="text-sm text-green-600">Total Invoices</p>
+                      <p className="text-2xl font-bold text-green-800">{invoices.length}</p>
+                    </div>
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                      <p className="text-sm text-yellow-600">Pending</p>
+                      <p className="text-2xl font-bold text-yellow-800">
+                        {invoices.filter(inv => inv.payment_status === 'Pending').length}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-emerald-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-emerald-800 mb-2">Recent Invoices</h4>
+                    {invoices.slice(0, 3).map((invoice, index) => (
+                      <div key={index} className="flex justify-between items-center text-sm mb-1">
+                        <span className="text-emerald-700">{invoice.invoice_number}</span>
+                        <span className="font-medium text-emerald-800">₹{invoice.total_amount?.toLocaleString('en-IN')}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Invoice
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Project Gallery */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Camera className="h-5 w-5 mr-2" />
+                    Project Gallery
+                  </CardTitle>
+                  <CardDescription>Portfolio and client testimonials</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-purple-50 p-3 rounded-lg">
+                      <p className="text-sm text-purple-600">Projects</p>
+                      <p className="text-2xl font-bold text-purple-800">{projects.length}</p>
+                    </div>
+                    <div className="bg-indigo-50 p-3 rounded-lg">
+                      <p className="text-sm text-indigo-600">Featured</p>
+                      <p className="text-2xl font-bold text-indigo-800">
+                        {projects.filter(proj => proj.is_featured).length}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-emerald-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-emerald-800 mb-2">Recent Projects</h4>
+                    {projects.slice(0, 3).map((project, index) => (
+                      <div key={index} className="text-sm text-emerald-700 mb-1">
+                        • {project.project_name} - {project.location}
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Project
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Executive Dashboard Summary */}
+            {executiveDashboard && (
+              <Card className="bg-gradient-to-r from-emerald-50 to-green-100 border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <BarChart3 className="h-5 w-5 mr-2" />
+                    Business Performance Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-emerald-800">
+                        ₹{(executiveDashboard.business_overview.total_revenue_ytd / 100000).toFixed(1)}L
+                      </p>
+                      <p className="text-sm text-emerald-600">Revenue YTD</p>
+                      <Badge className="bg-green-100 text-green-800 mt-1">
+                        +{executiveDashboard.business_overview.growth_rate}%
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-emerald-800">
+                        {executiveDashboard.business_overview.active_customers}
+                      </p>
+                      <p className="text-sm text-emerald-600">Active Customers</p>
+                      <Badge className="bg-emerald-100 text-emerald-800 mt-1">
+                        {executiveDashboard.business_overview.customer_satisfaction}/5 ⭐
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-emerald-800">
+                        {executiveDashboard.sales_metrics.conversion_rate}%
+                      </p>
+                      <p className="text-sm text-emerald-600">Conversion Rate</p>
+                      <Badge className="bg-blue-100 text-blue-800 mt-1">
+                        {executiveDashboard.sales_metrics.sales_cycle_days} days cycle
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-emerald-800">
+                        {executiveDashboard.financial_health.profit_margin}%
+                      </p>
+                      <p className="text-sm text-emerald-600">Profit Margin</p>
+                      <Badge className="bg-purple-100 text-purple-800 mt-1">
+                        Healthy
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* HRMS Tab */}
+          <TabsContent value="hrms" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <UserCheck className="h-8 w-8 mr-3 text-emerald-600" />
+                HRMS - Human Resource Management
+              </h2>
+              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                Attendance • Payroll • Leave Management
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Attendance Management */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Clock2 className="h-5 w-5 mr-2" />
+                    Smart Attendance System
+                  </CardTitle>
+                  <CardDescription>Face recognition + GPS tracking</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-medium text-green-800">Today's Attendance</h4>
+                      <Badge className="bg-green-100 text-green-800">
+                        {new Date().toLocaleDateString('en-IN')}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl font-bold text-green-800">8</p>
+                        <p className="text-xs text-green-600">Present</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-red-800">1</p>
+                        <p className="text-xs text-red-600">Absent</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-yellow-800">1</p>
+                        <p className="text-xs text-yellow-600">Late</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
+                      <Camera className="h-4 w-4 mr-2" />
+                      Face Check-In
+                    </Button>
+                    <Button variant="outline" className="w-full border-emerald-300 hover:bg-emerald-50" size="sm">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      GPS Check-In
+                    </Button>
+                  </div>
+
+                  <div className="bg-emerald-50 p-3 rounded-lg">
+                    <h5 className="font-medium text-emerald-800 mb-2">Recent Check-ins</h5>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-emerald-700">Rajesh Kumar</span>
+                        <span className="text-emerald-600">09:15 AM</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-emerald-700">Priya Sharma</span>
+                        <span className="text-emerald-600">09:22 AM</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-emerald-700">Amit Patel</span>
+                        <span className="text-emerald-600">09:45 AM</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Payroll Management */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <DollarSign className="h-5 w-5 mr-2" />
+                    Payroll Management
+                  </CardTitle>
+                  <CardDescription>Salary calculations and reports</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {payrollReport && (
+                    <>
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium text-blue-800">Monthly Payroll</h4>
+                          <Badge className="bg-blue-100 text-blue-800">
+                            {payrollReport.month}/{payrollReport.year}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-blue-800">
+                              ₹{(payrollReport.total_payroll / 1000).toFixed(0)}K
+                            </p>
+                            <p className="text-xs text-blue-600">Total Payroll</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-blue-800">{payrollReport.total_employees}</p>
+                            <p className="text-xs text-blue-600">Employees</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-emerald-50 p-3 rounded-lg">
+                        <h5 className="font-medium text-emerald-800 mb-2">Employee Salaries</h5>
+                        <div className="space-y-2">
+                          {payrollReport.employees?.slice(0, 3).map((emp, index) => (
+                            <div key={index} className="flex justify-between items-center text-sm">
+                              <div>
+                                <span className="text-emerald-700 font-medium">{emp.name}</span>
+                                <br />
+                                <span className="text-emerald-600 text-xs">{emp.department}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-emerald-800 font-medium">
+                                  ₹{emp.net_salary?.toLocaleString('en-IN')}
+                                </span>
+                                <br />
+                                <span className="text-emerald-600 text-xs">
+                                  {emp.days_worked || 0} days
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" className="border-emerald-300 hover:bg-emerald-50" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Export
+                    </Button>
+                    <Button className="bg-emerald-600 hover:bg-emerald-700" size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Process
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Leave Management */}
+              <Card className="bg-white border-emerald-200 shadow-lg lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Calendar className="h-5 w-5 mr-2" />
+                    Leave Management System
+                  </CardTitle>
+                  <CardDescription>Apply, approve, and track employee leaves</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-orange-50 p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-orange-800">5</p>
+                      <p className="text-sm text-orange-600">Pending Requests</p>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-green-800">12</p>
+                      <p className="text-sm text-green-600">Approved</p>
+                    </div>
+                    <div className="bg-red-50 p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-red-800">2</p>
+                      <p className="text-sm text-red-600">Rejected</p>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-blue-800">15</p>
+                      <p className="text-sm text-blue-600">Avg Days/Month</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex gap-2">
+                    <Button className="bg-emerald-600 hover:bg-emerald-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Apply Leave
+                    </Button>
+                    <Button variant="outline" className="border-emerald-300 hover:bg-emerald-50">
+                      <Archive className="h-4 w-4 mr-2" />
+                      View Requests
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* AI Assistant Tab */}
           <TabsContent value="ai" className="space-y-6">
             <div className="flex justify-between items-center">
