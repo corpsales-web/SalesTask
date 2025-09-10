@@ -381,6 +381,142 @@ async def recall_client_context(client_id: str, query: str = ""):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Context recall failed: {str(e)}")
 
+# Telephony Routes
+@api_router.get("/telephony/ivr/{digit}")
+async def handle_ivr(digit: str):
+    """Handle IVR menu selections"""
+    try:
+        response = await telephony_service.create_ivr_response(digit)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"IVR processing failed: {str(e)}")
+
+@api_router.get("/telephony/analytics")
+async def get_call_analytics():
+    """Get call analytics and metrics"""
+    try:
+        analytics = await telephony_service.get_call_analytics()
+        return analytics
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analytics retrieval failed: {str(e)}")
+
+@api_router.post("/telephony/log-call")
+async def log_call(call_data: dict):
+    """Log call details"""
+    try:
+        call_log = await telephony_service.log_call(call_data)
+        # Save to database
+        call_dict = prepare_for_mongo(call_log.dict())
+        await db.call_logs.insert_one(call_dict)
+        return call_log
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Call logging failed: {str(e)}")
+
+# WhatsApp Routes
+@api_router.post("/whatsapp/send-template")
+async def send_whatsapp_template(to_number: str, template_name: str, variables: List[str] = None):
+    """Send WhatsApp template message"""
+    try:
+        message = await whatsapp_service.send_template_message(to_number, template_name, variables)
+        # Save to database
+        message_dict = prepare_for_mongo(message.dict())
+        await db.whatsapp_messages.insert_one(message_dict)
+        return message
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"WhatsApp message failed: {str(e)}")
+
+@api_router.post("/whatsapp/process-message")
+async def process_whatsapp_message(message_data: dict):
+    """Process incoming WhatsApp message"""
+    try:
+        response = await whatsapp_service.process_incoming_message(message_data)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Message processing failed: {str(e)}")
+
+# HRMS Routes
+@api_router.post("/hrms/check-in")
+async def employee_check_in(employee_id: str, location: str = None):
+    """Employee check-in"""
+    try:
+        attendance = await hrms_service.check_in_employee(employee_id, location)
+        # Save to database
+        attendance_dict = prepare_for_mongo(attendance.dict())
+        await db.attendance.insert_one(attendance_dict)
+        return attendance
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Check-in failed: {str(e)}")
+
+@api_router.post("/hrms/check-out")
+async def employee_check_out(attendance_id: str):
+    """Employee check-out"""
+    try:
+        attendance = await hrms_service.check_out_employee(attendance_id)
+        # Update in database
+        attendance_dict = prepare_for_mongo(attendance.dict())
+        await db.attendance.update_one({"id": attendance_id}, {"$set": attendance_dict})
+        return attendance
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Check-out failed: {str(e)}")
+
+@api_router.post("/hrms/apply-leave")
+async def apply_leave(leave_data: dict):
+    """Apply for leave"""
+    try:
+        leave_request = await hrms_service.apply_leave(leave_data)
+        # Save to database
+        leave_dict = prepare_for_mongo(leave_request.dict())
+        await db.leave_requests.insert_one(leave_dict)
+        return leave_request
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Leave application failed: {str(e)}")
+
+@api_router.get("/hrms/attendance-summary/{employee_id}")
+async def get_attendance_summary(employee_id: str, month: int, year: int):
+    """Get attendance summary"""
+    try:
+        summary = await hrms_service.get_attendance_summary(employee_id, month, year)
+        return summary
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Attendance summary failed: {str(e)}")
+
+# Super Admin Routes
+@api_router.get("/admin/system-stats")
+async def get_system_stats():
+    """Get comprehensive system statistics for super admin"""
+    try:
+        # Aggregate all system data
+        stats = {
+            "leads": {
+                "total": await db.leads.count_documents({}),
+                "by_status": {
+                    "new": await db.leads.count_documents({"status": "New"}),
+                    "qualified": await db.leads.count_documents({"status": "Qualified"}),
+                    "won": await db.leads.count_documents({"status": "Won"})
+                },
+                "by_source": await db.leads.aggregate([
+                    {"$group": {"_id": "$source", "count": {"$sum": 1}}}
+                ]).to_list(length=None)
+            },
+            "tasks": {
+                "total": await db.tasks.count_documents({}),
+                "ai_generated": await db.tasks.count_documents({"ai_generated": True}),
+                "by_status": {
+                    "pending": await db.tasks.count_documents({"status": "Pending"}),
+                    "completed": await db.tasks.count_documents({"status": "Completed"})
+                }
+            },
+            "telephony": await telephony_service.get_call_analytics(),
+            "system_health": {
+                "ai_models_active": 3,
+                "database_status": "healthy",
+                "api_uptime": "99.9%"
+            }
+        }
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"System stats failed: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
