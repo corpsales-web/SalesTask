@@ -23,6 +23,19 @@ from ai_service import (
     ContentGenerationResponse
 )
 
+# Import new services
+from telephony_service import (
+    telephony_service,
+    whatsapp_service, 
+    hrms_service,
+    CallRequest,
+    CallLog,
+    WhatsAppMessage,
+    Employee,
+    Attendance,
+    LeaveRequest
+)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
