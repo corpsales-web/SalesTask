@@ -178,10 +178,15 @@ const App = () => {
   const createLead = async (e) => {
     e.preventDefault();
     try {
+      const location = isCustomLocation ? 
+        customLocation : 
+        (selectedCity && selectedState ? `${selectedCity}, ${selectedState}` : "");
+      
       const leadData = {
         ...newLead,
+        location: location,
         budget: newLead.budget ? parseFloat(newLead.budget) : null,
-        tags: Array.isArray(newLead.tags) ? newLead.tags : newLead.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        tags: newLead.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
       };
       
       await axios.post(`${API}/leads`, leadData);
@@ -190,19 +195,27 @@ const App = () => {
         description: "Lead created successfully"
       });
       
+      // Reset form
       setNewLead({
         name: "",
         phone: "",
         email: "",
         budget: "",
         space_size: "",
-        location: "",
+        city: "",
+        state: "",
         source: "",
         category: "",
         notes: "",
         tags: "",
         assigned_to: ""
       });
+      
+      setSelectedState("");
+      setSelectedCity("");
+      setCustomLocation("");
+      setIsCustomLocation(false);
+      setIsCustomCategory(false);
       
       fetchLeads();
       fetchDashboardStats();
