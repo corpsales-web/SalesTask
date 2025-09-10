@@ -538,6 +538,291 @@ async def get_system_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"System stats failed: {str(e)}")
 
+# ERP Routes - Product Management
+@api_router.post("/erp/products", response_model=Product)
+async def create_product(product_data: ProductCreate):
+    """Create new product"""
+    try:
+        if not product_data.sku:
+            product_data.sku = await erp_service.generate_sku(product_data.category, product_data.name)
+        
+        if not product_data.barcode:
+            product_data.barcode = await erp_service.generate_barcode(product_data.sku)
+        
+        product = Product(**product_data.dict())
+        product_dict = prepare_for_mongo(product.dict())
+        await db.products.insert_one(product_dict)
+        return product
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Product creation failed: {str(e)}")
+
+@api_router.get("/erp/products", response_model=List[Product])
+async def get_products(category: Optional[str] = None, low_stock: bool = False):
+    """Get products with filtering options"""
+    try:
+        query = {"is_active": True}
+        if category:
+            query["category"] = category
+        if low_stock:
+            query["$expr"] = {"$lte": ["$stock_quantity", "$min_stock_level"]}
+        
+        products = await db.products.find(query).to_list(length=100)
+        return [Product(**parse_from_mongo(product)) for product in products]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch products: {str(e)}")
+
+@api_router.get("/erp/inventory-alerts")
+async def get_inventory_alerts():
+    """Get inventory alerts for low stock items"""
+    try:
+        products = await db.products.find({"is_active": True}).to_list(length=None)
+        product_objects = [Product(**parse_from_mongo(p)) for p in products]
+        alerts = await erp_service.check_stock_levels(product_objects)
+        return alerts
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get inventory alerts: {str(e)}")
+
+# ERP Routes - Invoice Management
+@api_router.post("/erp/invoices", response_model=Invoice)
+async def create_invoice(invoice_data: dict):
+    """Create new invoice"""
+    try:
+        # Generate invoice number
+        invoice_count = await db.invoices.count_documents({}) + 1
+        invoice_data["invoice_number"] = f"INV-{datetime.now().strftime('%Y%m%d')}-{invoice_count:04d}"
+        
+        # Calculate totals
+        totals = await erp_service.calculate_invoice_totals(
+            invoice_data.get("items", []),
+            invoice_data.get("tax_percentage", 18.0),
+            invoice_data.get("discount_percentage", 0.0)
+        )
+        invoice_data.update(totals)
+        
+        invoice = Invoice(**invoice_data)
+        invoice_dict = prepare_for_mongo(invoice.dict())
+        await db.invoices.insert_one(invoice_dict)
+        return invoice
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Invoice creation failed: {str(e)}")
+
+@api_router.get("/erp/invoices")
+async def get_invoices(status: Optional[str] = None, limit: int = 50):
+    """Get invoices with filtering"""
+    try:
+        query = {}
+        if status:
+            query["payment_status"] = status
+        
+        invoices = await db.invoices.find(query).limit(limit).to_list(length=limit)
+        return [Invoice(**parse_from_mongo(invoice)) for invoice in invoices]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch invoices: {str(e)}")
+
+# ERP Routes - Project Gallery
+@api_router.post("/erp/projects", response_model=ProjectGallery)
+async def create_project(project_data: dict):
+    """Add project to gallery"""
+    try:
+        project = ProjectGallery(**project_data)
+        project_dict = prepare_for_mongo(project.dict())
+        await db.projects.insert_one(project_dict)
+        return project
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Project creation failed: {str(e)}")
+
+@api_router.get("/erp/projects")
+async def get_projects(project_type: Optional[str] = None, featured_only: bool = False):
+    """Get project gallery"""
+    try:
+        query = {}
+        if project_type:
+            query["project_type"] = project_type
+        if featured_only:
+            query["is_featured"] = True
+        
+        projects = await db.projects.find(query).to_list(length=50)
+        return [ProjectGallery(**parse_from_mongo(project)) for project in projects]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch projects: {str(e)}")
+
+# ERP Routes - Lead Source Sync
+@api_router.post("/erp/sync-lead-sources")
+async def sync_external_lead_sources():
+    """Sync leads from external sources"""
+    try:
+        sync_results = await erp_service.sync_lead_sources()
+        return sync_results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lead sync failed: {str(e)}")
+
+# Calendar & Appointment Routes
+@api_router.post("/calendar/events", response_model=CalendarEvent)
+async def create_calendar_event(event_data: CalendarEventCreate):
+    """Create calendar event and sync with Google Calendar"""
+    try:
+        event = CalendarEvent(**event_data.dict())
+        
+        # Create in Google Calendar
+        google_event_id = await calendar_service.create_google_calendar_event(event)
+        event.google_event_id = google_event_id
+        
+        # Save to database
+        event_dict = prepare_for_mongo(event.dict())
+        await db.calendar_events.insert_one(event_dict)
+        
+        return event
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Event creation failed: {str(e)}")
+
+@api_router.get("/calendar/availability")
+async def check_availability(date: str, duration: int = 60):
+    """Check availability for booking"""
+    try:
+        event_date = datetime.fromisoformat(date)
+        availability = await calendar_service.check_availability(event_date, duration)
+        return availability
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Availability check failed: {str(e)}")
+
+@api_router.get("/calendar/booking-link")
+async def generate_booking_link(duration: int = 60):
+    """Generate public booking link"""
+    try:
+        booking_link = await calendar_service.generate_booking_link(duration)
+        return {"booking_link": booking_link}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Booking link generation failed: {str(e)}")
+
+@api_router.post("/calendar/send-reminder/{event_id}")
+async def send_appointment_reminder(event_id: str, reminder_type: str = "sms"):
+    """Send appointment reminder"""
+    try:
+        event = await db.calendar_events.find_one({"id": event_id})
+        if not event:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        event_obj = CalendarEvent(**parse_from_mongo(event))
+        reminder_result = await calendar_service.send_appointment_reminder(event_obj, reminder_type)
+        return reminder_result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Reminder sending failed: {str(e)}")
+
+# Advanced HRMS Routes
+@api_router.post("/hrms/face-checkin")
+async def face_recognition_checkin(employee_id: str, face_image: str, location: str):
+    """Face recognition check-in"""
+    try:
+        result = await complete_hrms_service.process_face_recognition_checkin(employee_id, face_image, location)
+        
+        if result["status"] == "success":
+            # Create attendance record
+            attendance = Attendance(
+                employee_id=employee_id,
+                date=datetime.now(timezone.utc).date(),
+                check_in=result["check_in_time"],
+                location=location,
+                status="Present"
+            )
+            attendance_dict = prepare_for_mongo(attendance.dict())
+            await db.attendance.insert_one(attendance_dict)
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Face check-in failed: {str(e)}")
+
+@api_router.get("/hrms/salary-calculation/{employee_id}")
+async def calculate_employee_salary(employee_id: str, month: int, year: int):
+    """Calculate monthly salary for employee"""
+    try:
+        salary_calculation = await complete_hrms_service.calculate_monthly_salary(employee_id, month, year)
+        return salary_calculation
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Salary calculation failed: {str(e)}")
+
+@api_router.get("/hrms/payroll-report")
+async def generate_payroll_report(month: int, year: int):
+    """Generate comprehensive payroll report"""
+    try:
+        payroll_report = await complete_hrms_service.generate_payroll_report(month, year)
+        return payroll_report
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Payroll report generation failed: {str(e)}")
+
+# Advanced WhatsApp Routes
+@api_router.post("/whatsapp/send-catalog")
+async def send_whatsapp_catalog(to_number: str):
+    """Send interactive catalog via WhatsApp"""
+    try:
+        catalog_message = await whatsapp_advanced_service.send_catalog_message(to_number)
+        return catalog_message
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Catalog sending failed: {str(e)}")
+
+@api_router.post("/whatsapp/ai-chatbot")
+async def process_whatsapp_ai_chatbot(message: str, customer_data: dict):
+    """Process WhatsApp message with AI chatbot"""
+    try:
+        response = await whatsapp_advanced_service.process_ai_chatbot_response(message, customer_data)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI chatbot processing failed: {str(e)}")
+
+@api_router.post("/whatsapp/smart-suggestions")
+async def send_smart_suggestions(customer_phone: str, interaction_history: List[dict]):
+    """Send smart suggestions based on customer behavior"""
+    try:
+        suggestion = await whatsapp_advanced_service.send_smart_suggestion(customer_phone, interaction_history)
+        return suggestion
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Smart suggestions failed: {str(e)}")
+
+# Analytics & Reporting Routes  
+@api_router.get("/analytics/executive-dashboard")
+async def get_executive_dashboard():
+    """Get comprehensive executive dashboard"""
+    try:
+        dashboard = await analytics_service.generate_executive_dashboard()
+        return dashboard
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Dashboard generation failed: {str(e)}")
+
+@api_router.get("/analytics/sales-report")
+async def get_sales_analytics(start_date: str, end_date: str):
+    """Get detailed sales analytics"""
+    try:
+        start = datetime.fromisoformat(start_date)
+        end = datetime.fromisoformat(end_date)
+        analytics = await erp_service.get_sales_analytics(start, end)
+        return analytics
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Sales analytics failed: {str(e)}")
+
+@api_router.post("/analytics/export-report")
+async def export_report(report_type: str, format: str, data: dict):
+    """Export reports to PDF or Excel"""
+    try:
+        if format.lower() == "pdf":
+            file_path = await analytics_service.export_report_pdf(report_type, data)
+        elif format.lower() == "excel":
+            file_path = await analytics_service.export_report_excel(report_type, data)
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported format")
+        
+        return {"file_path": file_path, "download_url": f"/download{file_path}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Report export failed: {str(e)}")
+
+# GPS Tracking Routes
+@api_router.post("/gps/track-visit")
+async def track_site_visit(event_id: str, gps_coordinates: str):
+    """Track GPS coordinates for site visits"""
+    try:
+        tracking_result = await calendar_service.track_site_visit_gps(event_id, gps_coordinates)
+        return tracking_result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"GPS tracking failed: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
