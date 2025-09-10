@@ -82,6 +82,19 @@ const App = () => {
   const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [newCustomCategory, setNewCustomCategory] = useState("");
   
+  // ERP & Business Management
+  const [products, setProducts] = useState([]);
+  const [inventoryAlerts, setInventoryAlerts] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [executiveDashboard, setExecutiveDashboard] = useState(null);
+  
+  // HRMS Data
+  const [employees, setEmployees] = useState([]);
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [payrollReport, setPayrollReport] = useState(null);
+  
   const mediaRecorder = useRef(null);
   const { toast } = useToast();
 
