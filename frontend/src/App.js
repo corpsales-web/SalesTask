@@ -46,6 +46,11 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedLead, setSelectedLead] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [voiceInput, setVoiceInput] = useState("");
+  const [aiInsights, setAiInsights] = useState([]);
+  const [generatedContent, setGeneratedContent] = useState("");
+  const mediaRecorder = useRef(null);
   const { toast } = useToast();
 
   // Form states
