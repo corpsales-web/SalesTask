@@ -36,7 +36,19 @@ import {
   Zap,
   Edit,
   Trash2,
-  Settings
+  Settings,
+  Package,
+  FileText,
+  BarChart3,
+  UserCheck,
+  MessageSquare,
+  Camera,
+  MapPin,
+  Download,
+  Upload,
+  Archive,
+  Clock2,
+  AlertTriangle
 } from "lucide-react";
 
 // Import location and category data
