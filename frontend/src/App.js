@@ -113,7 +113,7 @@ const App = () => {
       const leadData = {
         ...newLead,
         budget: newLead.budget ? parseFloat(newLead.budget) : null,
-        tags: newLead.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        tags: Array.isArray(newLead.tags) ? newLead.tags : newLead.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
       };
       
       await axios.post(`${API}/leads`, leadData);
