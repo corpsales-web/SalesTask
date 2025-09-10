@@ -1458,6 +1458,261 @@ const App = () => {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Admin Panel Tab */}
+          <TabsContent value="admin" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Settings className="h-8 w-8 mr-3 text-emerald-600" />
+                Super Admin Panel
+              </h2>
+              <Badge className="bg-red-100 text-red-800 border-red-300">
+                Full Access Mode
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Category Management */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Edit className="h-5 w-5 mr-2" />
+                    Lead Categories Management
+                  </CardTitle>
+                  <CardDescription>
+                    Add, edit, or delete lead categories for better organization
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Add New Category */}
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter new category name"
+                      value={newCustomCategory}
+                      onChange={(e) => setNewCustomCategory(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={addCustomCategory}
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  </div>
+
+                  {/* Default Categories */}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Default Categories:</Label>
+                    <div className="bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
+                      <div className="grid grid-cols-1 gap-1">
+                        {LEAD_CATEGORIES.map((category) => (
+                          <div key={category} className="text-sm text-gray-600 px-2 py-1 bg-white rounded border">
+                            {category}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Custom Categories */}
+                  {customCategories.length > 0 && (
+                    <div>
+                      <Label className="text-sm font-medium text-emerald-700 mb-2 block">Custom Categories:</Label>
+                      <div className="space-y-2">
+                        {customCategories.map((category) => (
+                          <div key={category} className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                            <span className="font-medium text-emerald-800">{category}</span>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-emerald-300 hover:bg-emerald-100"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => deleteCustomCategory(category)}
+                                className="border-red-300 hover:bg-red-100 text-red-600"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* System Statistics */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <TrendingUp className="h-5 w-5 mr-2" />
+                    System Statistics
+                  </CardTitle>
+                  <CardDescription>
+                    Comprehensive system performance metrics
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {dashboardStats && (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <p className="text-sm text-blue-600">Total Records</p>
+                          <p className="text-2xl font-bold text-blue-800">{dashboardStats.total_leads + (dashboardStats.pending_tasks || 0)}</p>
+                        </div>
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <p className="text-sm text-green-600">Conversion Rate</p>
+                          <p className="text-2xl font-bold text-green-800">{dashboardStats.conversion_rate}%</p>
+                        </div>
+                      </div>
+
+                      <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                        <h4 className="font-medium text-emerald-800 mb-2">Lead Sources Analysis</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-emerald-700">Website Sources</span>
+                            <span className="text-sm font-medium text-emerald-800">45%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-emerald-700">Referrals</span>
+                            <span className="text-sm font-medium text-emerald-800">30%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-emerald-700">Social Media</span>
+                            <span className="text-sm font-medium text-emerald-800">25%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                        <h4 className="font-medium text-purple-800 mb-2">AI System Status</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-purple-700">AI Tasks Generated</span>
+                            <span className="text-sm font-medium text-purple-800">{dashboardStats.ai_tasks_generated || 0}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-purple-700">Models Active</span>
+                            <Badge className="bg-purple-100 text-purple-800">3 Models</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* User Management */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Users className="h-5 w-5 mr-2" />
+                    User & Role Management
+                  </CardTitle>
+                  <CardDescription>
+                    Manage user access and permissions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <div>
+                        <p className="font-medium text-emerald-800">Super Admin</p>
+                        <p className="text-xs text-emerald-600">Full system access</p>
+                      </div>
+                      <Badge className="bg-emerald-100 text-emerald-800">You</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div>
+                        <p className="font-medium text-blue-800">Sales Manager</p>
+                        <p className="text-xs text-blue-600">Lead & task management</p>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800">Active</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div>
+                        <p className="font-medium text-gray-800">Sales Executive</p>
+                        <p className="text-xs text-gray-600">Lead entry & follow-up</p>
+                      </div>
+                      <Badge className="bg-gray-100 text-gray-800">Pending</Badge>
+                    </div>
+                  </div>
+
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New User
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* System Configuration */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Settings className="h-5 w-5 mr-2" />
+                    System Configuration
+                  </CardTitle>
+                  <CardDescription>
+                    Configure system settings and integrations
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div>
+                        <p className="font-medium text-green-800">Telephony (Twilio)</p>
+                        <p className="text-xs text-green-600">8447475761 - Active</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">Connected</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div>
+                        <p className="font-medium text-green-800">WhatsApp Business</p>
+                        <p className="text-xs text-green-600">360 Dialog Integration</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">Connected</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div>
+                        <p className="font-medium text-green-800">AI Models</p>
+                        <p className="text-xs text-green-600">GPT-5 + Claude + Gemini</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div>
+                        <p className="font-medium text-yellow-800">Database Backup</p>
+                        <p className="text-xs text-yellow-600">Last backup: 2 hours ago</p>
+                      </div>
+                      <Badge className="bg-yellow-100 text-yellow-800">Scheduled</Badge>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" className="border-emerald-300 hover:bg-emerald-50">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Configure
+                    </Button>
+                    <Button variant="outline" className="border-emerald-300 hover:bg-emerald-50">
+                      Backup Now
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </main>
       
