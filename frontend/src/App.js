@@ -43,7 +43,6 @@ import {
   UserCheck,
   MessageSquare,
   Camera,
-  MapPin,
   Download,
   Upload,
   Archive,
