@@ -891,6 +891,277 @@ const App = () => {
               ))}
             </div>
           </TabsContent>
+
+          {/* AI Assistant Tab */}
+          <TabsContent value="ai" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Brain className="h-8 w-8 mr-3 text-emerald-600" />
+                AI Assistant
+              </h2>
+              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                Hybrid AI • GPT-5 + Claude + Gemini
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Voice-to-Task Panel */}
+              <Card className="bg-gradient-to-br from-emerald-50 to-green-100 border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Mic className="h-5 w-5 mr-2" />
+                    Voice-to-Task AI
+                  </CardTitle>
+                  <CardDescription>
+                    Speak naturally and AI will create structured tasks with reminders
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {voiceInput ? (
+                    <div className="bg-white p-4 rounded-lg border border-emerald-200">
+                      <p className="text-sm text-gray-600 mb-2">Captured Voice Input:</p>
+                      <p className="text-emerald-700 font-medium italic">"{voiceInput}"</p>
+                      <div className="mt-3 flex gap-2">
+                        <Button 
+                          onClick={processVoiceToTask}
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700"
+                        >
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Create AI Task
+                        </Button>
+                        <Button 
+                          onClick={() => setVoiceInput("")}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Button
+                        onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                        size="lg"
+                        variant={isRecording ? "destructive" : "default"}
+                        className={isRecording ? 
+                          "bg-red-500 hover:bg-red-600 text-white animate-pulse" : 
+                          "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        }
+                      >
+                        {isRecording ? (
+                          <>
+                            <MicOff className="h-6 w-6 mr-2" />
+                            Stop Recording
+                          </>
+                        ) : (
+                          <>
+                            <Mic className="h-6 w-6 mr-2" />
+                            Start Voice Command
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-sm text-gray-600 mt-2">
+                        {isRecording ? "Listening... Speak your task requirements" : "Click to start voice command"}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Voice Input Examples */}
+                  <div className="bg-white p-3 rounded-lg border border-emerald-200">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Example voice commands:</p>
+                    <ul className="text-xs text-gray-600 space-y-1">
+                      <li>• "Visit Mr. Sharma tomorrow 3 PM for balcony proposal"</li>
+                      <li>• "Call Priya regarding garden design by Friday"</li>
+                      <li>• "Send catalog to new leads from this week"</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* AI Insights Panel */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Lightbulb className="h-5 w-5 mr-2" />
+                    AI Business Insights
+                  </CardTitle>
+                  <CardDescription>
+                    Get intelligent recommendations and performance alerts
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => generateAIInsights("leads")}
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 hover:bg-emerald-50"
+                    >
+                      Lead Insights
+                    </Button>
+                    <Button 
+                      onClick={() => generateAIInsights("performance")}
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 hover:bg-emerald-50"
+                    >
+                      Performance
+                    </Button>
+                    <Button 
+                      onClick={() => generateAIInsights("opportunities")}
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 hover:bg-emerald-50"
+                    >
+                      Opportunities
+                    </Button>
+                  </div>
+                  
+                  {aiInsights.length > 0 && (
+                    <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                      <h4 className="font-medium text-emerald-800 mb-2">Latest AI Insights:</h4>
+                      <ul className="space-y-2">
+                        {aiInsights.slice(0, 3).map((insight, index) => (
+                          <li key={index} className="text-sm text-emerald-700 flex items-start">
+                            <Bot className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                            {insight}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {aiInsights.length === 0 && (
+                    <div className="text-center py-6 text-gray-500">
+                      <Brain className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">Click a button above to generate AI insights</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Content Generation Panel */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    AI Content Generator
+                  </CardTitle>
+                  <CardDescription>
+                    Create marketing content, social posts, and advertisements
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex gap-2 flex-wrap">
+                    <Button 
+                      onClick={() => generateContent("social_post")}
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 hover:bg-emerald-50"
+                    >
+                      Social Post
+                    </Button>
+                    <Button 
+                      onClick={() => generateContent("ad_copy")}
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 hover:bg-emerald-50"
+                    >
+                      Ad Copy
+                    </Button>
+                    <Button 
+                      onClick={() => generateContent("blog")}
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 hover:bg-emerald-50"
+                    >
+                      Blog Post
+                    </Button>
+                    <Button 
+                      onClick={() => generateContent("reel_script")}
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 hover:bg-emerald-50"
+                    >
+                      Reel Script
+                    </Button>
+                  </div>
+                  
+                  {generatedContent && (
+                    <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 max-h-60 overflow-y-auto">
+                      <h4 className="font-medium text-emerald-800 mb-2">Generated Content:</h4>
+                      <div className="text-sm text-emerald-700 whitespace-pre-wrap">
+                        {generatedContent}
+                      </div>
+                      <Button 
+                        onClick={() => navigator.clipboard.writeText(generatedContent)}
+                        size="sm"
+                        variant="outline"
+                        className="mt-2 border-emerald-300 hover:bg-emerald-100"
+                      >
+                        Copy to Clipboard
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {!generatedContent && (
+                    <div className="text-center py-6 text-gray-500">
+                      <Sparkles className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">Select a content type to generate AI content</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* AI Model Status Panel */}
+              <Card className="bg-white border-emerald-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Zap className="h-5 w-5 mr-2" />
+                    AI System Status
+                  </CardTitle>
+                  <CardDescription>
+                    Hybrid AI orchestration with multiple models
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div>
+                        <p className="font-medium text-green-800">GPT-5 (Primary)</p>
+                        <p className="text-xs text-green-600">Task automation & workflows</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div>
+                        <p className="font-medium text-blue-800">Claude Sonnet 4</p>
+                        <p className="text-xs text-blue-600">Memory & context layer</p>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800">Active</Badge>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
+                      <div>
+                        <p className="font-medium text-purple-800">Gemini 2.0 Flash</p>
+                        <p className="text-xs text-purple-600">Multimodal & creative</p>
+                      </div>
+                      <Badge className="bg-purple-100 text-purple-800">Active</Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="text-xs text-gray-600 text-center">
+                      🚀 Automatic task routing for optimal performance
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </main>
       
