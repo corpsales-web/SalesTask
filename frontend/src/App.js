@@ -567,7 +567,7 @@ const App = () => {
                     <DialogTitle>Add New Lead</DialogTitle>
                     <DialogDescription>Create a new lead for potential customers</DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={createLead} className="space-y-4">
+                    <form onSubmit={createLead} className="space-y-4">
                     <div>
                       <Label htmlFor="name">Name *</Label>
                       <Input
@@ -595,14 +595,63 @@ const App = () => {
                         onChange={(e) => setNewLead({...newLead, email: e.target.value})}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="budget">Budget (₹)</Label>
-                      <Input
-                        id="budget"
-                        type="number"
-                        value={newLead.budget}
-                        onChange={(e) => setNewLead({...newLead, budget: e.target.value})}
-                      />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label htmlFor="source">Lead Source</Label>
+                        <Select value={newLead.source} onValueChange={(value) => setNewLead({...newLead, source: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select source" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Website">Website</SelectItem>
+                            <SelectItem value="Google Ads">Google Ads</SelectItem>
+                            <SelectItem value="Facebook">Facebook</SelectItem>
+                            <SelectItem value="Instagram">Instagram</SelectItem>
+                            <SelectItem value="Referral">Referral</SelectItem>
+                            <SelectItem value="WhatsApp">WhatsApp</SelectItem>
+                            <SelectItem value="Phone Call">Phone Call</SelectItem>
+                            <SelectItem value="Walk-in">Walk-in</SelectItem>
+                            <SelectItem value="IndiaMART">IndiaMART</SelectItem>
+                            <SelectItem value="JustDial">JustDial</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="category">Client Category</Label>
+                        <Select value={newLead.category} onValueChange={(value) => setNewLead({...newLead, category: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Residential">Residential</SelectItem>
+                            <SelectItem value="Commercial">Commercial</SelectItem>
+                            <SelectItem value="Enterprise">Enterprise</SelectItem>
+                            <SelectItem value="Individual">Individual</SelectItem>
+                            <SelectItem value="Corporate">Corporate</SelectItem>
+                            <SelectItem value="Builder">Builder</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label htmlFor="budget">Budget (₹)</Label>
+                        <Input
+                          id="budget"
+                          type="number"
+                          value={newLead.budget}
+                          onChange={(e) => setNewLead({...newLead, budget: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="space_size">Space Size</Label>
+                        <Input
+                          id="space_size"
+                          placeholder="e.g., 2 BHK, 1000 sq ft"
+                          value={newLead.space_size}
+                          onChange={(e) => setNewLead({...newLead, space_size: e.target.value})}
+                        />
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="location">Location</Label>
@@ -619,6 +668,15 @@ const App = () => {
                         value={newLead.notes}
                         onChange={(e) => setNewLead({...newLead, notes: e.target.value})}
                         rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="tags">Tags (comma-separated)</Label>
+                      <Input
+                        id="tags"
+                        placeholder="e.g., urgent, high-value, balcony"
+                        value={newLead.tags}
+                        onChange={(e) => setNewLead({...newLead, tags: e.target.value})}
                       />
                     </div>
                     <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
