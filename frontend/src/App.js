@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import axios from "axios";
 import { Button } from "./components/ui/button";
@@ -26,7 +26,14 @@ import {
   Target,
   Calendar,
   Activity,
-  Leaf
+  Leaf,
+  Mic,
+  MicOff,
+  Brain,
+  Sparkles,
+  Bot,
+  Lightbulb,
+  Zap
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
