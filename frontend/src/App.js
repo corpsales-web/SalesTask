@@ -33,8 +33,19 @@ import {
   Sparkles,
   Bot,
   Lightbulb,
-  Zap
+  Zap,
+  Edit,
+  Trash2,
+  Settings
 } from "lucide-react";
+
+// Import location and category data
+import { 
+  INDIAN_STATES, 
+  CITIES_BY_STATE, 
+  LEAD_CATEGORIES, 
+  LEAD_SOURCES 
+} from "./data/indianCitiesStates";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
