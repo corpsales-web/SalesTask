@@ -455,18 +455,155 @@ class AIService:
         }
         return actions_map.get(insight_type, actions_map["leads"])
 
-    def _parse_content(self, ai_response: str, content_type: str) -> Dict[str, Any]:
-        """Parse AI content generation response"""
+    def _parse_enhanced_content(self, ai_response: str, content_type: str) -> Dict[str, Any]:
+        """Parse enhanced AI content generation response"""
         try:
-            return json.loads(ai_response)
+            if '{' in ai_response and '}' in ai_response:
+                json_start = ai_response.find('{')
+                json_end = ai_response.rfind('}') + 1
+                json_str = ai_response[json_start:json_end]
+                return json.loads(json_str)
         except:
-            # Fallback parsing
-            return {
-                "content": ai_response,
-                "variations": [],
-                "hashtags": ["#AavanaGreens", "#GreenLiving", "#Sustainable", "#EcoFriendly"],
-                "call_to_action": "Contact us for your green solution needs!"
-            }
+            pass
+        
+        # Enhanced fallback parsing
+        hashtags_map = {
+            "social_post": ["#AavanaGreens", "#GreenLiving", "#SustainableLiving", "#EcoFriendly", "#GreenSpaces"],
+            "retail_promotion": ["#PlantNursery", "#GardenCenter", "#GreenThumb", "#PlantsForSale", "#GardenSupplies"],
+            "google_ads": ["#GreenBuilding", "#LandscapeDesign", "#BalconyGarden", "#SustainableLiving"],
+            "strategic_plan": ["#BusinessGrowth", "#GreenTech", "#Sustainability", "#MarketExpansion"],
+            "online_presence": ["#DigitalMarketing", "#OnlineBusiness", "#SEO", "#SocialMediaMarketing"],
+            "offline_marketing": ["#LocalBusiness", "#CommunityEngagement", "#TraditionalMarketing", "#NetworkingEvents"]
+        }
+        
+        cta_map = {
+            "social_post": "🌱 Transform your space with Aavana Greens! Call 8447475761",
+            "retail_promotion": "🛒 Visit our nursery or call 8447475761 for the best deals!",
+            "google_ads": "Get Free Consultation! Call 8447475761 Today",
+            "strategic_plan": "Ready to grow your green business? Let's discuss at 8447475761",
+            "online_presence": "Boost your online visibility with Aavana Greens - Call 8447475761",
+            "offline_marketing": "Connect with your community through Aavana Greens - 8447475761"
+        }
+        
+        return {
+            "content": ai_response,
+            "variations": [],
+            "hashtags": hashtags_map.get(content_type, hashtags_map["social_post"]),
+            "call_to_action": cta_map.get(content_type, "Contact Aavana Greens at 8447475761!")
+        }
+
+    def _get_default_content(self, content_type: str) -> str:
+        """Get default content based on type"""
+        default_content = {
+            "social_post": """🌿 Transform your living space into a green paradise! 
+
+At Aavana Greens, we believe every home deserves the touch of nature. Whether it's a cozy balcony garden or a complete green building solution, we've got you covered.
+
+✨ Our services include:
+🌱 Custom balcony & terrace gardens
+🏠 Green building consultations  
+🌳 Landscaping & plant nursery
+♻️ Sustainable living solutions
+
+Your green journey starts here! 🌟""",
+
+            "retail_promotion": """🎉 SPECIAL OFFER AT AAVANA GREENS NURSERY! 🎉
+
+This month only:
+🌿 20% OFF on all indoor plants
+🏡 Free consultation for balcony garden setup (worth ₹2000)
+🌱 Buy 10 plants, get 2 FREE!
+🛠️ Complete garden setup packages starting at ₹15,000
+
+🛒 What we offer:
+- Premium quality plants & seeds
+- Organic fertilizers & garden tools  
+- Expert gardening advice
+- Custom garden design services
+- Seasonal plant varieties
+
+Visit our nursery today or call for home delivery!""",
+
+            "google_ads": """🌟 HEADLINE: Transform Your Space with Expert Green Solutions | Aavana Greens
+
+DESCRIPTION 1: Professional balcony garden design & green building consultation. 20+ years experience. Free site visit. Call now for sustainable living solutions!
+
+DESCRIPTION 2: Get custom landscaping, plant nursery services & eco-friendly building solutions. Trusted by 500+ happy customers. Book free consultation today!
+
+KEYWORDS: green building consultant, balcony garden design, plant nursery near me, sustainable landscaping, eco-friendly solutions, garden design services""",
+
+            "strategic_plan": """📊 AAVANA GREENS STRATEGIC GROWTH PLAN
+
+🎯 MARKET OPPORTUNITIES:
+- Green building market growing 15% annually
+- Urban gardening demand increasing post-pandemic  
+- Corporate ESG requirements driving B2B opportunities
+- Government incentives for sustainable construction
+
+🚀 GROWTH STRATEGIES:
+1. Digital Transformation: SEO, social media, online booking
+2. Service Expansion: Maintenance contracts, consultation services
+3. B2B Partnerships: Builders, architects, interior designers
+4. Geographic Expansion: Target 3 new cities within 18 months
+
+💰 REVENUE OPTIMIZATION:
+- Subscription-based plant care services
+- Premium consultation packages
+- Corporate wellness programs
+- Seasonal promotional campaigns""",
+
+            "online_presence": """🌐 AAVANA GREENS DIGITAL PRESENCE STRATEGY
+
+🔍 SEO OPTIMIZATION:
+- Target keywords: "balcony garden design", "green building consultant"  
+- Local SEO for "plant nursery near me"
+- Google My Business optimization with customer reviews
+
+📱 SOCIAL MEDIA STRATEGY:
+- Instagram: Before/after garden transformations
+- Facebook: Gardening tips & customer testimonials
+- YouTube: DIY plant care tutorials
+- WhatsApp Business: Customer support & consultations
+
+🎯 CONTENT MARKETING:
+- Weekly gardening blog posts
+- Seasonal plant care guides  
+- Customer success stories
+- Video tutorials & virtual consultations
+
+📈 LEAD GENERATION:
+- Free consultation landing pages
+- Email marketing campaigns
+- Retargeting ads for website visitors""",
+
+            "offline_marketing": """🤝 AAVANA GREENS OFFLINE MARKETING STRATEGY
+
+🏪 LOCAL PARTNERSHIPS:
+- Interior designers & architects referral program
+- Real estate developers collaboration
+- Building society workshops & demonstrations
+- Gardening clubs & community centers
+
+📰 TRADITIONAL ADVERTISING:
+- Local newspaper gardening column
+- Radio sponsorship of environmental shows
+- Print flyers for residential complexes
+- Outdoor banners at garden exhibitions
+
+🎪 EVENTS & WORKSHOPS:
+- Monthly gardening workshops
+- Plant exhibition stalls
+- School environmental awareness programs  
+- Corporate office garden setup demos
+
+🎁 REFERRAL PROGRAMS:
+- Customer referral rewards (20% discount)
+- Partner commission structure
+- Seasonal loyalty programs
+- Community ambassador initiatives"""
+        }
+        
+        return default_content.get(content_type, default_content["social_post"])
 
 # Global AI service instance
 ai_service = AIService()
