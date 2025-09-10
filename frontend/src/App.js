@@ -485,7 +485,7 @@ const App = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-white shadow-sm border border-emerald-100">
+          <TabsList className="grid w-full grid-cols-6 bg-white shadow-sm border border-emerald-100">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
               <Activity className="h-4 w-4 mr-2" />
               Dashboard
@@ -505,6 +505,10 @@ const App = () => {
             <TabsTrigger value="ai" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
               <Brain className="h-4 w-4 mr-2" />
               AI Assistant
+            </TabsTrigger>
+            <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+              <Settings className="h-4 w-4 mr-2" />
+              Admin Panel
             </TabsTrigger>
           </TabsList>
 
