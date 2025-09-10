@@ -629,30 +629,34 @@ const App = () => {
                     Add Lead
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Add New Lead</DialogTitle>
-                    <DialogDescription>Create a new lead for potential customers</DialogDescription>
+                    <DialogDescription>Create a new lead with comprehensive information</DialogDescription>
                   </DialogHeader>
-                    <form onSubmit={createLead} className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">Name *</Label>
-                      <Input
-                        id="name"
-                        value={newLead.name}
-                        onChange={(e) => setNewLead({...newLead, name: e.target.value})}
-                        required
-                      />
+                  <form onSubmit={createLead} className="space-y-4">
+                    {/* Basic Information */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="name">Name *</Label>
+                        <Input
+                          id="name"
+                          value={newLead.name}
+                          onChange={(e) => setNewLead({...newLead, name: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="phone">Phone *</Label>
+                        <Input
+                          id="phone"
+                          value={newLead.phone}
+                          onChange={(e) => setNewLead({...newLead, phone: e.target.value})}
+                          required
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="phone">Phone *</Label>
-                      <Input
-                        id="phone"
-                        value={newLead.phone}
-                        onChange={(e) => setNewLead({...newLead, phone: e.target.value})}
-                        required
-                      />
-                    </div>
+
                     <div>
                       <Label htmlFor="email">Email</Label>
                       <Input
@@ -662,50 +666,182 @@ const App = () => {
                         onChange={(e) => setNewLead({...newLead, email: e.target.value})}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label htmlFor="source">Lead Source</Label>
-                        <Select value={newLead.source} onValueChange={(value) => setNewLead({...newLead, source: value})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select source" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Website">Website</SelectItem>
-                            <SelectItem value="Google Ads">Google Ads</SelectItem>
-                            <SelectItem value="Facebook">Facebook</SelectItem>
-                            <SelectItem value="Instagram">Instagram</SelectItem>
-                            <SelectItem value="Referral">Referral</SelectItem>
-                            <SelectItem value="WhatsApp">WhatsApp</SelectItem>
-                            <SelectItem value="Phone Call">Phone Call</SelectItem>
-                            <SelectItem value="Walk-in">Walk-in</SelectItem>
-                            <SelectItem value="IndiaMART">IndiaMART</SelectItem>
-                            <SelectItem value="JustDial">JustDial</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="category">Client Category</Label>
-                        <Select value={newLead.category} onValueChange={(value) => setNewLead({...newLead, category: value})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Residential">Residential</SelectItem>
-                            <SelectItem value="Commercial">Commercial</SelectItem>
-                            <SelectItem value="Enterprise">Enterprise</SelectItem>
-                            <SelectItem value="Individual">Individual</SelectItem>
-                            <SelectItem value="Corporate">Corporate</SelectItem>
-                            <SelectItem value="Builder">Builder</SelectItem>
-                          </SelectContent>
-                        </Select>
+
+                    {/* Lead Source */}
+                    <div>
+                      <Label htmlFor="source">Lead Source *</Label>
+                      <Select value={newLead.source} onValueChange={(value) => setNewLead({...newLead, source: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select lead source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {LEAD_SOURCES.map((source) => (
+                            <SelectItem key={source} value={source}>{source}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Client Category */}
+                    <div>
+                      <Label htmlFor="category">Client Category *</Label>
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Select 
+                            value={newLead.category} 
+                            onValueChange={(value) => setNewLead({...newLead, category: value})}
+                            disabled={isCustomCategory}
+                          >
+                            <SelectTrigger className="flex-1">
+                              <SelectValue placeholder="Select client category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {LEAD_CATEGORIES.concat(customCategories).map((category) => (
+                                <SelectItem key={category} value={category}>{category}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button 
+                            type="button"
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setIsCustomCategory(!isCustomCategory)}
+                          >
+                            {isCustomCategory ? "Select" : "Custom"}
+                          </Button>
+                        </div>
+                        
+                        {isCustomCategory && (
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Enter custom category"
+                              value={newCustomCategory}
+                              onChange={(e) => setNewCustomCategory(e.target.value)}
+                              className="flex-1"
+                            />
+                            <Button 
+                              type="button" 
+                              size="sm" 
+                              onClick={addCustomCategory}
+                              className="bg-emerald-600 hover:bg-emerald-700"
+                            >
+                              Add
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {/* Custom Categories Management */}
+                        {customCategories.length > 0 && (
+                          <div className="bg-emerald-50 p-3 rounded-lg">
+                            <Label className="text-sm font-medium text-emerald-800">Custom Categories:</Label>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {customCategories.map((category) => (
+                                <div key={category} className="flex items-center bg-white px-2 py-1 rounded border">
+                                  <span className="text-sm">{category}</span>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteCustomCategory(category)}
+                                    className="ml-1 h-4 w-4 p-0 hover:bg-red-100"
+                                  >
+                                    <Trash2 className="h-3 w-3 text-red-600" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+
+                    {/* Location Management */}
+                    <div>
+                      <Label>Location *</Label>
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant={!isCustomLocation ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setIsCustomLocation(false)}
+                          >
+                            Select from List
+                          </Button>
+                          <Button
+                            type="button"
+                            variant={isCustomLocation ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setIsCustomLocation(true)}
+                          >
+                            Enter Manually
+                          </Button>
+                        </div>
+
+                        {!isCustomLocation ? (
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="state">State</Label>
+                              <Select value={selectedState} onValueChange={setSelectedState}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select state" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {INDIAN_STATES.map((state) => (
+                                    <SelectItem key={state} value={state}>{state}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="city">City</Label>
+                              <Select 
+                                value={selectedCity} 
+                                onValueChange={setSelectedCity}
+                                disabled={!selectedState}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select city" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {selectedState && CITIES_BY_STATE[selectedState]?.map((city) => (
+                                    <SelectItem key={city} value={city}>{city}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <Label htmlFor="customLocation">Custom Location</Label>
+                            <Input
+                              id="customLocation"
+                              placeholder="Enter city, state (e.g., Noida, Uttar Pradesh)"
+                              value={customLocation}
+                              onChange={(e) => setCustomLocation(e.target.value)}
+                            />
+                          </div>
+                        )}
+
+                        {/* Display selected location */}
+                        {((selectedCity && selectedState) || customLocation) && (
+                          <div className="bg-emerald-50 p-2 rounded border border-emerald-200">
+                            <span className="text-sm text-emerald-700">
+                              📍 Location: {isCustomLocation ? customLocation : `${selectedCity}, ${selectedState}`}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Additional Details */}
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="budget">Budget (₹)</Label>
                         <Input
                           id="budget"
                           type="number"
+                          placeholder="e.g., 50000"
                           value={newLead.budget}
                           onChange={(e) => setNewLead({...newLead, budget: e.target.value})}
                         />
@@ -720,23 +856,33 @@ const App = () => {
                         />
                       </div>
                     </div>
+
                     <div>
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        value={newLead.location}
-                        onChange={(e) => setNewLead({...newLead, location: e.target.value})}
-                      />
+                      <Label htmlFor="assigned_to">Assigned To</Label>
+                      <Select value={newLead.assigned_to} onValueChange={(value) => setNewLead({...newLead, assigned_to: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select team member" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Sales Team A">Sales Team A</SelectItem>
+                          <SelectItem value="Sales Team B">Sales Team B</SelectItem>
+                          <SelectItem value="Design Team">Design Team</SelectItem>
+                          <SelectItem value="Senior Consultant">Senior Consultant</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
+
                     <div>
                       <Label htmlFor="notes">Notes</Label>
                       <Textarea
                         id="notes"
+                        placeholder="Additional information about the lead..."
                         value={newLead.notes}
                         onChange={(e) => setNewLead({...newLead, notes: e.target.value})}
                         rows={3}
                       />
                     </div>
+
                     <div>
                       <Label htmlFor="tags">Tags (comma-separated)</Label>
                       <Input
@@ -746,6 +892,7 @@ const App = () => {
                         onChange={(e) => setNewLead({...newLead, tags: e.target.value})}
                       />
                     </div>
+
                     <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
                       Create Lead
                     </Button>
