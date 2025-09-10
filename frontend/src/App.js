@@ -576,30 +576,38 @@ const App = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-white shadow-sm border border-emerald-100">
+          <TabsList className="grid w-full grid-cols-8 bg-white shadow-sm border border-emerald-100 text-xs">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-              <Activity className="h-4 w-4 mr-2" />
+              <Activity className="h-3 w-3 mr-1" />
               Dashboard
             </TabsTrigger>
             <TabsTrigger value="leads" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-              <Users className="h-4 w-4 mr-2" />
+              <Users className="h-3 w-3 mr-1" />
               Leads
             </TabsTrigger>
             <TabsTrigger value="pipeline" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-              <Target className="h-4 w-4 mr-2" />
+              <Target className="h-3 w-3 mr-1" />
               Pipeline
             </TabsTrigger>
             <TabsTrigger value="tasks" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-              <CheckCircle className="h-4 w-4 mr-2" />
+              <CheckCircle className="h-3 w-3 mr-1" />
               Tasks
             </TabsTrigger>
+            <TabsTrigger value="erp" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+              <Package className="h-3 w-3 mr-1" />
+              ERP
+            </TabsTrigger>
+            <TabsTrigger value="hrms" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+              <UserCheck className="h-3 w-3 mr-1" />
+              HRMS
+            </TabsTrigger>
             <TabsTrigger value="ai" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-              <Brain className="h-4 w-4 mr-2" />
-              AI Assistant
+              <Brain className="h-3 w-3 mr-1" />
+              AI
             </TabsTrigger>
             <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-              <Settings className="h-4 w-4 mr-2" />
-              Admin Panel
+              <Settings className="h-3 w-3 mr-1" />
+              Admin
             </TabsTrigger>
           </TabsList>
 
