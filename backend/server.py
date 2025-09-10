@@ -36,6 +36,27 @@ from telephony_service import (
     LeaveRequest
 )
 
+from erp_service import (
+    erp_service,
+    hrms_service as complete_hrms_service,
+    analytics_service,
+    Product,
+    ProductCreate,
+    Invoice,
+    ProjectGallery,
+    Appointment,
+    InventoryAlert
+)
+
+from calendar_service import (
+    calendar_service,
+    whatsapp_advanced_service,
+    CalendarEvent,
+    CalendarEventCreate,
+    SMSNotification,
+    EmailNotification
+)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
