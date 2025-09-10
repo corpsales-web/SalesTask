@@ -499,7 +499,17 @@ const App = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchDashboardStats(), fetchLeads(), fetchTasks()]);
+      await Promise.all([
+        fetchDashboardStats(), 
+        fetchLeads(), 
+        fetchTasks(),
+        fetchProducts(),
+        fetchInventoryAlerts(),
+        fetchInvoices(),
+        fetchProjects(),
+        fetchExecutiveDashboard(),
+        fetchPayrollReport()
+      ]);
       setLoading(false);
     };
     loadData();
