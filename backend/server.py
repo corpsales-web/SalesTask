@@ -66,6 +66,8 @@ class Lead(BaseModel):
     budget: Optional[float] = None
     space_size: Optional[str] = None
     location: Optional[str] = None
+    source: Optional[str] = None  # Website, Google Ads, Facebook, Referral, etc.
+    category: Optional[str] = None  # Residential, Commercial, Enterprise, etc.
     status: LeadStatus = LeadStatus.NEW
     notes: Optional[str] = None
     tags: List[str] = []
@@ -81,6 +83,8 @@ class LeadCreate(BaseModel):
     budget: Optional[float] = None
     space_size: Optional[str] = None
     location: Optional[str] = None
+    source: Optional[str] = None
+    category: Optional[str] = None
     notes: Optional[str] = None
     tags: List[str] = []
     assigned_to: Optional[str] = None
@@ -92,6 +96,8 @@ class LeadUpdate(BaseModel):
     budget: Optional[float] = None
     space_size: Optional[str] = None
     location: Optional[str] = None
+    source: Optional[str] = None
+    category: Optional[str] = None
     status: Optional[LeadStatus] = None
     notes: Optional[str] = None
     tags: Optional[List[str]] = None
