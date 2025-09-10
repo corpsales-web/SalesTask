@@ -61,6 +61,8 @@ const App = () => {
     budget: "",
     space_size: "",
     location: "",
+    source: "",
+    category: "",
     notes: "",
     tags: "",
     assigned_to: ""
