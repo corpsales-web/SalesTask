@@ -256,24 +256,67 @@ class AIService:
     async def generate_content(self, content_request: ContentGenerationRequest) -> ContentGenerationResponse:
         """Generate marketing content using AI"""
         try:
-            context_str = f"""
-            Create {content_request.type} content for Aavana Greens (green building/nursery business).
-            Topic: {content_request.topic}
-            Brand Context: {content_request.brand_context or "Eco-friendly, sustainable green solutions"}
-            Target Audience: {content_request.target_audience or "Homeowners interested in green living"}
+            # Enhanced content generation prompts for Aavana Greens
+            content_prompts = {
+                "social_post": f"""
+                Create an engaging social media post for Aavana Greens about {content_request.topic}.
+                Focus on eco-friendly living, sustainable solutions, and green building benefits.
+                Include relevant hashtags and a call-to-action. Keep it conversational and inspiring.
+                """,
+                "retail_promotion": f"""
+                Create promotional content for Aavana Greens retail store/nursery about {content_request.topic}.
+                Include special offers, seasonal plants, gardening supplies, and consultation services.
+                Highlight unique selling points and competitive advantages. Include store contact: 8447475761
+                """,
+                "google_ads": f"""
+                Create high-converting Google Ads copy for Aavana Greens targeting {content_request.topic}.
+                Focus on keywords like: green building consultant, balcony garden design, nursery near me, 
+                sustainable landscaping, eco-friendly solutions. Include compelling headlines and descriptions.
+                """,
+                "strategic_plan": f"""
+                Develop strategic planning content for Aavana Greens focusing on {content_request.topic}.
+                Include market analysis, growth opportunities, competitive positioning, revenue strategies,
+                digital transformation roadmap, and expansion possibilities in the green building sector.
+                """,
+                "online_presence": f"""
+                Create a comprehensive online presence strategy for Aavana Greens about {content_request.topic}.
+                Cover: SEO optimization, social media strategy, content marketing, Google My Business,
+                website improvements, online reputation management, and digital lead generation.
+                """,
+                "offline_marketing": f"""
+                Develop offline marketing strategies for Aavana Greens about {content_request.topic}.
+                Include: local partnerships, print advertising, events, workshops, referral programs,
+                community engagement, trade show participation, and traditional marketing channels.
+                """
+            }
             
-            Make it engaging, relevant to green/eco-friendly themes, and include appropriate hashtags.
+            prompt = content_prompts.get(content_request.type, content_prompts["social_post"])
+            
+            context_str = f"""
+            {prompt}
+            
+            Brand Context: {content_request.brand_context or "Aavana Greens - Leading provider of sustainable green building solutions, landscaping, and plant nursery services"}
+            Target Audience: {content_request.target_audience or "Homeowners, businesses, and eco-conscious consumers interested in green living"}
+            Business Phone: 8447475761
+            
+            Make it professional, engaging, and specific to the green building/nursery industry.
             """
             
             response = await self.orchestrator.route_task("creative", context_str)
             
             # Parse and structure the content response
-            content_data = self._parse_content(response, content_request.type)
+            content_data = self._parse_enhanced_content(response, content_request.type)
             
             return ContentGenerationResponse(**content_data)
             
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Content generation error: {str(e)}")
+            print(f"Content generation error: {e}")
+            # Return default content if AI fails
+            return ContentGenerationResponse(
+                content=self._get_default_content(content_request.type),
+                hashtags=["#AavanaGreens", "#GreenLiving", "#Sustainable", "#EcoFriendly"],
+                call_to_action="Contact Aavana Greens at 8447475761 for your green solution needs!"
+            )
 
     async def recall_client_context(self, client_id: str, query: str) -> str:
         """Use Claude's memory layer to recall client context"""
