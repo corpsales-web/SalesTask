@@ -81,13 +81,46 @@ const App = () => {
     email: "",
     budget: "",
     space_size: "",
-    location: "",
+    city: "",
+    state: "",
     source: "",
     category: "",
     notes: "",
     tags: "",
     assigned_to: ""
   });
+
+  // Category Management Functions
+  const addCustomCategory = () => {
+    if (newCustomCategory.trim() && !customCategories.includes(newCustomCategory.trim())) {
+      setCustomCategories([...customCategories, newCustomCategory.trim()]);
+      setNewCustomCategory("");
+      toast({
+        title: "Category Added",
+        description: `"${newCustomCategory.trim()}" has been added to categories`
+      });
+    }
+  };
+
+  const deleteCustomCategory = (categoryToDelete) => {
+    setCustomCategories(customCategories.filter(cat => cat !== categoryToDelete));
+    toast({
+      title: "Category Deleted",
+      description: `"${categoryToDelete}" has been removed`
+    });
+  };
+
+  // Location Management
+  const handleLocationChange = () => {
+    if (selectedState && selectedCity) {
+      const location = `${selectedCity}, ${selectedState}`;
+      setNewLead({...newLead, city: selectedCity, state: selectedState});
+    }
+  };
+
+  useEffect(() => {
+    handleLocationChange();
+  }, [selectedState, selectedCity]);
 
   const [newTask, setNewTask] = useState({
     title: "",
