@@ -178,7 +178,138 @@ const App = () => {
     }
   };
 
-  // Create task function
+  // Voice-to-Task functions
+  const startVoiceRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder.current = new MediaRecorder(stream);
+      
+      let audioChunks = [];
+      
+      mediaRecorder.current.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+      
+      mediaRecorder.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        // For demo purposes, we'll use a text input instead of actual speech recognition
+        // In production, you would integrate with speech-to-text service
+        setVoiceInput("Visit Mr. Sharma tomorrow 3 PM for balcony garden proposal");
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorder.current.start();
+      setIsRecording(true);
+      
+      toast({
+        title: "Recording Started",
+        description: "Speak your task requirements..."
+      });
+      
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+      toast({
+        title: "Error",
+        description: "Could not access microphone",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const stopVoiceRecording = () => {
+    if (mediaRecorder.current && isRecording) {
+      mediaRecorder.current.stop();
+      setIsRecording(false);
+      
+      toast({
+        title: "Recording Stopped",
+        description: "Processing your voice input..."
+      });
+    }
+  };
+
+  const processVoiceToTask = async () => {
+    if (!voiceInput.trim()) return;
+    
+    try {
+      const response = await axios.post(`${API}/ai/voice-to-task`, {
+        voice_input: voiceInput,
+        context: {
+          user_role: "sales_manager",
+          current_time: new Date().toISOString()
+        }
+      });
+      
+      toast({
+        title: "✨ AI Task Created",
+        description: `Task "${response.data.task_breakdown.title}" has been created successfully!`
+      });
+      
+      // Clear voice input and refresh tasks
+      setVoiceInput("");
+      fetchTasks();
+      
+    } catch (error) {
+      console.error("Error processing voice input:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process voice input",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // AI Insights function
+  const generateAIInsights = async (type = "leads") => {
+    try {
+      const response = await axios.post(`${API}/ai/insights`, {
+        type: type,
+        timeframe: "current"
+      });
+      
+      setAiInsights(response.data.insights);
+      
+      toast({
+        title: "🧠 AI Insights Generated",
+        description: "Fresh business insights are ready!"
+      });
+      
+    } catch (error) {
+      console.error("Error generating insights:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate AI insights",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // AI Content Generation
+  const generateContent = async (type = "social_post") => {
+    try {
+      const response = await axios.post(`${API}/ai/generate-content`, {
+        type: type,
+        topic: "Green building solutions and sustainable living",
+        brand_context: "Aavana Greens - Your partner in sustainable green solutions",
+        target_audience: "Homeowners and businesses interested in eco-friendly living"
+      });
+      
+      setGeneratedContent(response.data.content);
+      
+      toast({
+        title: "🎨 Content Generated",
+        description: "AI has created marketing content for you!"
+      });
+      
+    } catch (error) {
+      console.error("Error generating content:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate content",
+        variant: "destructive"
+      });
+    }
+  };
   const createTask = async (e) => {
     e.preventDefault();
     try {
