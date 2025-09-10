@@ -1126,28 +1126,44 @@ const App = () => {
                       Social Post
                     </Button>
                     <Button 
-                      onClick={() => generateContent("ad_copy")}
+                      onClick={() => generateContent("retail_promotion")}
                       size="sm"
                       variant="outline"
                       className="border-emerald-300 hover:bg-emerald-50"
                     >
-                      Ad Copy
+                      Store Promotion
                     </Button>
                     <Button 
-                      onClick={() => generateContent("blog")}
+                      onClick={() => generateContent("google_ads")}
                       size="sm"
                       variant="outline"
                       className="border-emerald-300 hover:bg-emerald-50"
                     >
-                      Blog Post
+                      Google Ads
                     </Button>
                     <Button 
-                      onClick={() => generateContent("reel_script")}
+                      onClick={() => generateContent("strategic_plan")}
                       size="sm"
                       variant="outline"
                       className="border-emerald-300 hover:bg-emerald-50"
                     >
-                      Reel Script
+                      Strategic Plan
+                    </Button>
+                    <Button 
+                      onClick={() => generateContent("online_presence")}
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 hover:bg-emerald-50"
+                    >
+                      Online Presence
+                    </Button>
+                    <Button 
+                      onClick={() => generateContent("offline_marketing")}
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 hover:bg-emerald-50"
+                    >
+                      Offline Marketing
                     </Button>
                   </div>
                   
