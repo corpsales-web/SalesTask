@@ -61,6 +61,16 @@ const App = () => {
   const [voiceInput, setVoiceInput] = useState("");
   const [aiInsights, setAiInsights] = useState([]);
   const [generatedContent, setGeneratedContent] = useState("");
+  
+  // Location and Category Management
+  const [customCategories, setCustomCategories] = useState([]);
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [customLocation, setCustomLocation] = useState("");
+  const [isCustomLocation, setIsCustomLocation] = useState(false);
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [newCustomCategory, setNewCustomCategory] = useState("");
+  
   const mediaRecorder = useRef(null);
   const { toast } = useToast();
 
