@@ -735,67 +735,123 @@ const App = () => {
           <TabsContent value="tasks" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">Task Management</h2>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Task
+              <div className="flex gap-2">
+                {/* Voice-to-Task Feature */}
+                <div className="flex items-center gap-2 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
+                  <Button
+                    onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                    variant={isRecording ? "destructive" : "outline"}
+                    size="sm"
+                    className={isRecording ? "bg-red-500 hover:bg-red-600" : "border-emerald-300 hover:bg-emerald-100"}
+                  >
+                    {isRecording ? <MicOff className="h-4 w-4 mr-2" /> : <Mic className="h-4 w-4 mr-2" />}
+                    {isRecording ? "Stop" : "Voice Task"}
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Create New Task</DialogTitle>
-                    <DialogDescription>Add a new task to your workflow</DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={createTask} className="space-y-4">
-                    <div>
-                      <Label htmlFor="task-title">Title *</Label>
-                      <Input
-                        id="task-title"
-                        value={newTask.title}
-                        onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="task-description">Description</Label>
-                      <Textarea
-                        id="task-description"
-                        value={newTask.description}
-                        onChange={(e) => setNewTask({...newTask, description: e.target.value})}
-                        rows={3}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="task-priority">Priority</Label>
-                      <Select value={newTask.priority} onValueChange={(value) => setNewTask({...newTask, priority: value})}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Low">Low</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="High">High</SelectItem>
-                          <SelectItem value="Urgent">Urgent</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="task-due-date">Due Date</Label>
-                      <Input
-                        id="task-due-date"
-                        type="datetime-local"
-                        value={newTask.due_date}
-                        onChange={(e) => setNewTask({...newTask, due_date: e.target.value})}
-                      />
-                    </div>
-                    <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                      Create Task
+                  {voiceInput && (
+                    <Button
+                      onClick={processVoiceToTask}
+                      size="sm"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Create AI Task
                     </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                  )}
+                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Task
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Create New Task</DialogTitle>
+                      <DialogDescription>Add a new task to your workflow</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={createTask} className="space-y-4">
+                      <div>
+                        <Label htmlFor="task-title">Title *</Label>
+                        <Input
+                          id="task-title"
+                          value={newTask.title}
+                          onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="task-description">Description</Label>
+                        <Textarea
+                          id="task-description"
+                          value={newTask.description}
+                          onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="task-priority">Priority</Label>
+                        <Select value={newTask.priority} onValueChange={(value) => setNewTask({...newTask, priority: value})}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Low">Low</SelectItem>
+                            <SelectItem value="Medium">Medium</SelectItem>
+                            <SelectItem value="High">High</SelectItem>
+                            <SelectItem value="Urgent">Urgent</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="task-due-date">Due Date</Label>
+                        <Input
+                          id="task-due-date"
+                          type="datetime-local"
+                          value={newTask.due_date}
+                          onChange={(e) => setNewTask({...newTask, due_date: e.target.value})}
+                        />
+                      </div>
+                      <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
+                        Create Task
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
+
+            {/* Voice Input Display */}
+            {voiceInput && (
+              <Card className="bg-emerald-50 border-emerald-200">
+                <CardHeader>
+                  <CardTitle className="text-emerald-800 flex items-center">
+                    <Mic className="h-5 w-5 mr-2" />
+                    Voice Input Captured
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-emerald-700 italic">"{voiceInput}"</p>
+                  <div className="mt-3 flex gap-2">
+                    <Button 
+                      onClick={processVoiceToTask}
+                      size="sm"
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Convert to Task
+                    </Button>
+                    <Button 
+                      onClick={() => setVoiceInput("")}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {tasks.map((task) => (
