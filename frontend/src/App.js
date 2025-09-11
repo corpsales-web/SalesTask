@@ -103,6 +103,26 @@ const App = () => {
   const [attendanceData, setAttendanceData] = useState([]);
   const [payrollReport, setPayrollReport] = useState(null);
   
+  // User Management & Authentication State
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
+  const [users, setUsers] = useState([]);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [newUser, setNewUser] = useState({
+    username: "",
+    email: "",
+    phone: "",
+    full_name: "",
+    role: "Employee",
+    department: "",
+    password: ""
+  });
+  const [loginData, setLoginData] = useState({
+    identifier: "",
+    password: ""
+  });
+  
   const mediaRecorder = useRef(null);
   const { toast } = useToast();
 
