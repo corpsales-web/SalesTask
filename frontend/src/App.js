@@ -338,6 +338,52 @@ const App = () => {
     }
   }, []);
 
+  // Permission checking functions
+  const hasAIPermission = (user) => {
+    if (!user) return false;
+    
+    // Super Admin and Admin always have access
+    if (user.role === 'Super Admin' || user.role === 'Admin') {
+      return true;
+    }
+    
+    // Check role-based permissions
+    const aiRoles = ['Sales Manager', 'Marketing Manager'];
+    if (aiRoles.includes(user.role)) {
+      return true;
+    }
+    
+    // Check custom permissions
+    if (user.permissions && Array.isArray(user.permissions)) {
+      return user.permissions.some(perm => 
+        perm.startsWith('ai:') || perm === 'ai:view' || perm === 'ai:use_basic'
+      );
+    }
+    
+    return false;
+  };
+
+  const hasPermission = (user, permission) => {
+    if (!user) return false;
+    
+    // Super Admin always has access
+    if (user.role === 'Super Admin') {
+      return true;
+    }
+    
+    // Check custom permissions
+    if (user.permissions && Array.isArray(user.permissions)) {
+      return user.permissions.includes(permission);
+    }
+    
+    return false;
+  };
+
+  const hasAdminAccess = (user) => {
+    if (!user) return false;
+    return ['Super Admin', 'Admin', 'HR Manager'].includes(user.role);
+  };
+
   // Location Management
   const handleLocationChange = () => {
     if (selectedState && selectedCity) {
