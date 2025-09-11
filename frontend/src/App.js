@@ -2154,7 +2154,11 @@ const App = () => {
                       <Download className="h-4 w-4 mr-2" />
                       Export
                     </Button>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700" size="sm">
+                    <Button 
+                      className="bg-emerald-600 hover:bg-emerald-700" 
+                      size="sm"
+                      onClick={handleProcessPayroll}
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       Process
                     </Button>
