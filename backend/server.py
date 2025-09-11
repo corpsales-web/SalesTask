@@ -402,6 +402,492 @@ async def recall_client_context(client_id: str, query: str = ""):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Context recall failed: {str(e)}")
 
+# Comprehensive AI Stack Integration Routes
+
+# Conversational CRM AI Features
+@api_router.post("/ai/crm/smart-lead-scoring")
+async def ai_lead_scoring(lead_id: str):
+    """AI-powered lead scoring and qualification"""
+    try:
+        lead = await db.leads.find_one({"id": lead_id})
+        if not lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+        
+        scoring_prompt = f"""
+        Analyze this lead for Aavana Greens and provide AI-powered lead scoring:
+        
+        Lead Data: {json.dumps(lead)}
+        
+        Please provide:
+        1. Lead Score (0-100)
+        2. Qualification Status (Hot/Warm/Cold)
+        3. Conversion Probability
+        4. Recommended Actions
+        5. Optimal Follow-up Timeline
+        6. Budget Fit Assessment
+        
+        Consider factors: location, budget, space_size, source, engagement level, business fit for green building solutions.
+        """
+        
+        result = await ai_service.orchestrator.route_task("analytics", scoring_prompt, {"lead_id": lead_id})
+        
+        return {"lead_scoring": result, "lead_id": lead_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI lead scoring failed: {str(e)}")
+
+@api_router.post("/ai/crm/conversation-analysis")
+async def ai_conversation_analysis(conversation_data: dict):
+    """Analyze customer conversations for sentiment and insights"""
+    try:
+        analysis_prompt = f"""
+        Analyze this customer conversation for Aavana Greens:
+        
+        Conversation: {json.dumps(conversation_data)}
+        
+        Provide:
+        1. Sentiment Analysis (Positive/Neutral/Negative)
+        2. Customer Intent Detection
+        3. Pain Points Identified
+        4. Buying Signals
+        5. Next Best Action
+        6. Urgency Level
+        7. Product/Service Interest
+        """
+        
+        result = await ai_service.orchestrator.route_task("insights", analysis_prompt, conversation_data)
+        
+        return {"conversation_analysis": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Conversation analysis failed: {str(e)}")
+
+# Sales & Pipeline AI Features
+@api_router.post("/ai/sales/deal-prediction")
+async def ai_deal_prediction():
+    """Predict deal closure probability using AI"""
+    try:
+        # Get all active leads
+        leads = await db.leads.find({"status": {"$in": ["New", "Qualified", "Proposal"]}}).to_list(length=100)
+        
+        prediction_prompt = f"""
+        Analyze these active deals for Aavana Greens and predict closure probability:
+        
+        Active Deals: {json.dumps(leads)}
+        
+        For each deal, provide:
+        1. Closure Probability (%)
+        2. Expected Close Date
+        3. Revenue Forecast
+        4. Risk Factors
+        5. Acceleration Strategies
+        
+        Also provide overall pipeline health and revenue predictions for next quarter.
+        """
+        
+        result = await ai_service.orchestrator.route_task("analytics", prediction_prompt)
+        
+        return {"deal_predictions": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Deal prediction failed: {str(e)}")
+
+@api_router.post("/ai/sales/smart-proposal-generator")
+async def ai_proposal_generator(lead_id: str, service_type: str):
+    """Generate AI-powered custom proposals"""
+    try:
+        lead = await db.leads.find_one({"id": lead_id})
+        if not lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+        
+        proposal_prompt = f"""
+        Generate a comprehensive proposal for Aavana Greens client:
+        
+        Client Details: {json.dumps(lead)}
+        Service Type: {service_type}
+        
+        Create a detailed proposal including:
+        1. Executive Summary
+        2. Understanding of Client Needs
+        3. Proposed Solutions & Services
+        4. Timeline & Milestones
+        5. Investment Details
+        6. Value Proposition
+        7. Next Steps
+        8. Terms & Conditions
+        
+        Make it professional, personalized, and compelling for green building/landscaping services.
+        Include specific benefits for their space size: {lead.get('space_size', 'N/A')} and budget: ₹{lead.get('budget', 'N/A')}
+        """
+        
+        result = await ai_service.orchestrator.route_task("creative", proposal_prompt, {"lead_id": lead_id})
+        
+        return {"proposal": result, "lead_id": lead_id, "service_type": service_type}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Proposal generation failed: {str(e)}")
+
+# Marketing & Growth AI Features
+@api_router.post("/ai/marketing/campaign-optimizer")
+async def ai_campaign_optimizer(campaign_data: dict):
+    """Optimize marketing campaigns using AI"""
+    try:
+        optimization_prompt = f"""
+        Optimize this marketing campaign for Aavana Greens:
+        
+        Campaign Data: {json.dumps(campaign_data)}
+        
+        Provide optimization recommendations for:
+        1. Target Audience Refinement
+        2. Message Optimization
+        3. Channel Selection (Google Ads, Facebook, Instagram, WhatsApp)
+        4. Budget Allocation
+        5. Timing & Seasonality
+        6. Creative Variations
+        7. Landing Page Optimization
+        8. ROI Predictions
+        
+        Focus on green building, landscaping, and plant nursery market segments.
+        """
+        
+        result = await ai_service.orchestrator.route_task("creative", optimization_prompt, campaign_data)
+        
+        return {"campaign_optimization": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Campaign optimization failed: {str(e)}")
+
+@api_router.post("/ai/marketing/competitor-analysis")
+async def ai_competitor_analysis(location: str = "Mumbai"):
+    """AI-powered competitor analysis"""
+    try:
+        analysis_prompt = f"""
+        Conduct competitive analysis for Aavana Greens in {location} market:
+        
+        Analyze the competitive landscape for:
+        1. Green building consultants
+        2. Landscaping services
+        3. Plant nurseries
+        4. Balcony garden specialists
+        
+        Provide insights on:
+        1. Key Competitors & Their Positioning
+        2. Pricing Strategies
+        3. Service Offerings Comparison
+        4. Digital Presence Analysis
+        5. Market Gaps & Opportunities
+        6. Differentiation Strategies
+        7. Competitive Advantages to Leverage
+        8. Market Entry Barriers
+        
+        Location Focus: {location} and surrounding areas
+        """
+        
+        result = await ai_service.orchestrator.route_task("insights", analysis_prompt, {"location": location})
+        
+        return {"competitor_analysis": result, "location": location}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Competitor analysis failed: {str(e)}")
+
+# Product/Project/Gallery AI Features
+@api_router.post("/ai/product/smart-catalog")
+async def ai_product_catalog_optimization():
+    """AI-optimized product catalog management"""
+    try:
+        products = await db.products.find().to_list(length=100)
+        
+        catalog_prompt = f"""
+        Optimize Aavana Greens product catalog using AI:
+        
+        Current Products: {json.dumps(products)}
+        
+        Provide optimization for:
+        1. Product Categorization & Organization
+        2. Seasonal Demand Predictions
+        3. Inventory Level Recommendations
+        4. Pricing Strategy Optimization
+        5. Cross-selling Opportunities
+        6. New Product Suggestions
+        7. Product Description Enhancements
+        8. Bundling Strategies
+        
+        Focus on plants, gardening supplies, green building materials, and consultation services.
+        """
+        
+        result = await ai_service.orchestrator.route_task("analytics", catalog_prompt)
+        
+        return {"catalog_optimization": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Catalog optimization failed: {str(e)}")
+
+@api_router.post("/ai/project/design-suggestions")
+async def ai_design_suggestions(project_requirements: dict):
+    """AI-powered design suggestions for projects"""
+    try:
+        design_prompt = f"""
+        Generate design suggestions for Aavana Greens project:
+        
+        Project Requirements: {json.dumps(project_requirements)}
+        
+        Provide creative design suggestions for:
+        1. Plant Selection based on space, light, maintenance
+        2. Layout & Design Concepts
+        3. Color Schemes & Themes
+        4. Functional Zoning
+        5. Sustainable Features Integration
+        6. Maintenance Requirements
+        7. Seasonal Care Instructions
+        8. Budget Optimization Tips
+        
+        Consider factors: space constraints, client preferences, local climate, maintenance capacity.
+        """
+        
+        result = await ai_service.orchestrator.route_task("creative", design_prompt, project_requirements)
+        
+        return {"design_suggestions": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Design suggestions failed: {str(e)}")
+
+# HR & Team Operations AI Features
+@api_router.post("/ai/hr/performance-analysis")
+async def ai_performance_analysis():
+    """AI-powered team performance analysis"""
+    try:
+        employees = await db.employees.find().to_list(length=50)
+        attendance = await db.attendance.find().to_list(length=200)
+        
+        performance_prompt = f"""
+        Analyze team performance for Aavana Greens:
+        
+        Employee Data: {json.dumps(employees)}
+        Attendance Data: {json.dumps(attendance)}
+        
+        Provide analysis for:
+        1. Individual Performance Insights
+        2. Team Productivity Trends
+        3. Attendance Pattern Analysis
+        4. Skill Gap Identification
+        5. Training Recommendations
+        6. Workload Distribution
+        7. Employee Engagement Levels
+        8. Retention Risk Assessment
+        
+        Focus on green industry specific skills and seasonal work patterns.
+        """
+        
+        result = await ai_service.orchestrator.route_task("insights", performance_prompt)
+        
+        return {"performance_analysis": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Performance analysis failed: {str(e)}")
+
+@api_router.post("/ai/hr/smart-scheduling")
+async def ai_smart_scheduling(scheduling_requirements: dict):
+    """AI-optimized employee scheduling"""
+    try:
+        scheduling_prompt = f"""
+        Create optimal employee schedule for Aavana Greens:
+        
+        Requirements: {json.dumps(scheduling_requirements)}
+        
+        Optimize for:
+        1. Project Requirements & Skills Matching
+        2. Employee Availability & Preferences
+        3. Workload Balancing
+        4. Seasonal Demand Patterns
+        5. Cost Optimization
+        6. Quality Assurance Coverage
+        7. Emergency Response Capability
+        8. Customer Service Standards
+        
+        Consider: site visits, nursery operations, design consultations, installation projects.
+        """
+        
+        result = await ai_service.orchestrator.route_task("automation", scheduling_prompt, scheduling_requirements)
+        
+        return {"smart_schedule": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Smart scheduling failed: {str(e)}")
+
+# Analytics & Admin AI Features
+@api_router.post("/ai/analytics/business-intelligence")
+async def ai_business_intelligence():
+    """Comprehensive AI-powered business intelligence"""
+    try:
+        # Gather business data
+        leads_count = await db.leads.count_documents({})
+        won_deals = await db.leads.count_documents({"status": "Won"})
+        products_count = await db.products.count_documents({})
+        employees_count = await db.employees.count_documents({})
+        
+        bi_prompt = f"""
+        Generate comprehensive business intelligence report for Aavana Greens:
+        
+        Business Metrics:
+        - Total Leads: {leads_count}
+        - Won Deals: {won_deals}
+        - Products in Catalog: {products_count}
+        - Team Size: {employees_count}
+        
+        Provide strategic insights on:
+        1. Revenue Growth Opportunities
+        2. Market Expansion Strategies
+        3. Operational Efficiency Improvements
+        4. Digital Transformation Roadmap
+        5. Competitive Positioning
+        6. Risk Assessment & Mitigation
+        7. Investment Priorities
+        8. Long-term Growth Projections
+        
+        Focus on green building industry trends and sustainable business practices.
+        """
+        
+        result = await ai_service.orchestrator.route_task("insights", bi_prompt)
+        
+        return {"business_intelligence": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Business intelligence failed: {str(e)}")
+
+@api_router.post("/ai/analytics/predictive-forecasting")
+async def ai_predictive_forecasting(forecast_type: str = "revenue"):
+    """AI-powered predictive forecasting"""
+    try:
+        forecasting_prompt = f"""
+        Generate predictive forecasting for Aavana Greens:
+        
+        Forecast Type: {forecast_type}
+        
+        Provide predictions for:
+        1. Revenue Forecasting (Next 6 months)
+        2. Seasonal Demand Patterns
+        3. Market Trends Impact
+        4. Customer Acquisition Projections
+        5. Inventory Requirements
+        6. Resource Planning Needs
+        7. Cash Flow Projections
+        8. Growth Trajectory Analysis
+        
+        Consider: seasonal variations, market conditions, green industry trends, economic factors.
+        Include confidence intervals and scenario planning (optimistic, realistic, conservative).
+        """
+        
+        result = await ai_service.orchestrator.route_task("analytics", forecasting_prompt, {"forecast_type": forecast_type})
+        
+        return {"predictive_forecast": result, "forecast_type": forecast_type}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Predictive forecasting failed: {str(e)}")
+
+# Automation Layer AI Features
+@api_router.post("/ai/automation/workflow-optimization")
+async def ai_workflow_optimization(department: str):
+    """AI-powered workflow optimization"""
+    try:
+        workflow_prompt = f"""
+        Optimize workflows for Aavana Greens {department} department:
+        
+        Department: {department}
+        
+        Analyze and optimize:
+        1. Current Process Mapping
+        2. Bottleneck Identification
+        3. Automation Opportunities
+        4. Resource Allocation
+        5. Quality Control Points
+        6. Communication Flows
+        7. Technology Integration
+        8. Performance Metrics
+        
+        Provide specific recommendations for:
+        - Process improvements
+        - Technology solutions
+        - Staff productivity
+        - Customer experience
+        - Cost reduction
+        
+        Focus on green industry best practices and sustainable operations.
+        """
+        
+        result = await ai_service.orchestrator.route_task("automation", workflow_prompt, {"department": department})
+        
+        return {"workflow_optimization": result, "department": department}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Workflow optimization failed: {str(e)}")
+
+@api_router.post("/ai/automation/smart-notifications")
+async def ai_smart_notifications():
+    """AI-powered smart notification system"""
+    try:
+        # Get recent activities
+        recent_leads = await db.leads.find().sort("created_at", -1).limit(10).to_list(length=10)
+        pending_tasks = await db.tasks.find({"status": "Pending"}).to_list(length=20)
+        
+        notification_prompt = f"""
+        Generate smart notifications for Aavana Greens team:
+        
+        Recent Leads: {json.dumps(recent_leads)}
+        Pending Tasks: {json.dumps(pending_tasks)}
+        
+        Create intelligent notifications for:
+        1. Priority Alerts (High-value leads, urgent tasks)
+        2. Follow-up Reminders (Lead nurturing, customer service)
+        3. Performance Notifications (Goals, achievements, concerns)
+        4. Operational Alerts (Inventory, appointments, deadlines)
+        5. Opportunity Notifications (Upselling, cross-selling)
+        6. System Updates (Important changes, new features)
+        
+        Prioritize notifications by importance and urgency.
+        Include specific actions and context for each notification.
+        """
+        
+        result = await ai_service.orchestrator.route_task("automation", notification_prompt)
+        
+        return {"smart_notifications": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Smart notifications failed: {str(e)}")
+
+# Global AI Chat Interface
+@api_router.post("/ai/chat/global-assistant")
+async def ai_global_assistant(message: str, context: dict = None, session_id: str = None):
+    """Global AI assistant for all business queries"""
+    try:
+        if not session_id:
+            session_id = f"global-{uuid.uuid4()}"
+        
+        # Create dynamic context based on current business state
+        business_context = {
+            "leads_count": await db.leads.count_documents({}),
+            "active_tasks": await db.tasks.count_documents({"status": "Pending"}),
+            "products_count": await db.products.count_documents({}),
+            "user_context": context or {}
+        }
+        
+        assistant_prompt = f"""
+        You are the Global AI Assistant for Aavana Greens CRM & Business Management System.
+        
+        Business Context: {json.dumps(business_context)}
+        User Query: {message}
+        Session: {session_id}
+        
+        Provide helpful assistance for:
+        - CRM operations (leads, tasks, follow-ups)
+        - Sales pipeline management
+        - Marketing strategy and content
+        - Product catalog and inventory
+        - Project planning and design
+        - Team management and HR
+        - Business analytics and insights
+        - Process automation
+        - Strategic planning
+        
+        Be conversational, helpful, and specific to Aavana Greens' green building and landscaping business.
+        Provide actionable suggestions and relevant business insights.
+        """
+        
+        result = await ai_service.orchestrator.route_task("automation", assistant_prompt, business_context)
+        
+        return {
+            "response": result,
+            "session_id": session_id,
+            "context": business_context
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Global assistant failed: {str(e)}")
+
 # Telephony Routes
 @api_router.get("/telephony/ivr/{digit}")
 async def handle_ivr(digit: str):
