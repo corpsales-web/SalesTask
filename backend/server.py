@@ -2334,8 +2334,8 @@ async def phone_login(phone_data: PhoneLogin):
 async def forgot_password(reset_data: PasswordReset):
     """Request password reset"""
     try:
-        user = await db.users.find_one({"email": reset_data.email})
-        if not user:
+        existing_user = await db.users.find_one({"email": reset_data.email})
+        if not existing_user:
             # Don't reveal if email exists
             return {"message": "If the email exists, a reset link has been sent"}
         
@@ -2345,7 +2345,7 @@ async def forgot_password(reset_data: PasswordReset):
         
         # Update user with reset token
         await db.users.update_one(
-            {"id": user["id"]},
+            {"id": existing_user["id"]},
             {"$set": {
                 "reset_token": reset_token,
                 "reset_token_expires": reset_expires
@@ -2353,7 +2353,7 @@ async def forgot_password(reset_data: PasswordReset):
         )
         
         # In production, send email with reset link
-        # await send_password_reset_email(user["email"], reset_token)
+        # await send_password_reset_email(existing_user["email"], reset_token)
         
         return {
             "message": "If the email exists, a reset link has been sent",
@@ -2367,12 +2367,12 @@ async def forgot_password(reset_data: PasswordReset):
 async def reset_password(reset_data: PasswordResetConfirm):
     """Confirm password reset"""
     try:
-        user = await db.users.find_one({
+        existing_user = await db.users.find_one({
             "reset_token": reset_data.token,
             "reset_token_expires": {"$gt": datetime.now(timezone.utc)}
         })
         
-        if not user:
+        if not existing_user:
             raise HTTPException(status_code=400, detail="Invalid or expired reset token")
         
         # Hash new password
@@ -2380,7 +2380,7 @@ async def reset_password(reset_data: PasswordResetConfirm):
         
         # Update user password and clear reset token
         await db.users.update_one(
-            {"id": user["id"]},
+            {"id": existing_user["id"]},
             {"$set": {
                 "password_hash": new_password_hash,
                 "reset_token": None,
