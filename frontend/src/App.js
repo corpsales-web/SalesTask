@@ -938,6 +938,102 @@ const App = () => {
     }
   };
 
+  // Aavana 2.0 Chat Functions
+  const [aavana2Message, setAavana2Message] = useState("");
+  const [aavana2History, setAavana2History] = useState([]);
+  const [aavana2Language, setAavana2Language] = useState("auto");
+  const [showAavana2, setShowAavana2] = useState(false);
+  const [aavana2SessionId, setAavana2SessionId] = useState("");
+
+  const sendAavana2Message = async () => {
+    if (!aavana2Message.trim()) return;
+    
+    const userMessage = aavana2Message;
+    setAavana2History(prev => [...prev, { 
+      type: 'user', 
+      message: userMessage, 
+      timestamp: new Date().toLocaleTimeString(),
+      language: aavana2Language 
+    }]);
+    setAavana2Message("");
+    
+    try {
+      const response = await axios.post(`${API}/aavana/conversation`, {
+        message: userMessage,
+        channel: "in_app_chat",
+        user_id: "frontend_user",
+        language: aavana2Language === "auto" ? null : aavana2Language,
+        session_id: aavana2SessionId || null,
+        context: {
+          source: "frontend_chat",
+          user_agent: navigator.userAgent
+        }
+      });
+      
+      // Update session ID
+      if (response.data.session_id) {
+        setAavana2SessionId(response.data.session_id);
+      }
+      
+      const aavanaResponse = {
+        type: 'aavana',
+        message: response.data.response,
+        timestamp: new Date().toLocaleTimeString(),
+        language: response.data.language,
+        intent: response.data.intent,
+        confidence: response.data.confidence,
+        suggested_replies: response.data.suggested_replies || [],
+        cached_audio_url: response.data.cached_audio_url,
+        processing_time_ms: response.data.processing_time_ms
+      };
+      
+      setAavana2History(prev => [...prev, aavanaResponse]);
+      
+      toast({
+        title: `🤖 Aavana 2.0 (${response.data.language})`,
+        description: `Intent: ${response.data.intent} (${Math.round(response.data.confidence * 100)}% confidence)`
+      });
+      
+    } catch (error) {
+      console.error("Error with Aavana 2.0:", error);
+      setAavana2History(prev => [...prev, { 
+        type: 'error', 
+        message: `Error: Unable to process your message. Please try again or call 8447475761 for assistance.`,
+        timestamp: new Date().toLocaleTimeString()
+      }]);
+    }
+  };
+
+  const testLanguageDetection = async (testText) => {
+    try {
+      const response = await axios.post(`${API}/aavana/language-detect`, { text: testText });
+      toast({
+        title: "🔍 Language Detection",
+        description: `Detected: ${response.data.detected_language} | Text: "${testText}"`
+      });
+    } catch (error) {
+      console.error("Language detection error:", error);
+    }
+  };
+
+  const useSuggestedReply = (reply) => {
+    setAavana2Message(reply);
+  };
+
+  const playAavanaAudio = (audioUrl) => {
+    if (audioUrl) {
+      // In Phase 1, we use device TTS since server TTS is deferred
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance("Audio playback via device TTS");
+        speechSynthesis.speak(utterance);
+      }
+      toast({
+        title: "🔊 Audio",
+        description: "Playing cached audio template (device TTS)"
+      });
+    }
+  };
+
   // AI Chat Functions
   const sendAiMessage = async () => {
     if (!aiChatMessage.trim()) return;
