@@ -68,7 +68,9 @@ def main():
 
     # Test 1: Basic OTP Request (working)
     print("\n📱 Testing Basic OTP Request...")
-    phone_data = {"phone": "9876543210", "resend": False}
+    import time
+    unique_phone = f"99999{str(int(time.time()))[-5:]}"
+    phone_data = {"phone": unique_phone, "resend": False}
     success, otp_response = tester.run_test(
         "Basic OTP Request", 
         "POST", 
