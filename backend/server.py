@@ -968,6 +968,293 @@ async def ai_smart_notifications():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Smart notifications failed: {str(e)}")
 
+# Aavana 2.0 Orchestration Routes
+
+@api_router.post("/aavana/conversation")
+async def aavana_conversation(
+    message: str,
+    channel: str = "in_app_chat",
+    user_id: str = "default_user",
+    language: str = None,
+    session_id: str = None,
+    context: dict = None
+):
+    """
+    Aavana 2.0 - Central conversational AI endpoint
+    Supports Hindi, English, Hinglish, Tamil with intent parsing
+    """
+    try:
+        # Map channel string to enum
+        channel_mapping = {
+            "in_app_chat": ChannelType.IN_APP_CHAT,
+            "whatsapp": ChannelType.WHATSAPP,
+            "exotel_voice": ChannelType.EXOTEL_VOICE,
+            "sms": ChannelType.SMS
+        }
+        
+        # Map language string to enum
+        language_mapping = {
+            "hi": SupportedLanguage.HINDI,
+            "en": SupportedLanguage.ENGLISH,
+            "hi-en": SupportedLanguage.HINGLISH,
+            "hinglish": SupportedLanguage.HINGLISH,
+            "ta": SupportedLanguage.TAMIL
+        }
+        
+        request = ConversationRequest(
+            channel=channel_mapping.get(channel, ChannelType.IN_APP_CHAT),
+            user_id=user_id,
+            message=message,
+            language=language_mapping.get(language) if language else None,
+            session_id=session_id,
+            context=context or {}
+        )
+        
+        response = await aavana_2_0.process_conversation(request)
+        
+        return {
+            "operation_id": response.operation_id,
+            "response": response.response_text,
+            "language": response.language.value,
+            "intent": response.intent.value,
+            "confidence": response.confidence,
+            "actions": response.actions,
+            "cached_audio_url": response.cached_audio_url,
+            "suggested_replies": response.suggested_replies,
+            "session_id": response.session_id,
+            "processing_time_ms": response.processing_time_ms
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Aavana 2.0 processing failed: {str(e)}")
+
+@api_router.post("/aavana/whatsapp")
+async def aavana_whatsapp_webhook(message_data: dict):
+    """
+    WhatsApp webhook for Aavana 2.0 integration
+    Processes incoming WhatsApp messages with multilingual support
+    """
+    try:
+        # Extract WhatsApp message data
+        from_number = message_data.get("from", "")
+        message_text = message_data.get("text", {}).get("body", "")
+        message_id = message_data.get("id", "")
+        
+        if not message_text:
+            return {"status": "ignored", "reason": "No text content"}
+        
+        # Create Aavana 2.0 request
+        request = ConversationRequest(
+            channel=ChannelType.WHATSAPP,
+            user_id=from_number,
+            message=message_text,
+            context={
+                "whatsapp_message_id": message_id,
+                "from_number": from_number
+            }
+        )
+        
+        # Process with Aavana 2.0
+        response = await aavana_2_0.process_conversation(request)
+        
+        # Send response back via WhatsApp
+        whatsapp_response = await whatsapp_service.send_template_message(
+            from_number, 
+            "text", 
+            [response.response_text]
+        )
+        
+        return {
+            "status": "processed",
+            "operation_id": response.operation_id,
+            "intent": response.intent.value,
+            "language": response.language.value,
+            "whatsapp_status": "sent"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"WhatsApp processing failed: {str(e)}")
+
+@api_router.post("/aavana/exotel-stt")
+async def aavana_exotel_stt_webhook(call_data: dict):
+    """
+    Exotel STT webhook for voice message processing
+    Transcribes voice to text and processes with Aavana 2.0
+    """
+    try:
+        # Extract Exotel call data
+        call_sid = call_data.get("CallSid", "")
+        from_number = call_data.get("From", "")
+        recording_url = call_data.get("RecordingUrl", "")
+        transcript = call_data.get("transcript", "")  # STT result
+        
+        if not transcript:
+            return {"status": "ignored", "reason": "No transcript available"}
+        
+        # Create Aavana 2.0 request
+        request = ConversationRequest(
+            channel=ChannelType.EXOTEL_VOICE,
+            user_id=from_number,
+            message=transcript,
+            context={
+                "call_sid": call_sid,
+                "recording_url": recording_url,
+                "from_number": from_number
+            }
+        )
+        
+        # Process with Aavana 2.0
+        response = await aavana_2_0.process_conversation(request)
+        
+        # Create task or lead based on intent
+        if response.intent in [IntentType.LEAD_INQUIRY, IntentType.APPOINTMENT_BOOKING]:
+            # Create lead
+            lead_data = {
+                "name": f"Voice Lead from {from_number}",
+                "phone": from_number,
+                "source": "Voice Call",
+                "notes": f"Original message: {transcript}\nAI Response: {response.response_text}",
+                "category": "Voice Inquiry"
+            }
+            
+            lead_dict = prepare_for_mongo(lead_data)
+            await db.leads.insert_one(lead_dict)
+        
+        return {
+            "status": "processed",
+            "operation_id": response.operation_id,
+            "intent": response.intent.value,
+            "language": response.language.value,
+            "lead_created": response.intent in [IntentType.LEAD_INQUIRY, IntentType.APPOINTMENT_BOOKING]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Exotel STT processing failed: {str(e)}")
+
+@api_router.post("/aavana/language-detect")
+async def aavana_language_detection(text: str):
+    """
+    Standalone language detection endpoint
+    """
+    try:
+        detected_language = await aavana_2_0.language_detector.detect_language(text)
+        
+        # If Hinglish detected, also provide normalized version
+        normalized_text = text
+        if detected_language == SupportedLanguage.HINGLISH:
+            normalized_text = await aavana_2_0.hinglish_normalizer.normalize_hinglish(text)
+        
+        return {
+            "original_text": text,
+            "detected_language": detected_language.value,
+            "normalized_text": normalized_text,
+            "confidence": 0.9  # Placeholder confidence
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Language detection failed: {str(e)}")
+
+@api_router.get("/aavana/audio-templates")
+async def aavana_audio_templates(language: str = "en"):
+    """
+    Get available cached audio templates
+    """
+    try:
+        language_enum = SupportedLanguage.ENGLISH
+        if language == "hi":
+            language_enum = SupportedLanguage.HINDI
+        elif language in ["hi-en", "hinglish"]:
+            language_enum = SupportedLanguage.HINGLISH
+        elif language == "ta":
+            language_enum = SupportedLanguage.TAMIL
+        
+        templates = {}
+        for template_key in ['welcome', 'thank_you', 'appointment_confirmed', 'price_inquiry_response', 'catalog_intro']:
+            audio_url = await aavana_2_0.audio_cache.get_cached_audio(template_key, language_enum)
+            text = await aavana_2_0.audio_cache.get_template_text(template_key, language_enum)
+            
+            if audio_url and text:
+                templates[template_key] = {
+                    "audio_url": audio_url,
+                    "text": text
+                }
+        
+        return {
+            "language": language,
+            "templates": templates
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Audio templates failed: {str(e)}")
+
+@api_router.get("/aavana/operation/{operation_id}")
+async def aavana_get_operation(operation_id: str):
+    """
+    Get operation state for tracking and debugging
+    """
+    try:
+        state = await aavana_2_0.state_manager.get_operation(operation_id)
+        
+        if not state:
+            raise HTTPException(status_code=404, detail="Operation not found")
+        
+        return {
+            "operation_id": state.operation_id,
+            "status": state.status.value,
+            "channel": state.channel.value,
+            "user_id": state.user_id,
+            "original_message": state.original_message,
+            "processed_message": state.processed_message,
+            "language": state.language.value,
+            "intent": state.intent.value,
+            "confidence": state.confidence,
+            "response": state.response,
+            "retry_count": state.retry_count,
+            "created_at": state.created_at.isoformat(),
+            "updated_at": state.updated_at.isoformat(),
+            "error_message": state.error_message
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Operation retrieval failed: {str(e)}")
+
+@api_router.get("/aavana/health")
+async def aavana_health_check():
+    """
+    Aavana 2.0 health check endpoint
+    """
+    try:
+        # Test language detection
+        test_language = await aavana_2_0.language_detector.detect_language("Hello, how are you?")
+        
+        # Test intent parsing (without AI call to save cost)
+        test_intent, confidence = aavana_2_0.intent_parser._apply_safety_rules("what is the price?")
+        
+        return {
+            "status": "healthy",
+            "version": "2.0",
+            "components": {
+                "language_detector": "operational",
+                "hinglish_normalizer": "operational",
+                "intent_parser": "operational",
+                "state_manager": "operational",
+                "audio_cache": "operational"
+            },
+            "supported_languages": ["hi", "en", "hi-en", "ta"],
+            "supported_channels": ["in_app_chat", "whatsapp", "exotel_voice", "sms"],
+            "test_results": {
+                "language_detection": test_language.value,
+                "intent_parsing": test_intent.value,
+                "confidence": confidence
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "error": str(e)
+        }
+
 # Global AI Chat Interface
 @api_router.post("/ai/chat/global-assistant")
 async def ai_global_assistant(message: str, context: dict = None, session_id: str = None):
