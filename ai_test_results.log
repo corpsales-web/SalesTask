@@ -1,0 +1,40 @@
+🚀 Final AI Endpoints Verification Test
+Testing the 4 critical AI endpoints that were previously failing
+======================================================================
+
+📋 Getting real lead ID for testing...
+   Error getting leads, using demo ID
+
+🔍 Testing 1. Smart Lead Scoring...
+   URL: https://unify-crm.preview.emergentagent.com/api/ai/crm/smart-lead-scoring
+   Params: {'lead_id': 'test_lead_id'}
+   ❌ TIMEOUT after 90s
+   ⏳ Waiting 5s before next test...
+
+🔍 Testing 2. Deal Prediction...
+   URL: https://unify-crm.preview.emergentagent.com/api/ai/sales/deal-prediction
+   ❌ TIMEOUT after 90s
+   ⏳ Waiting 5s before next test...
+
+🔍 Testing 3. Smart Proposal Generator...
+   URL: https://unify-crm.preview.emergentagent.com/api/ai/sales/smart-proposal-generator
+   Params: {'lead_id': 'test_lead_id', 'service_type': 'balcony_garden'}
+   ❌ TIMEOUT after 90s
+   ⏳ Waiting 5s before next test...
+
+🔍 Testing 4. Recall Context...
+   URL: https://unify-crm.preview.emergentagent.com/api/ai/recall-context/test_lead_id
+   Params: {'query': 'Complete client history'}
+   Response time: 76.2s
+   Status: 502
+   ❌ FAILED
+   Error: ...
+   ⏳ Waiting 5s before next test...
+
+======================================================================
+📊 FINAL TEST RESULTS
+Tests Passed: 0/4
+Success Rate: 0.0%
+
+❌ FAILURE: Most endpoints still have issues
+Additional debugging required
