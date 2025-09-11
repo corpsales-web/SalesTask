@@ -288,6 +288,14 @@ class PhoneLogin(BaseModel):
     phone: str
     otp: Optional[str] = None
 
+class PhoneOTPRequest(BaseModel):
+    phone: str
+    resend: bool = False
+
+class PhoneOTPVerify(BaseModel):
+    phone: str
+    otp: str
+
 class PasswordReset(BaseModel):
     email: EmailStr
 
