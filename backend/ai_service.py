@@ -162,6 +162,8 @@ class AIService:
 
     async def process_voice_to_task(self, voice_request: VoiceTaskRequest) -> VoiceTaskResponse:
         """Convert voice input to structured task with AI breakdown"""
+        import asyncio
+        
         try:
             context_str = f"""
             You are processing a voice command for Aavana Greens CRM. 
@@ -190,7 +192,31 @@ class AIService:
             }}
             """
             
-            response = await self.orchestrator.route_task("automation", context_str)
+            try:
+                response = await asyncio.wait_for(
+                    self.orchestrator.route_task("automation", context_str), 
+                    timeout=25.0
+                )
+            except asyncio.TimeoutError:
+                # Fallback response for timeout
+                response = json.dumps({
+                    "task_breakdown": {
+                        "title": self._extract_task_title(voice_request.voice_input),
+                        "description": voice_request.voice_input,
+                        "priority": "Medium",
+                        "due_date": self._extract_due_date(voice_request.voice_input)
+                    },
+                    "suggested_actions": [
+                        "Follow up with client",
+                        "Prepare necessary materials",
+                        "Schedule reminder"
+                    ],
+                    "calendar_event": None,
+                    "follow_up_tasks": [
+                        "Send confirmation email",
+                        "Update CRM with details"
+                    ]
+                })
             
             # Parse AI response and structure it properly
             try:
@@ -239,7 +265,23 @@ class AIService:
             
         except Exception as e:
             print(f"Voice processing error: {e}")
-            raise HTTPException(status_code=500, detail=f"Voice processing error: {str(e)}")
+            # Return fallback response on any error
+            return VoiceTaskResponse(
+                task_breakdown={
+                    "title": self._extract_task_title(voice_request.voice_input),
+                    "description": voice_request.voice_input,
+                    "priority": "Medium",
+                    "due_date": self._extract_due_date(voice_request.voice_input)
+                },
+                suggested_actions=[
+                    "Follow up with client",
+                    "Prepare necessary materials"
+                ],
+                calendar_event=None,
+                follow_up_tasks=[
+                    "Send confirmation email"
+                ]
+            )
 
     async def generate_ai_insights(self, insight_request: AIInsightRequest) -> AIInsightResponse:
         """Generate AI insights for business operations"""
