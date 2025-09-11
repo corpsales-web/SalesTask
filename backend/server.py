@@ -417,6 +417,43 @@ class PasswordResetConfirm(BaseModel):
     token: str
     new_password: str
 
+# Project Types Models
+class ProjectType(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    category: str  # Residential, Commercial, Landscape, Interior, etc.
+    is_active: bool = True
+    sort_order: int = 0
+    created_by: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ProjectTypeCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    category: str
+    is_active: bool = True
+    sort_order: int = 0
+
+class ProjectTypeUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    is_active: Optional[bool] = None
+    sort_order: Optional[int] = None
+
+class ProjectTypeResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    category: str
+    is_active: bool
+    sort_order: int
+    created_by: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
