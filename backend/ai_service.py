@@ -37,19 +37,31 @@ class AIOrchestrator:
         ).with_model("gemini", "gemini-2.0-flash")
 
     async def route_task(self, task_type: str, content: str, context: Dict = None) -> str:
-        """Route tasks to the most appropriate AI model"""
+        """Route tasks to the most appropriate AI model with timeout handling"""
+        import asyncio
+        
         try:
+            # Set timeout for AI calls (30 seconds)
             if task_type in ["automation", "workflow", "insights", "analytics"]:
-                return await self._use_gpt5(content, context)
+                task = self._use_gpt5(content, context)
             elif task_type in ["memory", "recall", "history", "context"]:
-                return await self._use_claude(content, context)
+                task = self._use_claude(content, context)
             elif task_type in ["image", "creative", "content", "multimodal"]:
-                return await self._use_gemini(content, context)
+                task = self._use_gemini(content, context)
             else:
                 # Default to GPT-5 for general tasks
-                return await self._use_gpt5(content, context)
+                task = self._use_gpt5(content, context)
+            
+            # Apply timeout with fallback
+            try:
+                return await asyncio.wait_for(task, timeout=30.0)
+            except asyncio.TimeoutError:
+                # Return fallback response on timeout
+                return self._get_fallback_response(task_type, content, context)
+                
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"AI processing error: {str(e)}")
+            # Return fallback response on any error
+            return self._get_fallback_response(task_type, content, context)
 
     async def _use_gpt5(self, content: str, context: Dict = None) -> str:
         """Use GPT-5 for task automation and insights"""
