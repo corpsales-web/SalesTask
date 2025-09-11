@@ -1597,7 +1597,7 @@ const App = () => {
                     <div>
                       <Label htmlFor="category">Client Category *</Label>
                       <div className="space-y-2">
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <Select 
                             value={newLead.category} 
                             onValueChange={(value) => setNewLead({...newLead, category: value})}
@@ -1617,13 +1617,14 @@ const App = () => {
                             variant="outline" 
                             size="sm"
                             onClick={() => setIsCustomCategory(!isCustomCategory)}
+                            className="sm:w-auto w-full"
                           >
                             {isCustomCategory ? "Select" : "Custom"}
                           </Button>
                         </div>
                         
                         {isCustomCategory && (
-                          <div className="flex gap-2">
+                          <div className="flex flex-col sm:flex-row gap-2">
                             <Input
                               placeholder="Enter custom category"
                               value={newCustomCategory}
@@ -1634,7 +1635,7 @@ const App = () => {
                               type="button" 
                               size="sm" 
                               onClick={addCustomCategory}
-                              className="bg-emerald-600 hover:bg-emerald-700"
+                              className="bg-emerald-600 hover:bg-emerald-700 sm:w-auto w-full"
                             >
                               Add
                             </Button>
