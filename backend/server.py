@@ -2191,6 +2191,7 @@ async def register_user(user_data: UserCreate):
         user_dict = user_data.dict()
         user_dict.pop("password")  # Remove plain password
         user_dict["password_hash"] = hashed_password
+        user_dict["status"] = UserStatus.ACTIVE  # Set as active for testing
         
         user = User(**user_dict)
         user_dict = prepare_for_mongo(user.dict())
