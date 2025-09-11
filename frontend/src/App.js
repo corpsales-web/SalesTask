@@ -155,6 +155,45 @@ const App = () => {
     due_date: ""
   });
 
+  // ERP Form states
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    category: "Indoor Plants",
+    price: "",
+    cost_price: "",
+    stock_quantity: "",
+    min_stock_level: "5",
+    unit: "piece",
+    description: "",
+    supplier: ""
+  });
+
+  const [newInvoice, setNewInvoice] = useState({
+    customer_name: "",
+    customer_phone: "",
+    customer_email: "",
+    items: [],
+    tax_percentage: 18,
+    discount_percentage: 0,
+    notes: ""
+  });
+
+  const [newProject, setNewProject] = useState({
+    project_name: "",
+    client_name: "",
+    location: "",
+    project_type: "Balcony Garden",
+    budget_range: "",
+    description: "",
+    testimonial: ""
+  });
+
+  // HRMS states
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const [aiChatMessage, setAiChatMessage] = useState("");
+  const [aiChatHistory, setAiChatHistory] = useState([]);
+  const [showAiChat, setShowAiChat] = useState(false);
+
   // Fetch data functions
   const fetchDashboardStats = async () => {
     try {
