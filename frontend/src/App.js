@@ -3482,7 +3482,7 @@ const App = () => {
         {/* Aavana 2.0 Floating Button */}
         <Button
           onClick={() => setShowAavana2(!showAavana2)}
-          className={`fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg z-[50] transition-all ${
+          className={`fixed bottom-6 right-20 w-14 h-14 rounded-full shadow-lg z-[50] transition-all ${
             showAavana2 
               ? 'bg-red-500 hover:bg-red-600' 
               : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700'
