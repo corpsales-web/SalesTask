@@ -31,7 +31,7 @@ def test_auth_flow():
     # Test 2: Login with username
     print("\n2. Testing Login with Username...")
     login_data = {
-        "identifier": "authtest456",
+        "identifier": "authtest789",
         "password": "SecurePass123!"
     }
     
