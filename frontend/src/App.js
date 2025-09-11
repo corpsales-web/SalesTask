@@ -2049,13 +2049,24 @@ const App = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
+                    <Button 
+                      className="w-full bg-emerald-600 hover:bg-emerald-700" 
+                      size="sm"
+                      onClick={handleFaceCheckin}
+                      disabled={isCheckingIn}
+                    >
                       <Camera className="h-4 w-4 mr-2" />
-                      Face Check-In
+                      {isCheckingIn ? "Checking In..." : "Face Check-In"}
                     </Button>
-                    <Button variant="outline" className="w-full border-emerald-300 hover:bg-emerald-50" size="sm">
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-emerald-300 hover:bg-emerald-50" 
+                      size="sm"
+                      onClick={handleGpsCheckin}
+                      disabled={isCheckingIn}
+                    >
                       <MapPin className="h-4 w-4 mr-2" />
-                      GPS Check-In
+                      {isCheckingIn ? "Locating..." : "GPS Check-In"}
                     </Button>
                   </div>
 
