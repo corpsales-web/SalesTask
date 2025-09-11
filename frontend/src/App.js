@@ -905,17 +905,38 @@ const App = () => {
       // Get current location for background validation
       const location = await getCurrentLocation();
       
-      // Capture image from video
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      let imageData;
       
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0);
-      
-      // Convert to base64
-      const imageData = canvas.toDataURL('image/jpeg', 0.8);
+      if (cameraStream === 'demo_mode') {
+        // Create demo image data for testing
+        const canvas = canvasRef.current;
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext('2d');
+        
+        // Create a demo face image
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(0, 0, 640, 480);
+        ctx.fillStyle = '#374151';
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Demo Face Check-in', 320, 200);
+        ctx.fillText('Employee: EMP001', 320, 240);
+        ctx.fillText(new Date().toLocaleString(), 320, 280);
+        
+        imageData = canvas.toDataURL('image/jpeg', 0.8);
+      } else {
+        // Capture image from video (real camera)
+        const canvas = canvasRef.current;
+        const video = videoRef.current;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        
+        imageData = canvas.toDataURL('image/jpeg', 0.8);
+      }
       
       // Stop camera
       stopCamera();
@@ -928,7 +949,8 @@ const App = () => {
         timestamp: new Date().toISOString(),
         device_info: {
           user_agent: navigator.userAgent,
-          platform: navigator.platform
+          platform: navigator.platform,
+          demo_mode: cameraStream === 'demo_mode'
         }
       });
       
