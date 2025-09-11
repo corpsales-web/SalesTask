@@ -2853,6 +2853,119 @@ async def get_current_user_profile(current_user: UserResponse = Depends(get_curr
     """Get current authenticated user's profile"""
     return current_user
 
+@api_router.get("/auth/permissions")
+async def get_available_permissions():
+    """Get all available permissions in the system"""
+    return {
+        "permissions": [
+            {
+                "name": perm.value,
+                "description": perm.value.replace(":", " ").replace("_", " ").title(),
+                "category": perm.value.split(":")[0].title()
+            }
+            for perm in Permission
+        ],
+        "roles": [
+            {
+                "name": role.value,
+                "permissions": ROLE_PERMISSIONS.get(role, [])
+            }
+            for role in UserRole
+        ]
+    }
+
+@api_router.get("/auth/my-permissions")
+async def get_my_permissions(current_user: UserResponse = Depends(get_current_user)):
+    """Get current user's effective permissions"""
+    user_permissions = get_user_permissions(current_user.role, current_user.permissions)
+    
+    return {
+        "user": {
+            "id": current_user.id,
+            "username": current_user.username,
+            "role": current_user.role
+        },
+        "permissions": user_permissions,
+        "role_permissions": ROLE_PERMISSIONS.get(current_user.role, []),
+        "custom_permissions": current_user.permissions or []
+    }
+
+@api_router.put("/users/{user_id}/permissions")
+async def update_user_permissions_endpoint(
+    user_id: str, 
+    permissions_data: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Update user's custom permissions (admin only)"""
+    try:
+        # Check if current user has permission to manage user permissions
+        if current_user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        new_permissions = permissions_data.get("permissions", [])
+        
+        # Validate permissions
+        valid_permissions = [perm.value for perm in Permission]
+        invalid_permissions = [perm for perm in new_permissions if perm not in valid_permissions]
+        
+        if invalid_permissions:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid permissions: {invalid_permissions}"
+            )
+        
+        # Update user permissions
+        result = await db.users.update_one(
+            {"id": user_id},
+            {"$set": {
+                "permissions": new_permissions,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get updated user
+        updated_user = await db.users.find_one({"id": user_id})
+        effective_permissions = get_user_permissions(
+            UserRole(updated_user["role"]), 
+            updated_user.get("permissions", [])
+        )
+        
+        return {
+            "message": "Permissions updated successfully",
+            "user_id": user_id,
+            "new_permissions": new_permissions,
+            "effective_permissions": effective_permissions
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Permission update failed: {str(e)}")
+
+@api_router.post("/auth/check-permission")
+async def check_user_permission(
+    permission_data: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Check if current user has specific permission"""
+    required_permission = permission_data.get("permission")
+    
+    if not required_permission:
+        raise HTTPException(status_code=400, detail="Permission parameter required")
+    
+    user_permissions = get_user_permissions(current_user.role, current_user.permissions)
+    has_perm = has_permission(user_permissions, required_permission)
+    
+    return {
+        "user_id": current_user.id,
+        "permission": required_permission,
+        "has_permission": has_perm,
+        "user_role": current_user.role
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
