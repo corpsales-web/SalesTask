@@ -2961,6 +2961,17 @@ async def create_user(user_data: UserCreate, current_user: UserResponse = Depend
         user_dict = prepare_for_mongo(user.dict())
         await db.users.insert_one(user_dict)
         
+        # Send welcome email (don't fail if email sending fails)
+        try:
+            await send_welcome_email(
+                user_data.email,
+                user_data.full_name,
+                user_data.username,
+                user_data.password  # Send temporary password in welcome email
+            )
+        except Exception as e:
+            print(f"Failed to send welcome email to {user_data.email}: {str(e)}")
+        
         # Return user response without sensitive fields
         user_response_data = {k: v for k, v in user.dict().items() 
                              if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
