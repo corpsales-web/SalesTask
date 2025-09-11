@@ -3302,7 +3302,7 @@ const App = () => {
 
         {/* Aavana 2.0 Floating Chat Interface */}
         {showAavana2 && (
-          <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-white border-2 border-emerald-200 rounded-lg shadow-2xl z-[60] flex flex-col">
+          <div className="fixed bottom-20 right-20 w-96 h-[500px] bg-white border-2 border-emerald-200 rounded-lg shadow-2xl z-[60] flex flex-col">
             {/* Header */}
             <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white p-4 rounded-t-lg">
               <div className="flex justify-between items-center">
