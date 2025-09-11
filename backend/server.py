@@ -364,7 +364,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    return User(**parse_from_mongo(user))
+    user_obj = User(**parse_from_mongo(user))
+    user_response_data = {k: v for k, v in user_obj.dict().items() 
+                         if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
+    return UserResponse(**user_response_data)
 
 def generate_reset_token() -> str:
     """Generate a secure reset token"""
