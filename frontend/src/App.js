@@ -326,6 +326,110 @@ const App = () => {
     }
   };
 
+  // Project Types Management Functions
+  const loadProjectTypes = async () => {
+    if (!authToken) return;
+    
+    try {
+      const response = await axios.get(`${API}/project-types`, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      setProjectTypes(response.data);
+    } catch (error) {
+      console.error('Failed to load project types:', error);
+      if (error.response?.status === 401) {
+        logout();
+      }
+    }
+  };
+
+  const createProjectType = async (projectTypeData) => {
+    if (!authToken) return false;
+    
+    try {
+      const response = await axios.post(`${API}/project-types`, projectTypeData, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      
+      toast({
+        title: "Project Type Created",
+        description: `${projectTypeData.name} has been successfully created`
+      });
+      
+      setShowAddProjectTypeModal(false);
+      setNewProjectType({
+        name: "",
+        description: "",
+        category: "Residential",
+        is_active: true,
+        sort_order: 0
+      });
+      
+      // Reload project types list
+      loadProjectTypes();
+      return true;
+    } catch (error) {
+      toast({
+        title: "Failed to Create Project Type",
+        description: error.response?.data?.detail || "Project type creation failed",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const deleteProjectType = async (projectTypeId, projectTypeName) => {
+    if (!authToken) return false;
+    
+    try {
+      await axios.delete(`${API}/project-types/${projectTypeId}`, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      
+      toast({
+        title: "Project Type Deleted",
+        description: `${projectTypeName} has been successfully deleted`
+      });
+      
+      // Reload project types list
+      loadProjectTypes();
+      return true;
+    } catch (error) {
+      toast({
+        title: "Failed to Delete Project Type",
+        description: error.response?.data?.detail || "Project type deletion failed",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const updateProjectTypeStatus = async (projectTypeId, newStatus) => {
+    if (!authToken) return false;
+    
+    try {
+      await axios.put(`${API}/project-types/${projectTypeId}`, { is_active: newStatus }, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      
+      toast({
+        title: "Project Type Status Updated",
+        description: `Status changed to ${newStatus ? 'Active' : 'Inactive'}`
+      });
+      
+      // Reload project types list
+      loadProjectTypes();
+      return true;
+    } catch (error) {
+      toast({
+        title: "Failed to Update Status",
+        description: error.response?.data?.detail || "Status update failed",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   // Load current user from localStorage on app start
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -340,6 +444,7 @@ const App = () => {
         // Load users if admin
         if (user.role === 'Super Admin' || user.role === 'Admin' || user.role === 'HR Manager') {
           loadUsers();
+          loadProjectTypes();
         }
       } catch (error) {
         // Clear invalid stored data
