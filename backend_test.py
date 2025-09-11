@@ -259,9 +259,13 @@ class AavanaGreensCRMTester:
 
     def test_user_login_email(self):
         """Test user login with email/password"""
+        if not hasattr(self, 'test_email'):
+            print("⚠️ Skipping test - no test user available")
+            return False, {}
+        
         login_data = {
-            "identifier": "testuser@example.com",
-            "password": "SecurePass123!"
+            "identifier": self.test_email,
+            "password": self.test_password
         }
         success, response = self.run_test("User Login (Email)", "POST", "auth/login", 200, data=login_data)
         if success and 'access_token' in response:
