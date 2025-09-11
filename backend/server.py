@@ -224,6 +224,136 @@ class DashboardStats(BaseModel):
     conversion_rate: float
     ai_tasks_generated: int = 0
 
+# User Authentication Models
+class User(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    username: str
+    email: EmailStr
+    phone: Optional[str] = None
+    full_name: str
+    role: UserRole = UserRole.EMPLOYEE
+    status: UserStatus = UserStatus.PENDING
+    department: Optional[str] = None
+    permissions: List[str] = []
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_login: Optional[datetime] = None
+    created_by: Optional[str] = None
+    password_hash: str = Field(exclude=True)  # Exclude from API responses
+    reset_token: Optional[str] = Field(default=None, exclude=True)
+    reset_token_expires: Optional[datetime] = Field(default=None, exclude=True)
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    phone: Optional[str] = None
+    full_name: str
+    role: UserRole = UserRole.EMPLOYEE
+    department: Optional[str] = None
+    permissions: List[str] = []
+    password: str
+    created_by: Optional[str] = None
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    full_name: Optional[str] = None
+    role: Optional[UserRole] = None
+    status: Optional[UserStatus] = None
+    department: Optional[str] = None
+    permissions: Optional[List[str]] = None
+
+class UserLogin(BaseModel):
+    identifier: str  # Can be username, email, or phone
+    password: str
+
+class PhoneLogin(BaseModel):
+    phone: str
+    otp: Optional[str] = None
+
+class PasswordReset(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    user: User
+
+# Authentication utilities
+SECRET_KEY = os.environ.get('JWT_SECRET_KEY', secrets.token_urlsafe(32))
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+security = HTTPBearer()
+
+def hash_password(password: str) -> str:
+    """Hash a password using SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash"""
+    return hash_password(plain_password) == hashed_password
+
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    """Create a JWT access token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def decode_access_token(token: str):
+    """Decode and verify a JWT access token"""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.PyJWTError:
+        return None
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Get the current authenticated user"""
+    token = credentials.credentials
+    payload = decode_access_token(token)
+    
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    user_id = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    user = await db.users.find_one({"id": user_id})
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return User(**parse_from_mongo(user))
+
+def generate_reset_token() -> str:
+    """Generate a secure reset token"""
+    return secrets.token_urlsafe(32)
+
 # Helper functions
 def prepare_for_mongo(data):
     if isinstance(data, dict):
