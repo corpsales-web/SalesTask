@@ -1669,10 +1669,78 @@ const App = () => {
                     </div>
                   )}
 
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Product
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Product
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add New Product</DialogTitle>
+                        <DialogDescription>Add product to inventory</DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={createProduct} className="space-y-4">
+                        <div>
+                          <Label htmlFor="product-name">Product Name *</Label>
+                          <Input
+                            id="product-name"
+                            value={newProduct.name}
+                            onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="product-category">Category</Label>
+                          <Select value={newProduct.category} onValueChange={(value) => setNewProduct({...newProduct, category: value})}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Indoor Plants">Indoor Plants</SelectItem>
+                              <SelectItem value="Outdoor Plants">Outdoor Plants</SelectItem>
+                              <SelectItem value="Garden Tools">Garden Tools</SelectItem>
+                              <SelectItem value="Fertilizers">Fertilizers</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label htmlFor="product-price">Price (₹) *</Label>
+                            <Input
+                              id="product-price"
+                              type="number"
+                              value={newProduct.price}
+                              onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="product-stock">Stock Qty *</Label>
+                            <Input
+                              id="product-stock"
+                              type="number"
+                              value={newProduct.stock_quantity}
+                              onChange={(e) => setNewProduct({...newProduct, stock_quantity: e.target.value})}
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="product-supplier">Supplier</Label>
+                          <Input
+                            id="product-supplier"
+                            value={newProduct.supplier}
+                            onChange={(e) => setNewProduct({...newProduct, supplier: e.target.value})}
+                          />
+                        </div>
+                        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
+                          Add Product
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
 
