@@ -2660,10 +2660,16 @@ async def request_phone_otp(otp_request: PhoneOTPRequest):
             )
         
         # Check if there's already a valid OTP
-        existing_otp = await db.temp_otps.find_one({
-            "phone": formatted_phone,
-            "expires_at": {"$gt": datetime.now(timezone.utc)}
-        })
+        try:
+            existing_otp = await db.temp_otps.find_one({
+                "phone": formatted_phone,
+                "expires_at": {"$gt": datetime.now(timezone.utc)}
+            })
+        except Exception as e:
+            # If datetime comparison fails, clean up all OTPs for this phone
+            print(f"Datetime comparison error, cleaning up OTPs: {e}")
+            await db.temp_otps.delete_many({"phone": formatted_phone})
+            existing_otp = None
         
         if existing_otp and not otp_request.resend:
             time_remaining = int((existing_otp["expires_at"] - datetime.now(timezone.utc)).total_seconds())
