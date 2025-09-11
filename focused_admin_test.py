@@ -83,7 +83,7 @@ def main():
     if success and 'demo_otp' in otp_response:
         print("\n🔐 Testing OTP Verification with Correct OTP...")
         verify_data = {
-            "phone": "9876543210",
+            "phone": unique_phone,
             "otp": otp_response['demo_otp']
         }
         success, verify_response = tester.run_test(
