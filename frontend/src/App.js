@@ -509,6 +509,172 @@ const App = () => {
       });
     }
   };
+
+  // Comprehensive AI Feature Handler
+  const handleAIFeature = async (featureType) => {
+    try {
+      let endpoint = '';
+      let payload = {};
+      
+      switch (featureType) {
+        case 'lead-scoring':
+          // For demo, use first lead or create sample
+          const firstLead = leads.length > 0 ? leads[0] : null;
+          if (!firstLead) {
+            toast({
+              title: "No Leads Available",
+              description: "Add some leads first to use AI lead scoring",
+              variant: "destructive"
+            });
+            return;
+          }
+          endpoint = `/ai/crm/smart-lead-scoring?lead_id=${firstLead.id}`;
+          break;
+          
+        case 'conversation-analysis':
+          endpoint = '/ai/crm/conversation-analysis';
+          payload = {
+            conversation: "Sample customer conversation for analysis",
+            customer_id: "sample_id",
+            timestamp: new Date().toISOString()
+          };
+          break;
+          
+        case 'client-context':
+          endpoint = `/ai/recall-context/sample_client_id?query=Complete client history`;
+          break;
+          
+        case 'deal-prediction':
+          endpoint = '/ai/sales/deal-prediction';
+          break;
+          
+        case 'proposal-generator':
+          const leadForProposal = leads.length > 0 ? leads[0] : null;
+          if (!leadForProposal) {
+            toast({
+              title: "No Leads Available",
+              description: "Add leads first to generate proposals",
+              variant: "destructive"
+            });
+            return;
+          }
+          endpoint = `/ai/sales/smart-proposal-generator?lead_id=${leadForProposal.id}&service_type=balcony_garden`;
+          break;
+          
+        case 'campaign-optimizer':
+          endpoint = '/ai/marketing/campaign-optimizer';
+          payload = {
+            campaign_type: "google_ads",
+            target_audience: "homeowners",
+            budget: 50000,
+            objective: "lead_generation"
+          };
+          break;
+          
+        case 'competitor-analysis':
+          endpoint = '/ai/marketing/competitor-analysis?location=Mumbai';
+          break;
+          
+        case 'smart-catalog':
+          endpoint = '/ai/product/smart-catalog';
+          break;
+          
+        case 'design-suggestions':
+          endpoint = '/ai/project/design-suggestions';
+          payload = {
+            space_type: "balcony",
+            size: "200_sq_ft",
+            budget: 25000,
+            preferences: ["low_maintenance", "colorful_flowers"]
+          };
+          break;
+          
+        case 'business-intelligence':
+          endpoint = '/ai/analytics/business-intelligence';
+          break;
+          
+        case 'predictive-forecasting':
+          endpoint = '/ai/analytics/predictive-forecasting?forecast_type=revenue';
+          break;
+          
+        case 'performance-analysis':
+          endpoint = '/ai/hr/performance-analysis';
+          break;
+          
+        case 'smart-scheduling':
+          endpoint = '/ai/hr/smart-scheduling';
+          payload = {
+            department: "sales",
+            requirements: "site_visits",
+            timeframe: "next_week"
+          };
+          break;
+          
+        default:
+          toast({
+            title: "Feature Coming Soon",
+            description: `${featureType} is being implemented`,
+          });
+          return;
+      }
+      
+      // Make API call
+      const response = payload && Object.keys(payload).length > 0 
+        ? await axios.post(`${API}${endpoint}`, payload)
+        : await axios.post(`${API}${endpoint}`);
+      
+      // Handle response
+      const result = response.data;
+      let displayContent = '';
+      
+      if (typeof result === 'string') {
+        displayContent = result;
+      } else if (result.lead_scoring) {
+        displayContent = result.lead_scoring;
+      } else if (result.conversation_analysis) {
+        displayContent = result.conversation_analysis;
+      } else if (result.deal_predictions) {
+        displayContent = result.deal_predictions;
+      } else if (result.proposal) {
+        displayContent = result.proposal;
+      } else if (result.campaign_optimization) {
+        displayContent = result.campaign_optimization;
+      } else if (result.competitor_analysis) {
+        displayContent = result.competitor_analysis;
+      } else if (result.catalog_optimization) {
+        displayContent = result.catalog_optimization;
+      } else if (result.design_suggestions) {
+        displayContent = result.design_suggestions;
+      } else if (result.business_intelligence) {
+        displayContent = result.business_intelligence;
+      } else if (result.predictive_forecast) {
+        displayContent = result.predictive_forecast;
+      } else if (result.performance_analysis) {
+        displayContent = result.performance_analysis;
+      } else if (result.smart_schedule) {
+        displayContent = result.smart_schedule;
+      } else {
+        displayContent = JSON.stringify(result, null, 2);
+      }
+      
+      // Update state with AI result
+      setGeneratedContent(displayContent);
+      
+      toast({
+        title: "🤖 AI Analysis Complete",
+        description: `${featureType.replace('-', ' ')} has been processed successfully!`
+      });
+      
+    } catch (error) {
+      console.error(`Error with AI feature ${featureType}:`, error);
+      toast({
+        title: "AI Feature Error",
+        description: `Failed to process ${featureType}. Please try again.`,
+        variant: "destructive"
+      });
+    }
+  };
+
   // Create task function
   const createTask = async (e) => {
     e.preventDefault();
