@@ -1572,6 +1572,234 @@ async def sync_external_lead_sources():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lead sync failed: {str(e)}")
 
+# Targets & Progress Routes
+
+@api_router.post("/targets/create")
+async def create_target(
+    user_id: str,
+    target_type: str,
+    period: str,
+    target_value: float,
+    created_by: str = "system"
+):
+    """Create a new target for user"""
+    try:
+        target = Target(
+            user_id=user_id,
+            target_type=TargetType(target_type),
+            period=TargetPeriod(period),
+            target_value=target_value,
+            created_by=created_by
+        )
+        
+        result = await targets.create_target(target)
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create target: {str(e)}")
+
+@api_router.post("/targets/update-progress")
+async def update_target_progress(
+    target_id: str,
+    increment_value: float,
+    source: str = "manual",
+    reference_id: str = None,
+    updated_by: str = "system",
+    notes: str = None
+):
+    """Update progress on a target"""
+    try:
+        progress = ProgressUpdate(
+            target_id=target_id,
+            increment_value=increment_value,
+            source=source,
+            reference_id=reference_id,
+            updated_by=updated_by,
+            notes=notes
+        )
+        
+        result = await targets.update_progress(progress)
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update progress: {str(e)}")
+
+@api_router.get("/targets/progress/{user_id}")
+async def get_user_progress(user_id: str, period: str = "daily"):
+    """Get progress summary for user"""
+    try:
+        period_enum = TargetPeriod(period)
+        summary = await targets.get_progress_summary(user_id, period_enum)
+        
+        return {
+            "user_id": summary.user_id,
+            "period": summary.period.value,
+            "sales": {
+                "target": summary.sales_target,
+                "achieved": summary.sales_achieved,
+                "progress_percent": summary.sales_progress_percent
+            },
+            "leads": {
+                "target": summary.leads_target,
+                "achieved": summary.leads_achieved,
+                "progress_percent": summary.leads_progress_percent
+            },
+            "tasks": {
+                "target": summary.tasks_target,
+                "achieved": summary.tasks_achieved,
+                "progress_percent": summary.tasks_progress_percent
+            },
+            "remaining_days": summary.remaining_days,
+            "is_on_track": summary.is_on_track,
+            "performance_rating": summary.performance_rating
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get progress: {str(e)}")
+
+@api_router.post("/targets/sync-pipedrive")
+async def sync_pipedrive_deals(user_id: str):
+    """Sync Pipedrive deals to update sales targets"""
+    try:
+        result = await targets.sync_pipedrive_deals(user_id)
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Pipedrive sync failed: {str(e)}")
+
+@api_router.post("/targets/send-reminders")
+async def send_target_reminders(user_id: str = None):
+    """Send progress reminders to users"""
+    try:
+        result = await targets.send_reminders(user_id)
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send reminders: {str(e)}")
+
+@api_router.get("/targets/dashboard/{user_id}")
+async def get_targets_dashboard(user_id: str):
+    """Get comprehensive targets dashboard data"""
+    try:
+        # Get progress for all periods
+        daily = await targets.get_progress_summary(user_id, TargetPeriod.DAILY)
+        weekly = await targets.get_progress_summary(user_id, TargetPeriod.WEEKLY)
+        monthly = await targets.get_progress_summary(user_id, TargetPeriod.MONTHLY)
+        
+        return {
+            "user_id": user_id,
+            "daily": daily.dict(),
+            "weekly": weekly.dict(),
+            "monthly": monthly.dict(),
+            "overall_performance": {
+                "rating": daily.performance_rating,
+                "is_on_track": daily.is_on_track
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Dashboard data failed: {str(e)}")
+
+@api_router.post("/targets/auto-update-from-lead")
+async def auto_update_from_lead_conversion(lead_id: str, user_id: str):
+    """Auto-update targets when lead is converted"""
+    try:
+        # Get lead details
+        lead = await db.leads.find_one({"id": lead_id})
+        if not lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+        
+        # Update leads count target
+        periods = [TargetPeriod.DAILY, TargetPeriod.WEEKLY, TargetPeriod.MONTHLY]
+        
+        for period in periods:
+            # Find active leads target
+            start_date, end_date = targets._calculate_period_dates(period)
+            
+            target = await db.targets.find_one({
+                "user_id": user_id,
+                "target_type": TargetType.LEADS_COUNT.value,
+                "period": period.value,
+                "is_active": True
+            })
+            
+            if target:
+                progress = ProgressUpdate(
+                    target_id=target['id'],
+                    increment_value=1,
+                    source="lead_conversion",
+                    reference_id=lead_id,
+                    updated_by=user_id,
+                    notes=f"Lead converted: {lead.get('name', 'Unknown')}"
+                )
+                await targets.update_progress(progress)
+        
+        # If lead has budget and status is Won, update sales target
+        if lead.get('status') == 'Won' and lead.get('budget'):
+            budget = float(lead['budget'])
+            for period in periods:
+                target = await db.targets.find_one({
+                    "user_id": user_id,
+                    "target_type": TargetType.SALES_AMOUNT.value,
+                    "period": period.value,
+                    "is_active": True
+                })
+                
+                if target:
+                    progress = ProgressUpdate(
+                        target_id=target['id'],
+                        increment_value=budget,
+                        source="lead_won",
+                        reference_id=lead_id,
+                        updated_by=user_id,
+                        notes=f"Deal won: ₹{budget}"
+                    )
+                    await targets.update_progress(progress)
+        
+        return {
+            "success": True,
+            "message": "Targets updated from lead conversion",
+            "lead_id": lead_id
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Auto-update failed: {str(e)}")
+
+@api_router.post("/targets/auto-update-from-task")
+async def auto_update_from_task_completion(task_id: str, user_id: str):
+    """Auto-update targets when task is completed"""
+    try:
+        # Update tasks count target
+        periods = [TargetPeriod.DAILY, TargetPeriod.WEEKLY, TargetPeriod.MONTHLY]
+        
+        for period in periods:
+            target = await db.targets.find_one({
+                "user_id": user_id,
+                "target_type": TargetType.TASKS_COUNT.value,
+                "period": period.value,
+                "is_active": True
+            })
+            
+            if target:
+                progress = ProgressUpdate(
+                    target_id=target['id'],
+                    increment_value=1,
+                    source="task_completion",
+                    reference_id=task_id,
+                    updated_by=user_id,
+                    notes=f"Task completed: {task_id}"
+                )
+                await targets.update_progress(progress)
+        
+        return {
+            "success": True,
+            "message": "Targets updated from task completion",
+            "task_id": task_id
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Auto-update failed: {str(e)}")
+
 # Calendar & Appointment Routes
 @api_router.post("/calendar/events", response_model=CalendarEvent)
 async def create_calendar_event(event_data: CalendarEventCreate):
