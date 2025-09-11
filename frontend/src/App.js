@@ -790,6 +790,43 @@ const App = () => {
     }
   };
 
+  // Fix ResizeObserver loop errors
+  useEffect(() => {
+    // Handle ResizeObserver loop errors globally
+    const originalError = console.error;
+    console.error = (...args) => {
+      if (
+        typeof args[0] === 'string' &&
+        args[0].includes('ResizeObserver loop completed with undelivered notifications')
+      ) {
+        // Suppress ResizeObserver errors as they are non-critical
+        return;
+      }
+      originalError.apply(console, args);
+    };
+
+    // Handle window error events for ResizeObserver
+    const handleError = (event) => {
+      if (event.message && event.message.includes('ResizeObserver loop completed with undelivered notifications')) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', (event) => {
+      if (event.reason && event.reason.message && event.reason.message.includes('ResizeObserver')) {
+        event.preventDefault();
+      }
+    });
+
+    return () => {
+      console.error = originalError;
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
