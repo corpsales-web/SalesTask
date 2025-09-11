@@ -1778,10 +1778,13 @@ const App = () => {
               <UserCheck className="h-3 w-3 mr-1" />
               HRMS
             </TabsTrigger>
-            <TabsTrigger value="ai" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-              <Brain className="h-3 w-3 mr-1" />
-              AI
-            </TabsTrigger>
+            {/* AI Tab - Only show if user has AI permissions */}
+            {currentUser && hasAIPermission(currentUser) && (
+              <TabsTrigger value="ai" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+                <Brain className="h-3 w-3 mr-1" />
+                AI
+              </TabsTrigger>
+            )}
             <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
               <Settings className="h-3 w-3 mr-1" />
               Admin
