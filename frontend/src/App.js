@@ -3914,6 +3914,172 @@ const App = () => {
           </div>
         </div>
       )}
+
+      {/* Targets & Progress Interface */}
+      {showTargets && (
+        <div className="fixed bottom-24 left-24 w-[420px] h-[550px] bg-white border-2 border-blue-200 rounded-lg shadow-2xl z-[9999] flex flex-col">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-t-lg">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-bold text-lg flex items-center">
+                  <Target className="h-5 w-5 mr-2" />
+                  Targets & Progress
+                </h3>
+                <p className="text-xs opacity-90">Daily, Weekly & Monthly Goals</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={sendTargetReminders}
+                  className="text-white hover:bg-blue-700 h-8 w-8 p-0"
+                  title="Send Reminders"
+                >
+                  📱
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTargets(false)}
+                  className="text-white hover:bg-blue-700 h-6 w-6 p-0"
+                >
+                  ✕
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Content */}
+          <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="bg-green-100 p-3 rounded-lg text-center border border-green-200">
+                <div className="text-lg font-bold text-green-800">₹{targetsData.daily?.sales?.achieved || 2500}</div>
+                <div className="text-xs text-green-600">Sales Today</div>
+              </div>
+              <div className="bg-blue-100 p-3 rounded-lg text-center border border-blue-200">
+                <div className="text-lg font-bold text-blue-800">{targetsData.daily?.leads?.achieved || 2}</div>
+                <div className="text-xs text-blue-600">Leads Today</div>
+              </div>
+              <div className="bg-purple-100 p-3 rounded-lg text-center border border-purple-200">
+                <div className="text-lg font-bold text-purple-800">{targetsData.daily?.tasks?.achieved || 4}</div>
+                <div className="text-xs text-purple-600">Tasks Today</div>
+              </div>
+            </div>
+
+            {/* Daily Progress */}
+            <div className="mb-4">
+              <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                📅 Daily Progress
+              </h4>
+              <div className="space-y-2">
+                <div className="bg-white p-3 rounded border">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-gray-700">Sales Target</span>
+                    <span className="text-sm font-medium">₹{targetsData.daily?.sales?.achieved || 2500} / ₹{targetsData.daily?.sales?.target || 10000}</span>
+                  </div>
+                  <Progress value={(targetsData.daily?.sales?.achieved || 2500) / (targetsData.daily?.sales?.target || 10000) * 100} className="h-2" />
+                  <div className="text-xs text-gray-500 mt-1">25% complete</div>
+                </div>
+                
+                <div className="bg-white p-3 rounded border">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-gray-700">Leads Target</span>
+                    <span className="text-sm font-medium">{targetsData.daily?.leads?.achieved || 2} / {targetsData.daily?.leads?.target || 5}</span>
+                  </div>
+                  <Progress value={(targetsData.daily?.leads?.achieved || 2) / (targetsData.daily?.leads?.target || 5) * 100} className="h-2" />
+                  <div className="text-xs text-gray-500 mt-1">40% complete</div>
+                </div>
+                
+                <div className="bg-white p-3 rounded border">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-gray-700">Tasks Target</span>
+                    <span className="text-sm font-medium">{targetsData.daily?.tasks?.achieved || 4} / {targetsData.daily?.tasks?.target || 10}</span>
+                  </div>
+                  <Progress value={(targetsData.daily?.tasks?.achieved || 4) / (targetsData.daily?.tasks?.target || 10) * 100} className="h-2" />
+                  <div className="text-xs text-gray-500 mt-1">40% complete</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Weekly Overview */}
+            <div className="mb-4">
+              <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                📊 Weekly Overview
+              </h4>
+              <div className="bg-white p-3 rounded border">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-sm font-medium text-gray-700">Sales</div>
+                    <div className="text-lg font-bold text-green-600">26%</div>
+                    <div className="text-xs text-gray-500">₹18K/₹70K</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-700">Leads</div>
+                    <div className="text-lg font-bold text-blue-600">34%</div>
+                    <div className="text-xs text-gray-500">12/35</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-700">Tasks</div>
+                    <div className="text-lg font-bold text-purple-600">40%</div>
+                    <div className="text-xs text-gray-500">28/70</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Monthly Summary */}
+            <div className="mb-4">
+              <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                📈 Monthly Summary
+              </h4>
+              <div className="bg-white p-3 rounded border">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-indigo-600 mb-1">25%</div>
+                  <div className="text-sm text-gray-600">Overall Progress</div>
+                  <div className="text-xs text-gray-500">₹75K/₹300K • 45/150 leads • 120/300 tasks</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2">
+              <Button 
+                onClick={() => createTarget("sales_amount", "daily", 15000)}
+                size="sm"
+                variant="outline"
+                className="w-full border-green-300 hover:bg-green-50"
+              >
+                🎯 Set Sales Target
+              </Button>
+              <Button 
+                onClick={() => updateProgress("sales", "daily", 1000)}
+                size="sm"
+                variant="outline"
+                className="w-full border-blue-300 hover:bg-blue-50"
+              >
+                📈 Update Progress
+              </Button>
+              <Button 
+                onClick={sendTargetReminders}
+                size="sm"
+                variant="outline"
+                className="w-full border-purple-300 hover:bg-purple-50"
+              >
+                📱 Send Team Reminders
+              </Button>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="p-3 border-t border-gray-200 bg-white rounded-b-lg">
+            <div className="text-xs text-gray-500 text-center">
+              🚀 Powered by Aavana 2.0 | Auto-sync with Pipedrive | Multilingual alerts
+            </div>
+          </div>
+        </div>
+      )}
       
       <Toaster />
     </div>
