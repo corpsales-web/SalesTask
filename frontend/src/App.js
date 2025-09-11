@@ -4217,6 +4217,98 @@ const App = () => {
           </div>
         </div>
       )}
+
+        {/* Face Check-in Camera Modal */}
+        {showCameraModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800">Face Check-in</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={cancelFaceCheckin}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                
+                <div className="text-center mb-4">
+                  <p className="text-sm text-gray-600 mb-3">
+                    Position your face in the camera frame and click capture for attendance verification
+                  </p>
+                  
+                  {/* Camera View */}
+                  <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-4">
+                    <video
+                      ref={videoRef}
+                      className="w-full h-64 object-cover"
+                      autoPlay
+                      muted
+                      playsInline
+                    />
+                    <canvas
+                      ref={canvasRef}
+                      className="hidden"
+                    />
+                    
+                    {/* Camera Overlay */}
+                    <div className="absolute inset-0 border-4 border-dashed border-emerald-500 opacity-50 rounded-lg pointer-events-none">
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-emerald-600">
+                        <div className="w-32 h-32 border-2 border-emerald-500 rounded-full opacity-70"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Instructions */}
+                  <div className="text-xs text-gray-500 mb-4 space-y-1">
+                    <p>✓ Ensure good lighting</p>
+                    <p>✓ Look directly at the camera</p>
+                    <p>✓ Remove any face coverings</p>
+                  </div>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={cancelFaceCheckin}
+                    variant="outline"
+                    className="flex-1"
+                    disabled={isCheckingIn}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={capturePhoto}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                    disabled={isCheckingIn || !cameraStream}
+                  >
+                    {isCheckingIn ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="h-4 w-4 mr-2" />
+                        Capture & Check-in
+                      </>
+                    )}
+                  </Button>
+                </div>
+                
+                {/* Privacy Notice */}
+                <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+                  <p className="text-xs text-blue-700">
+                    🔒 <strong>Privacy:</strong> Your photo is used only for attendance verification and is securely stored according to company policy.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       
       <Toaster />
     </div>
