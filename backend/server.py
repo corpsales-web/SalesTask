@@ -460,6 +460,9 @@ async def ai_lead_scoring(lead_id: str):
                 "notes": "Interested in balcony garden setup"
             }
             lead = demo_lead
+        else:
+            # Parse MongoDB data to remove ObjectId
+            lead = parse_from_mongo(lead)
         
         scoring_prompt = f"""
         Analyze this lead for Aavana Greens and provide AI-powered lead scoring:
