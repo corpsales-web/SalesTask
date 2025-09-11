@@ -618,7 +618,7 @@ async def ai_proposal_generator(lead_id: str, service_type: str):
         proposal_prompt = f"""
         Generate a comprehensive proposal for Aavana Greens client:
         
-        Client Details: {json.dumps(lead)}
+        Client Details: {json.dumps(make_json_safe(lead))}
         Service Type: {service_type}
         
         Create a detailed proposal including:
