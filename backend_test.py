@@ -185,19 +185,25 @@ class AavanaGreensCRMTester:
     # Admin Panel Authentication Tests
     def test_user_registration_valid(self):
         """Test user registration with valid data"""
+        import time
+        timestamp = str(int(time.time()))
         user_data = {
-            "username": "testuser123",
-            "email": "testuser@example.com",
-            "phone": "9876543210",
+            "username": f"testuser{timestamp}",
+            "email": f"testuser{timestamp}@example.com",
+            "phone": f"987654{timestamp[-4:]}",
             "full_name": "Test User",
             "role": "Employee",
             "password": "SecurePass123!",
             "department": "Sales"
         }
         success, response = self.run_test("User Registration (Valid)", "POST", "auth/register", 200, data=user_data)
-        if success and 'access_token' in response:
-            self.auth_token = response['access_token']
-            self.test_user_id = response.get('user', {}).get('id')
+        if success and 'id' in response:
+            self.auth_token = None  # Will be set during login
+            self.test_user_id = response.get('id')
+            self.test_username = user_data['username']
+            self.test_email = user_data['email']
+            self.test_phone = user_data['phone']
+            self.test_password = user_data['password']
             return True, response
         return False, {}
 
