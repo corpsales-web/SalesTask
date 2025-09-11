@@ -555,7 +555,7 @@ class EnhancedAdminFeaturesTester:
     def test_permission_based_access_control(self):
         """Test permission-based access control on existing endpoints"""
         # Create users with different roles
-        roles = ["Employee", "Sales_Manager", "Admin"]
+        roles = ["Employee", "Sales Manager", "Admin"]
         tokens = {}
         
         for role in roles:
