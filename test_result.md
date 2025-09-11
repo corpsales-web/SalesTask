@@ -281,7 +281,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All critical AI endpoints are now working properly"
+    - "Admin Panel Backend - User Authentication System"
+    - "Admin Panel Frontend - Add New User Button Integration"
   stuck_tasks:
     - "ResizeObserver visual errors (non-functional issue)"
   test_all: false
