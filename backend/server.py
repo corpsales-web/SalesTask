@@ -120,6 +120,21 @@ class Priority(str, Enum):
     HIGH = "High"
     URGENT = "Urgent"
 
+class UserRole(str, Enum):
+    SUPER_ADMIN = "Super Admin"
+    ADMIN = "Admin"
+    SALES_MANAGER = "Sales Manager"
+    SALES_EXECUTIVE = "Sales Executive"
+    MARKETING_MANAGER = "Marketing Manager"
+    HR_MANAGER = "HR Manager"
+    EMPLOYEE = "Employee"
+
+class UserStatus(str, Enum):
+    ACTIVE = "Active"
+    INACTIVE = "Inactive"
+    PENDING = "Pending"
+    SUSPENDED = "Suspended"
+
 # Models
 class Lead(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
