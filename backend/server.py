@@ -411,10 +411,15 @@ async def recall_client_context(client_id: str, query: str = ""):
                     "Proposal sent for balcony transformation"
                 ]
             }
+        else:
+            # Parse MongoDB data to remove ObjectId
+            lead = parse_from_mongo(lead)
         
         # Get related tasks with fallback
         try:
             tasks = await db.tasks.find({"lead_id": client_id}).to_list(length=10)
+            # Parse MongoDB data to remove ObjectId
+            tasks = [parse_from_mongo(task) for task in tasks]
         except:
             tasks = [
                 {
