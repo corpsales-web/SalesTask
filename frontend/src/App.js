@@ -831,24 +831,158 @@ const App = () => {
     }
   };
 
-  // HRMS Functions
+  // HRMS Functions - Enhanced with Real Camera Capture
+  const [cameraStream, setCameraStream] = useState(null);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+
   const handleFaceCheckin = async () => {
-    setIsCheckingIn(true);
+    setShowCameraModal(true);
+    await startCamera();
+  };
+
+  const startCamera = async () => {
     try {
-      // Simulate face recognition check-in
-      await axios.post(`${API}/hrms/face-checkin?employee_id=EMP001&face_image=sample_image&location=Office`);
-      toast({
-        title: "Success",
-        description: "Face check-in successful! Welcome to work."
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          width: 640, 
+          height: 480,
+          facingMode: 'user' // Front camera for selfie
+        } 
       });
+      setCameraStream(stream);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      
+    } catch (error) {
+      console.error("Camera access denied:", error);
+      toast({
+        title: "Camera Access Required",
+        description: "Please allow camera access for face check-in. This is required for attendance verification.",
+        variant: "destructive"
+      });
+      setShowCameraModal(false);
+    }
+  };
+
+  const capturePhoto = async () => {
+    if (!videoRef.current || !canvasRef.current) {
+      toast({
+        title: "Error",
+        description: "Camera not ready. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsCheckingIn(true);
+    
+    try {
+      // Get current location for background validation
+      const location = await getCurrentLocation();
+      
+      // Capture image from video
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+      
+      // Convert to base64
+      const imageData = canvas.toDataURL('image/jpeg', 0.8);
+      
+      // Stop camera
+      stopCamera();
+      
+      // Send to backend with real image data
+      await axios.post(`${API}/hrms/face-checkin`, {
+        employee_id: "EMP001",
+        face_image: imageData,
+        location: location,
+        timestamp: new Date().toISOString(),
+        device_info: {
+          user_agent: navigator.userAgent,
+          platform: navigator.platform
+        }
+      });
+      
+      toast({
+        title: "✅ Face Check-in Successful!",
+        description: `Welcome to work! Location: ${location.address || 'Office'}`
+      });
+      
+      setShowCameraModal(false);
+      
     } catch (error) {
       console.error("Error with face check-in:", error);
       toast({
-        title: "Error",
-        description: "Face check-in failed. Please try again.",
+        title: "Face Check-in Failed",
+        description: "Unable to process face check-in. Please try again or use GPS check-in.",
         variant: "destructive"
       });
     }
+    
+    setIsCheckingIn(false);
+  };
+
+  const getCurrentLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        resolve({ lat: 0, lng: 0, address: "Location unavailable" });
+        return;
+      }
+      
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          // Try to get address (simplified - would use Google Maps API in production)
+          try {
+            const address = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+            resolve({
+              lat: latitude,
+              lng: longitude,
+              address: address,
+              accuracy: position.coords.accuracy
+            });
+          } catch (error) {
+            resolve({
+              lat: latitude,
+              lng: longitude,
+              address: "Location detected",
+              accuracy: position.coords.accuracy
+            });
+          }
+        },
+        (error) => {
+          console.error("Location error:", error);
+          resolve({ lat: 0, lng: 0, address: "Location unavailable" });
+        },
+        { 
+          enableHighAccuracy: true, 
+          timeout: 10000, 
+          maximumAge: 60000 
+        }
+      );
+    });
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+  };
+
+  const cancelFaceCheckin = () => {
+    stopCamera();
+    setShowCameraModal(false);
     setIsCheckingIn(false);
   };
 
