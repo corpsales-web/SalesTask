@@ -135,6 +135,103 @@ class UserStatus(str, Enum):
     PENDING = "Pending"
     SUSPENDED = "Suspended"
 
+# Advanced Permission System
+class Permission(str, Enum):
+    # Lead Management
+    LEADS_VIEW = "leads:view"
+    LEADS_CREATE = "leads:create"
+    LEADS_EDIT = "leads:edit"
+    LEADS_DELETE = "leads:delete"
+    LEADS_ASSIGN = "leads:assign"
+    
+    # Task Management
+    TASKS_VIEW = "tasks:view"
+    TASKS_CREATE = "tasks:create"
+    TASKS_EDIT = "tasks:edit"
+    TASKS_DELETE = "tasks:delete"
+    TASKS_ASSIGN = "tasks:assign"
+    
+    # User Management
+    USERS_VIEW = "users:view"
+    USERS_CREATE = "users:create"
+    USERS_EDIT = "users:edit"
+    USERS_DELETE = "users:delete"
+    USERS_MANAGE_ROLES = "users:manage_roles"
+    
+    # AI Features
+    AI_VIEW = "ai:view"
+    AI_USE_BASIC = "ai:use_basic"
+    AI_USE_ADVANCED = "ai:use_advanced"
+    AI_MANAGE = "ai:manage"
+    
+    # Analytics & Reports
+    ANALYTICS_VIEW = "analytics:view"
+    ANALYTICS_EXPORT = "analytics:export"
+    ANALYTICS_ADMIN = "analytics:admin"
+    
+    # HRMS
+    HRMS_VIEW = "hrms:view"
+    HRMS_MANAGE = "hrms:manage"
+    HRMS_PAYROLL = "hrms:payroll"
+    
+    # ERP
+    ERP_VIEW = "erp:view"
+    ERP_MANAGE = "erp:manage"
+    ERP_FINANCIAL = "erp:financial"
+    
+    # System Admin
+    SYSTEM_CONFIG = "system:config"
+    SYSTEM_LOGS = "system:logs"
+    SYSTEM_BACKUP = "system:backup"
+
+# Role-based permission mapping
+ROLE_PERMISSIONS = {
+    UserRole.SUPER_ADMIN: [perm.value for perm in Permission],  # All permissions
+    UserRole.ADMIN: [
+        Permission.LEADS_VIEW, Permission.LEADS_CREATE, Permission.LEADS_EDIT, Permission.LEADS_ASSIGN,
+        Permission.TASKS_VIEW, Permission.TASKS_CREATE, Permission.TASKS_EDIT, Permission.TASKS_ASSIGN,
+        Permission.USERS_VIEW, Permission.USERS_CREATE, Permission.USERS_EDIT, Permission.USERS_MANAGE_ROLES,
+        Permission.AI_VIEW, Permission.AI_USE_BASIC, Permission.AI_USE_ADVANCED,
+        Permission.ANALYTICS_VIEW, Permission.ANALYTICS_EXPORT,
+        Permission.HRMS_VIEW, Permission.HRMS_MANAGE,
+        Permission.ERP_VIEW, Permission.ERP_MANAGE,
+        Permission.SYSTEM_CONFIG
+    ],
+    UserRole.SALES_MANAGER: [
+        Permission.LEADS_VIEW, Permission.LEADS_CREATE, Permission.LEADS_EDIT, Permission.LEADS_ASSIGN,
+        Permission.TASKS_VIEW, Permission.TASKS_CREATE, Permission.TASKS_EDIT, Permission.TASKS_ASSIGN,
+        Permission.USERS_VIEW,
+        Permission.AI_VIEW, Permission.AI_USE_BASIC, Permission.AI_USE_ADVANCED,
+        Permission.ANALYTICS_VIEW, Permission.ANALYTICS_EXPORT,
+        Permission.ERP_VIEW
+    ],
+    UserRole.SALES_EXECUTIVE: [
+        Permission.LEADS_VIEW, Permission.LEADS_CREATE, Permission.LEADS_EDIT,
+        Permission.TASKS_VIEW, Permission.TASKS_CREATE, Permission.TASKS_EDIT,
+        Permission.AI_VIEW, Permission.AI_USE_BASIC,
+        Permission.ANALYTICS_VIEW,
+        Permission.ERP_VIEW
+    ],
+    UserRole.MARKETING_MANAGER: [
+        Permission.LEADS_VIEW, Permission.LEADS_CREATE,
+        Permission.TASKS_VIEW, Permission.TASKS_CREATE, Permission.TASKS_EDIT,
+        Permission.AI_VIEW, Permission.AI_USE_BASIC, Permission.AI_USE_ADVANCED,
+        Permission.ANALYTICS_VIEW, Permission.ANALYTICS_EXPORT,
+        Permission.ERP_VIEW
+    ],
+    UserRole.HR_MANAGER: [
+        Permission.USERS_VIEW, Permission.USERS_CREATE, Permission.USERS_EDIT,
+        Permission.HRMS_VIEW, Permission.HRMS_MANAGE, Permission.HRMS_PAYROLL,
+        Permission.ANALYTICS_VIEW,
+        Permission.AI_VIEW, Permission.AI_USE_BASIC
+    ],
+    UserRole.EMPLOYEE: [
+        Permission.LEADS_VIEW, Permission.TASKS_VIEW,
+        Permission.AI_VIEW, Permission.AI_USE_BASIC,
+        Permission.HRMS_VIEW
+    ]
+}
+
 # Models
 class Lead(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
