@@ -1538,7 +1538,7 @@ const App = () => {
                       Add Lead
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto pointer-events-auto">
+                  <DialogContent className="max-w-2xl sm:max-w-lg md:max-w-2xl w-[95vw] max-h-[95vh] overflow-y-auto pointer-events-auto">
                     <DialogHeader>
                       <DialogTitle>Add New Lead</DialogTitle>
                       <DialogDescription>Create a new lead with comprehensive information</DialogDescription>
@@ -1547,7 +1547,7 @@ const App = () => {
                       onClick={(e) => e.stopPropagation()}
                     >
                     {/* Basic Information */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="name">Name *</Label>
                         <Input
