@@ -1777,10 +1777,61 @@ const App = () => {
                     ))}
                   </div>
 
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Invoice
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Invoice
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Create New Invoice</DialogTitle>
+                        <DialogDescription>Generate invoice for customer</DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={createInvoice} className="space-y-4">
+                        <div>
+                          <Label htmlFor="invoice-customer">Customer Name *</Label>
+                          <Input
+                            id="invoice-customer"
+                            value={newInvoice.customer_name}
+                            onChange={(e) => setNewInvoice({...newInvoice, customer_name: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="invoice-phone">Customer Phone *</Label>
+                          <Input
+                            id="invoice-phone"
+                            value={newInvoice.customer_phone}
+                            onChange={(e) => setNewInvoice({...newInvoice, customer_phone: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="invoice-email">Customer Email</Label>
+                          <Input
+                            id="invoice-email"
+                            type="email"
+                            value={newInvoice.customer_email}
+                            onChange={(e) => setNewInvoice({...newInvoice, customer_email: e.target.value})}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="invoice-notes">Notes</Label>
+                          <Textarea
+                            id="invoice-notes"
+                            value={newInvoice.notes}
+                            onChange={(e) => setNewInvoice({...newInvoice, notes: e.target.value})}
+                            rows={2}
+                          />
+                        </div>
+                        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
+                          Create Invoice
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
 
