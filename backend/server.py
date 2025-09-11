@@ -519,6 +519,8 @@ async def ai_deal_prediction():
         # Get all active leads with error handling
         try:
             leads = await db.leads.find({"status": {"$in": ["New", "Qualified", "Proposal"]}}).to_list(length=100)
+            # Parse MongoDB data to remove ObjectId
+            leads = [parse_from_mongo(lead) for lead in leads]
         except:
             # Fallback with demo data if database query fails
             leads = [
