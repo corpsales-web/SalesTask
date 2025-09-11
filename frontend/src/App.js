@@ -3302,7 +3302,7 @@ const App = () => {
 
         {/* Aavana 2.0 Floating Chat Interface */}
         {showAavana2 && (
-          <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-white border-2 border-emerald-200 rounded-lg shadow-2xl z-50 flex flex-col">
+          <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-white border-2 border-emerald-200 rounded-lg shadow-2xl z-[60] flex flex-col">
             {/* Header */}
             <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white p-4 rounded-t-lg">
               <div className="flex justify-between items-center">
@@ -3482,11 +3482,12 @@ const App = () => {
         {/* Aavana 2.0 Floating Button */}
         <Button
           onClick={() => setShowAavana2(!showAavana2)}
-          className={`fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg z-40 ${
+          className={`fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg z-[50] transition-all ${
             showAavana2 
               ? 'bg-red-500 hover:bg-red-600' 
               : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700'
           }`}
+          title="Aavana 2.0 - Multilingual AI Assistant"
         >
           {showAavana2 ? (
             <span className="text-white text-lg">✕</span>
