@@ -332,12 +332,12 @@ class EnhancedAdminFeaturesTester:
     def test_role_based_permissions(self):
         """Test role-based permission mapping"""
         roles_to_test = [
-            "Super_Admin",
+            "Super Admin",
             "Admin", 
-            "Sales_Manager",
-            "Sales_Executive",
-            "Marketing_Manager",
-            "HR_Manager",
+            "Sales Manager",
+            "Sales Executive",
+            "Marketing Manager",
+            "HR Manager",
             "Employee"
         ]
         
