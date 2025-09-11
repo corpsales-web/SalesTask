@@ -2397,8 +2397,8 @@ async def reset_password(reset_data: PasswordResetConfirm):
         raise HTTPException(status_code=500, detail=f"Password reset confirmation failed: {str(e)}")
 
 # User Management Routes
-@api_router.get("/users", response_model=List[User])
-async def get_users(current_user: User = Depends(get_current_user), limit: int = 100):
+@api_router.get("/users", response_model=List[UserResponse])
+async def get_users(current_user: UserResponse = Depends(get_current_user), limit: int = 100):
     """Get all users (requires authentication)"""
     try:
         # Check if user has permission to view users
@@ -2406,32 +2406,41 @@ async def get_users(current_user: User = Depends(get_current_user), limit: int =
             raise HTTPException(status_code=403, detail="Insufficient permissions")
         
         users = await db.users.find({}).limit(limit).to_list(length=limit)
-        return [User(**parse_from_mongo(user)) for user in users]
+        user_responses = []
+        for user in users:
+            user_obj = User(**parse_from_mongo(user))
+            user_response_data = {k: v for k, v in user_obj.dict().items() 
+                                 if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
+            user_responses.append(UserResponse(**user_response_data))
+        return user_responses
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve users: {str(e)}")
 
-@api_router.get("/users/{user_id}", response_model=User)
-async def get_user(user_id: str, current_user: User = Depends(get_current_user)):
+@api_router.get("/users/{user_id}", response_model=UserResponse)
+async def get_user(user_id: str, current_user: UserResponse = Depends(get_current_user)):
     """Get specific user details"""
     try:
         # Users can view their own profile or admins can view any profile
         if user_id != current_user.id and current_user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.HR_MANAGER]:
             raise HTTPException(status_code=403, detail="Insufficient permissions")
         
-        user = await db.users.find_one({"id": user_id})
-        if not user:
+        existing_user = await db.users.find_one({"id": user_id})
+        if not existing_user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        return User(**parse_from_mongo(user))
+        user_obj = User(**parse_from_mongo(existing_user))
+        user_response_data = {k: v for k, v in user_obj.dict().items() 
+                             if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
+        return UserResponse(**user_response_data)
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve user: {str(e)}")
 
-@api_router.post("/users", response_model=User)
-async def create_user(user_data: UserCreate, current_user: User = Depends(get_current_user)):
+@api_router.post("/users", response_model=UserResponse)
+async def create_user(user_data: UserCreate, current_user: UserResponse = Depends(get_current_user)):
     """Create a new user (admin only)"""
     try:
         # Check permissions
@@ -2461,19 +2470,23 @@ async def create_user(user_data: UserCreate, current_user: User = Depends(get_cu
         user_dict.pop("password")  # Remove plain password
         user_dict["password_hash"] = hashed_password
         user_dict["created_by"] = current_user.id
+        user_dict["status"] = UserStatus.ACTIVE  # Set as active by default
         
         user = User(**user_dict)
         user_dict = prepare_for_mongo(user.dict())
         await db.users.insert_one(user_dict)
         
-        return user
+        # Return user response without sensitive fields
+        user_response_data = {k: v for k, v in user.dict().items() 
+                             if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
+        return UserResponse(**user_response_data)
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"User creation failed: {str(e)}")
 
-@api_router.put("/users/{user_id}", response_model=User)
-async def update_user(user_id: str, user_update: UserUpdate, current_user: User = Depends(get_current_user)):
+@api_router.put("/users/{user_id}", response_model=UserResponse)
+async def update_user(user_id: str, user_update: UserUpdate, current_user: UserResponse = Depends(get_current_user)):
     """Update user information"""
     try:
         # Users can update their own profile or admins can update any profile
@@ -2497,15 +2510,18 @@ async def update_user(user_id: str, user_update: UserUpdate, current_user: User 
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="User not found")
         
-        user = await db.users.find_one({"id": user_id})
-        return User(**parse_from_mongo(user))
+        existing_user = await db.users.find_one({"id": user_id})
+        user_obj = User(**parse_from_mongo(existing_user))
+        user_response_data = {k: v for k, v in user_obj.dict().items() 
+                             if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
+        return UserResponse(**user_response_data)
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"User update failed: {str(e)}")
 
 @api_router.delete("/users/{user_id}")
-async def delete_user(user_id: str, current_user: User = Depends(get_current_user)):
+async def delete_user(user_id: str, current_user: UserResponse = Depends(get_current_user)):
     """Delete a user (admin only)"""
     try:
         # Check permissions
