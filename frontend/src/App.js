@@ -2200,7 +2200,11 @@ const App = () => {
                       <Plus className="h-4 w-4 mr-2" />
                       Apply Leave
                     </Button>
-                    <Button variant="outline" className="border-emerald-300 hover:bg-emerald-50">
+                    <Button 
+                      variant="outline" 
+                      className="border-emerald-300 hover:bg-emerald-50"
+                      onClick={handleApplyLeave}
+                    >
                       <Archive className="h-4 w-4 mr-2" />
                       View Requests
                     </Button>
