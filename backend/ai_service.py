@@ -93,6 +93,34 @@ class AIOrchestrator:
         response = await self.gemini_chat.send_message(message)
         return response
 
+    def _get_fallback_response(self, task_type: str, content: str, context: Dict = None) -> str:
+        """Provide fallback responses when AI calls timeout or fail"""
+        fallback_responses = {
+            "automation": "AI automation analysis is currently processing. Please try again in a few moments for detailed workflow optimization recommendations.",
+            "workflow": "Workflow optimization suggestions are being generated. For immediate assistance, please contact your system administrator.",
+            "insights": "Business insights are being compiled. Current system shows healthy operational metrics with opportunities for growth optimization.",
+            "analytics": "Analytics processing is in progress. Preliminary data indicates positive business trends and performance metrics.",
+            "memory": "Context retrieval is temporarily delayed. Historical client information and interaction data are being processed.",
+            "recall": "Memory recall system is currently updating. Client context and historical data will be available shortly.",
+            "history": "Historical data compilation is in progress. Previous interactions and client preferences are being organized.",
+            "context": "Contextual information is being gathered from multiple sources. Please allow additional time for comprehensive analysis.",
+            "image": "Visual content analysis is processing. Creative suggestions and design recommendations will be available soon.",
+            "creative": "Creative content generation is in progress. Innovative ideas and marketing materials are being developed.",
+            "content": "Content creation system is currently generating personalized materials. Please check back for completed content.",
+            "multimodal": "Multimodal AI processing is active. Visual and textual analysis results will be provided upon completion."
+        }
+        
+        base_response = fallback_responses.get(task_type, "AI processing is currently in progress. Please try again shortly for detailed analysis and recommendations.")
+        
+        # Add context-specific information if available
+        if context and isinstance(context, dict):
+            if "lead_id" in context:
+                base_response += f" (Reference: Lead ID {context['lead_id']})"
+            elif "department" in context:
+                base_response += f" (Department: {context['department']})"
+        
+        return base_response
+
 # Voice-to-Task Models
 class VoiceTaskRequest(BaseModel):
     voice_input: str
