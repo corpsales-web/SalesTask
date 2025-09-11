@@ -2291,36 +2291,38 @@ async def phone_login(phone_data: PhoneLogin):
                 raise HTTPException(status_code=401, detail="Invalid or expired OTP")
             
             # Find or create user
-            user = await db.users.find_one({"phone": phone_data.phone})
-            if not user:
+            existing_user = await db.users.find_one({"phone": phone_data.phone})
+            if not existing_user:
                 # Create new user with phone
                 user_data = {
                     "username": f"user_{phone_data.phone}",
                     "email": f"{phone_data.phone}@phone.login",
                     "phone": phone_data.phone,
                     "full_name": f"User {phone_data.phone}",
-                    "role": UserRole.EMPLOYEE,
-                    "status": UserStatus.ACTIVE,
+                    "role": UserRole.EMPLOYEE.value,  # Use .value for string conversion
+                    "status": UserStatus.ACTIVE.value,  # Use .value for string conversion
                     "password_hash": hash_password(secrets.token_urlsafe(16))  # Random password
                 }
                 
                 user = User(**user_data)
                 user_dict = prepare_for_mongo(user.dict())
                 await db.users.insert_one(user_dict)
-                user = user_dict
+                existing_user = user_dict
             
             # Create access token
-            access_token = create_access_token(data={"sub": user["id"], "username": user["username"]})
+            access_token = create_access_token(data={"sub": existing_user["id"], "username": existing_user["username"]})
             
             # Clean up OTP
             await db.temp_otps.delete_one({"_id": otp_record["_id"]})
             
-            user_obj = User(**parse_from_mongo(user))
+            user_obj = User(**parse_from_mongo(existing_user))
+            user_response_data = {k: v for k, v in user_obj.dict().items() 
+                                 if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
             
             return TokenResponse(
                 access_token=access_token,
                 expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-                user=user_obj
+                user=UserResponse(**user_response_data)
             )
             
     except HTTPException:
