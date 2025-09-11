@@ -577,7 +577,7 @@ async def ai_deal_prediction():
         prediction_prompt = f"""
         Analyze these active deals for Aavana Greens and predict closure probability:
         
-        Active Deals: {json.dumps(leads)}
+        Active Deals: {json.dumps(make_json_safe(leads))}
         
         For each deal, provide:
         1. Closure Probability (%)
