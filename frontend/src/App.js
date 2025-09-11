@@ -1047,6 +1047,86 @@ const App = () => {
     }
   };
 
+  // Targets & Progress Functions
+  const [targetsData, setTargetsData] = useState({
+    daily: { sales: { target: 10000, achieved: 2500 }, leads: { target: 5, achieved: 2 }, tasks: { target: 10, achieved: 4 } },
+    weekly: { sales: { target: 70000, achieved: 18000 }, leads: { target: 35, achieved: 12 }, tasks: { target: 70, achieved: 28 } },
+    monthly: { sales: { target: 300000, achieved: 75000 }, leads: { target: 150, achieved: 45 }, tasks: { target: 300, achieved: 120 } }
+  });
+
+  const createTarget = async (targetType, period, value) => {
+    try {
+      const response = await axios.post(`${API}/targets/create`, {
+        user_id: "current_user",
+        target_type: targetType,
+        period: period,
+        target_value: value,
+        created_by: "frontend_user"
+      });
+      
+      toast({
+        title: "🎯 Target Created",
+        description: `${targetType} target set for ${period}: ₹${value}`
+      });
+      
+      await fetchTargetsData();
+      
+    } catch (error) {
+      console.error("Error creating target:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create target. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const fetchTargetsData = async () => {
+    try {
+      const response = await axios.get(`${API}/targets/dashboard/current_user`);
+      setTargetsData(response.data);
+    } catch (error) {
+      console.error("Error fetching targets:", error);
+    }
+  };
+
+  const updateProgress = async (targetType, period, increment) => {
+    try {
+      // This would find the target ID and update it
+      const response = await axios.post(`${API}/targets/update-progress`, {
+        target_id: "demo_target_id",
+        increment_value: increment,
+        source: "manual",
+        updated_by: "frontend_user",
+        notes: `Manual update: +${increment}`
+      });
+      
+      toast({
+        title: "📈 Progress Updated",
+        description: `Added ${increment} to ${targetType} ${period} target`
+      });
+      
+      await fetchTargetsData();
+      
+    } catch (error) {
+      console.error("Error updating progress:", error);
+    }
+  };
+
+  const sendTargetReminders = async () => {
+    try {
+      const response = await axios.post(`${API}/targets/send-reminders`);
+      
+      toast({
+        title: "📱 Reminders Sent", 
+        description: `Sent progress reminders to ${response.data.reminders_sent} users`
+      });
+      
+    } catch (error) {
+      console.error("Error sending reminders:", error);
+    }
+  };
+
   // AI Chat Functions
   const sendAiMessage = async () => {
     if (!aiChatMessage.trim()) return;
