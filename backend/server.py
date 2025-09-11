@@ -92,6 +92,22 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Email Configuration
+email_conf = ConnectionConfig(
+    MAIL_USERNAME=os.environ.get('MAIL_USERNAME', 'noreply@aavanagreens.com'),
+    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD', 'demo_password'),
+    MAIL_FROM=os.environ.get('MAIL_FROM', 'noreply@aavanagreens.com'),
+    MAIL_PORT=int(os.environ.get('MAIL_PORT', '587')),
+    MAIL_SERVER=os.environ.get('MAIL_SERVER', 'smtp.gmail.com'),
+    MAIL_FROM_NAME=os.environ.get('MAIL_FROM_NAME', 'Aavana Greens CRM'),
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True
+)
+
+fastmail = FastMail(email_conf)
+
 # Initialize services
 targets = get_targets_service(db)
 
