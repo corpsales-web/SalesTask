@@ -269,8 +269,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix database query issues in Smart Lead Scoring and Recall Context endpoints"
-    - "Fix database query issues in Deal Prediction and Smart Proposal Generator endpoints"
+    - "All critical AI endpoints are now working properly"
   stuck_tasks:
     - "ResizeObserver visual errors (non-functional issue)"
   test_all: false
