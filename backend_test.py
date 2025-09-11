@@ -11,6 +11,9 @@ class AavanaGreensCRMTester:
         self.tests_passed = 0
         self.created_leads = []
         self.created_tasks = []
+        self.auth_token = None
+        self.test_user_id = None
+        self.created_user_id = None
 
     def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
         """Run a single API test"""
