@@ -123,6 +123,17 @@ const App = () => {
     password: ""
   });
   
+  // Project Types Management State
+  const [projectTypes, setProjectTypes] = useState([]);
+  const [showAddProjectTypeModal, setShowAddProjectTypeModal] = useState(false);
+  const [newProjectType, setNewProjectType] = useState({
+    name: "",
+    description: "",
+    category: "Residential",
+    is_active: true,
+    sort_order: 0
+  });
+  
   const mediaRecorder = useRef(null);
   const { toast } = useToast();
 
