@@ -3674,36 +3674,114 @@ const App = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <div>
-                        <p className="font-medium text-emerald-800">Super Admin</p>
-                        <p className="text-xs text-emerald-600">Full system access</p>
-                      </div>
-                      <Badge className="bg-emerald-100 text-emerald-800">You</Badge>
+                  {/* Authentication Status */}
+                  {!currentUser ? (
+                    <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <p className="text-yellow-800 mb-3">Please login to manage users</p>
+                      <Button 
+                        onClick={() => setShowLoginModal(true)}
+                        className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                      >
+                        Login as Admin
+                      </Button>
                     </div>
-
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div>
-                        <p className="font-medium text-blue-800">Sales Manager</p>
-                        <p className="text-xs text-blue-600">Lead & task management</p>
+                  ) : (
+                    <>
+                      {/* Current User Info */}
+                      <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-emerald-800">{currentUser.full_name}</p>
+                            <p className="text-xs text-emerald-600">{currentUser.role} - {currentUser.department}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Badge className="bg-emerald-100 text-emerald-800">Logged In</Badge>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={logout}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              Logout
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                      <Badge className="bg-blue-100 text-blue-800">Active</Badge>
-                    </div>
 
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div>
-                        <p className="font-medium text-gray-800">Sales Executive</p>
-                        <p className="text-xs text-gray-600">Lead entry & follow-up</p>
-                      </div>
-                      <Badge className="bg-gray-100 text-gray-800">Pending</Badge>
-                    </div>
-                  </div>
-
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add New User
-                  </Button>
+                      {/* Users List */}
+                      {(currentUser.role === 'Super Admin' || currentUser.role === 'Admin' || currentUser.role === 'HR Manager') ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium text-gray-800">System Users ({users.length})</h4>
+                            <Button 
+                              size="sm"
+                              onClick={() => setShowAddUserModal(true)}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add User
+                            </Button>
+                          </div>
+                          
+                          <div className="max-h-60 overflow-y-auto space-y-2">
+                            {users.length === 0 ? (
+                              <div className="text-center p-4 text-gray-500">
+                                No users found. Click "Add User" to create the first user.
+                              </div>
+                            ) : (
+                              users.map((user) => (
+                                <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-gray-800">{user.full_name}</p>
+                                    <p className="text-xs text-gray-600">{user.role} - {user.email}</p>
+                                    <p className="text-xs text-gray-500">{user.department || 'No Department'}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge 
+                                      className={
+                                        user.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                        user.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-red-100 text-red-800'
+                                      }
+                                    >
+                                      {user.status}
+                                    </Badge>
+                                    {user.id !== currentUser.id && (
+                                      <div className="flex gap-1">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => updateUserStatus(user.id, user.status === 'Active' ? 'Inactive' : 'Active')}
+                                          className="text-xs"
+                                        >
+                                          {user.status === 'Active' ? 'Deactivate' : 'Activate'}
+                                        </Button>
+                                        {currentUser.role === 'Super Admin' && (
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => deleteUser(user.id, user.full_name)}
+                                            className="text-red-600 hover:text-red-700 text-xs"
+                                          >
+                                            Delete
+                                          </Button>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                          <p className="text-yellow-800">Insufficient permissions to manage users</p>
+                          <p className="text-xs text-yellow-600 mt-1">Admin or HR Manager access required</p>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </CardContent>
               </Card>
 
