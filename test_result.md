@@ -302,7 +302,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All high priority tasks completed"
+    - "All high priority tasks completed and tested"
   stuck_tasks:
     - "ResizeObserver visual errors (non-functional issue)"
   test_all: false
