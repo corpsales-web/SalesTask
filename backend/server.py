@@ -36,6 +36,16 @@ from telephony_service import (
     LeaveRequest
 )
 
+# Import Aavana 2.0 Orchestrator
+from aavana_2_0_orchestrator import (
+    aavana_2_0,
+    ConversationRequest,
+    ConversationResponse,
+    SupportedLanguage,
+    ChannelType,
+    IntentType
+)
+
 from erp_service import (
     erp_service,
     hrms_service as complete_hrms_service,
