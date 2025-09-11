@@ -381,6 +381,43 @@ def generate_reset_token() -> str:
     """Generate a secure reset token"""
     return secrets.token_urlsafe(32)
 
+def generate_otp() -> str:
+    """Generate a 6-digit OTP"""
+    return str(secrets.randbelow(999999)).zfill(6)
+
+def format_phone_number(phone: str) -> str:
+    """Format phone number to a standard format"""
+    # Remove all non-digit characters
+    phone = ''.join(filter(str.isdigit, phone))
+    
+    # Add country code if not present (assuming India +91)
+    if len(phone) == 10:
+        phone = "91" + phone
+    elif len(phone) == 11 and phone.startswith("0"):
+        phone = "91" + phone[1:]
+    elif len(phone) == 13 and phone.startswith("91"):
+        phone = phone
+    else:
+        # Keep as is for international numbers
+        pass
+    
+    return phone
+
+async def check_otp_rate_limit(phone: str, db) -> bool:
+    """Check if OTP requests are within rate limit (max 3 per 15 minutes)"""
+    fifteen_minutes_ago = datetime.now(timezone.utc) - timedelta(minutes=15)
+    recent_requests = await db.temp_otps.count_documents({
+        "phone": phone,
+        "created_at": {"$gte": fifteen_minutes_ago}
+    })
+    return recent_requests < 3
+
+async def cleanup_expired_otps(db):
+    """Clean up expired OTP records"""
+    await db.temp_otps.delete_many({
+        "expires_at": {"$lt": datetime.now(timezone.utc)}
+    })
+
 # Helper functions
 def prepare_for_mongo(data):
     if isinstance(data, dict):
