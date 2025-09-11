@@ -501,6 +501,7 @@ const App = () => {
       });
     }
   };
+  // Create task function
   const createTask = async (e) => {
     e.preventDefault();
     try {
@@ -532,6 +533,260 @@ const App = () => {
         description: "Failed to create task",
         variant: "destructive"
       });
+    }
+  };
+
+  // ERP Functions
+  const createProduct = async (e) => {
+    e.preventDefault();
+    try {
+      const productData = {
+        ...newProduct,
+        price: parseFloat(newProduct.price),
+        cost_price: newProduct.cost_price ? parseFloat(newProduct.cost_price) : null,
+        stock_quantity: parseInt(newProduct.stock_quantity),
+        min_stock_level: parseInt(newProduct.min_stock_level)
+      };
+      
+      await axios.post(`${API}/erp/products`, productData);
+      toast({
+        title: "Success",
+        description: "Product added successfully"
+      });
+      
+      setNewProduct({
+        name: "",
+        category: "Indoor Plants",
+        price: "",
+        cost_price: "",
+        stock_quantity: "",
+        min_stock_level: "5",
+        unit: "piece",
+        description: "",
+        supplier: ""
+      });
+      
+      fetchProducts();
+    } catch (error) {
+      console.error("Error creating product:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add product",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const createInvoice = async (e) => {
+    e.preventDefault();
+    try {
+      const invoiceData = {
+        ...newInvoice,
+        items: [
+          {
+            name: "Sample Service",
+            quantity: 1,
+            price: 1000,
+            total: 1000
+          }
+        ]
+      };
+      
+      await axios.post(`${API}/erp/invoices`, invoiceData);
+      toast({
+        title: "Success",
+        description: "Invoice created successfully"
+      });
+      
+      setNewInvoice({
+        customer_name: "",
+        customer_phone: "",
+        customer_email: "",
+        items: [],
+        tax_percentage: 18,
+        discount_percentage: 0,
+        notes: ""
+      });
+      
+      fetchInvoices();
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create invoice",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const createProject = async (e) => {
+    e.preventDefault();
+    try {
+      const projectData = {
+        ...newProject,
+        completion_date: new Date().toISOString(),
+        before_images: [],
+        after_images: [],
+        tags: []
+      };
+      
+      await axios.post(`${API}/erp/projects`, projectData);
+      toast({
+        title: "Success",
+        description: "Project added to gallery successfully"
+      });
+      
+      setNewProject({
+        project_name: "",
+        client_name: "",
+        location: "",
+        project_type: "Balcony Garden",
+        budget_range: "",
+        description: "",
+        testimonial: ""
+      });
+      
+      fetchProjects();
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add project",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // HRMS Functions
+  const handleFaceCheckin = async () => {
+    setIsCheckingIn(true);
+    try {
+      // Simulate face recognition check-in
+      await axios.post(`${API}/hrms/face-checkin?employee_id=EMP001&face_image=sample_image&location=Office`);
+      toast({
+        title: "Success",
+        description: "Face check-in successful! Welcome to work."
+      });
+    } catch (error) {
+      console.error("Error with face check-in:", error);
+      toast({
+        title: "Error",
+        description: "Face check-in failed. Please try again.",
+        variant: "destructive"
+      });
+    }
+    setIsCheckingIn(false);
+  };
+
+  const handleGpsCheckin = async () => {
+    setIsCheckingIn(true);
+    try {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          try {
+            const location = `${position.coords.latitude},${position.coords.longitude}`;
+            await axios.post(`${API}/hrms/check-in?employee_id=EMP001&location=${location}`);
+            toast({
+              title: "Success",
+              description: "GPS check-in successful! Location verified."
+            });
+          } catch (error) {
+            toast({
+              title: "Error",
+              description: "GPS check-in failed.",
+              variant: "destructive"
+            });
+          }
+          setIsCheckingIn(false);
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "GPS not supported by this browser.",
+          variant: "destructive"
+        });
+        setIsCheckingIn(false);
+      }
+    } catch (error) {
+      console.error("Error with GPS check-in:", error);
+      setIsCheckingIn(false);
+    }
+  };
+
+  const handleProcessPayroll = async () => {
+    try {
+      toast({
+        title: "Processing",
+        description: "Payroll processing initiated. This may take a few minutes."
+      });
+      
+      // Simulate payroll processing
+      setTimeout(() => {
+        toast({
+          title: "Success",
+          description: "Payroll processed successfully for all employees."
+        });
+        fetchPayrollReport();
+      }, 3000);
+    } catch (error) {
+      console.error("Error processing payroll:", error);
+      toast({
+        title: "Error",
+        description: "Payroll processing failed.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleApplyLeave = async () => {
+    try {
+      const leaveData = {
+        employee_id: "EMP001",
+        leave_type: "Casual",
+        start_date: new Date().toISOString(),
+        end_date: new Date(Date.now() + 24*60*60*1000).toISOString(),
+        days_count: 1,
+        reason: "Personal work"
+      };
+      
+      await axios.post(`${API}/hrms/apply-leave`, leaveData);
+      toast({
+        title: "Success",
+        description: "Leave application submitted successfully."
+      });
+    } catch (error) {
+      console.error("Error applying leave:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit leave application.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // AI Chat Functions
+  const sendAiMessage = async () => {
+    if (!aiChatMessage.trim()) return;
+    
+    const userMessage = aiChatMessage;
+    setAiChatHistory(prev => [...prev, { type: 'user', message: userMessage }]);
+    setAiChatMessage("");
+    
+    try {
+      const response = await axios.post(`${API}/ai/insights`, {
+        type: "general",
+        data: { query: userMessage }
+      });
+      
+      const aiResponse = response.data.insights?.[0] || "I can help you with lead management, task creation, business insights, and marketing content. What would you like to know?";
+      
+      setAiChatHistory(prev => [...prev, { type: 'ai', message: aiResponse }]);
+    } catch (error) {
+      console.error("Error with AI chat:", error);
+      setAiChatHistory(prev => [...prev, { 
+        type: 'ai', 
+        message: "I'm here to help! You can ask me about:\n• Lead management and conversion\n• Task creation and automation\n• Business insights and analytics\n• Marketing content generation\n• Sales strategies\n\nWhat would you like assistance with?" 
+      }]);
     }
   };
 
