@@ -151,7 +151,7 @@ backend:
 
   - task: "AI Stack Integration - Sales & Pipeline AI"
     implemented: true
-    working: "partial"
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
@@ -160,6 +160,9 @@ backend:
       - working: "partial"
         agent: "testing"
         comment: "Deal Prediction and Smart Proposal Generator endpoints returning 500 errors. Issues appear to be related to database queries for lead data rather than AI model integration."
+      - working: true
+        agent: "testing"
+        comment: "FIXED: Deal Prediction and Smart Proposal Generator endpoints now working. Resolved MongoDB ObjectId and datetime serialization issues. Both endpoints return 200 OK with proper AI-generated responses. Database fallback mechanisms functioning correctly."
 
   - task: "AI Stack Integration - Marketing & Growth AI"
     implemented: true
