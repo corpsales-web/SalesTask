@@ -105,6 +105,80 @@ class AavanaGreensCRMTester:
         """Test updating a task"""
         return self.run_test("Update Task", "PUT", f"tasks/{task_id}", 200, data=update_data)
 
+    # Aavana 2.0 Orchestration Tests
+    def test_aavana_health_check(self):
+        """Test Aavana 2.0 health check endpoint"""
+        return self.run_test("Aavana 2.0 Health Check", "GET", "aavana/health", 200)
+
+    def test_aavana_conversation_english(self):
+        """Test Aavana 2.0 conversation processing with English message"""
+        data = {
+            "message": "Hello, I need help with plants",
+            "channel": "in_app_chat",
+            "user_id": "test_user_001",
+            "language": "en"
+        }
+        return self.run_test("Aavana 2.0 Conversation (English)", "POST", "aavana/conversation", 200, data=data)
+
+    def test_aavana_conversation_hindi(self):
+        """Test Aavana 2.0 conversation processing with Hindi message"""
+        data = {
+            "message": "नमस्ते, मुझे पौधों की जानकारी चाहिए",
+            "channel": "in_app_chat", 
+            "user_id": "test_user_002",
+            "language": "hi"
+        }
+        return self.run_test("Aavana 2.0 Conversation (Hindi)", "POST", "aavana/conversation", 200, data=data)
+
+    def test_aavana_conversation_hinglish(self):
+        """Test Aavana 2.0 conversation processing with Hinglish message"""
+        data = {
+            "message": "kya haal hai, garden ke liye help chahiye",
+            "channel": "in_app_chat",
+            "user_id": "test_user_003", 
+            "language": "hinglish"
+        }
+        return self.run_test("Aavana 2.0 Conversation (Hinglish)", "POST", "aavana/conversation", 200, data=data)
+
+    def test_aavana_language_detect_english(self):
+        """Test Aavana 2.0 language detection with English text"""
+        data = {"text": "Hello, how are you today?"}
+        return self.run_test("Aavana 2.0 Language Detection (English)", "POST", "aavana/language-detect", 200, data=data)
+
+    def test_aavana_language_detect_hindi(self):
+        """Test Aavana 2.0 language detection with Hindi text"""
+        data = {"text": "नमस्ते, आप कैसे हैं?"}
+        return self.run_test("Aavana 2.0 Language Detection (Hindi)", "POST", "aavana/language-detect", 200, data=data)
+
+    def test_aavana_language_detect_hinglish(self):
+        """Test Aavana 2.0 language detection with Hinglish text"""
+        data = {"text": "Hello yaar, kya chal raha hai?"}
+        return self.run_test("Aavana 2.0 Language Detection (Hinglish)", "POST", "aavana/language-detect", 200, data=data)
+
+    def test_aavana_audio_templates_english(self):
+        """Test Aavana 2.0 audio templates for English"""
+        return self.run_test("Aavana 2.0 Audio Templates (English)", "GET", "aavana/audio-templates", 200, params={"language": "en"})
+
+    def test_aavana_audio_templates_hindi(self):
+        """Test Aavana 2.0 audio templates for Hindi"""
+        return self.run_test("Aavana 2.0 Audio Templates (Hindi)", "GET", "aavana/audio-templates", 200, params={"language": "hi"})
+
+    def test_aavana_audio_templates_hinglish(self):
+        """Test Aavana 2.0 audio templates for Hinglish"""
+        return self.run_test("Aavana 2.0 Audio Templates (Hinglish)", "GET", "aavana/audio-templates", 200, params={"language": "hinglish"})
+
+    def test_aavana_whatsapp_integration(self):
+        """Test Aavana 2.0 WhatsApp integration with mock data"""
+        mock_whatsapp_data = {
+            "from": "919876543210",
+            "id": "wamid.test123",
+            "text": {
+                "body": "Hi, I want to know about your garden services"
+            },
+            "timestamp": "1640995200"
+        }
+        return self.run_test("Aavana 2.0 WhatsApp Integration", "POST", "aavana/whatsapp", 200, data=mock_whatsapp_data)
+
 def main():
     print("🚀 Starting Aavana Greens CRM API Tests")
     print("=" * 50)
