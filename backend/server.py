@@ -46,6 +46,18 @@ from aavana_2_0_orchestrator import (
     IntentType
 )
 
+# Import Targets Service
+from targets_service import (
+    get_targets_service,
+    Target,
+    ProgressUpdate,
+    ProgressSummary,
+    ReminderSettings,
+    TargetPeriod,
+    TargetType,
+    UserRole
+)
+
 from erp_service import (
     erp_service,
     hrms_service as complete_hrms_service,
