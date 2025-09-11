@@ -2210,8 +2210,8 @@ async def register_user(user_data: UserCreate):
 async def login_user(login_data: UserLogin):
     """Authenticate user and return access token"""
     try:
-        # Find user by username, email, or phone
-        user = await db.users.find_one({
+        # Check if user already exists
+        existing_user = await db.users.find_one({
             "$or": [
                 {"username": login_data.identifier},
                 {"email": login_data.identifier},
@@ -2219,33 +2219,33 @@ async def login_user(login_data: UserLogin):
             ]
         })
         
-        if not user or not verify_password(login_data.password, user["password_hash"]):
+        if not existing_user or not verify_password(login_data.password, existing_user.get("password_hash", "")):
             raise HTTPException(
                 status_code=401,
                 detail="Invalid credentials"
             )
         
         # Check if user is active
-        if user.get("status") != UserStatus.ACTIVE:
+        if existing_user.get("status") != UserStatus.ACTIVE:
             raise HTTPException(
                 status_code=403,
-                detail=f"Account is {user.get('status', 'inactive').lower()}"
+                detail=f"Account is {existing_user.get('status', 'inactive').lower()}"
             )
         
         # Update last login
         await db.users.update_one(
-            {"id": user["id"]}, 
+            {"id": existing_user["id"]}, 
             {"$set": {"last_login": datetime.now(timezone.utc)}}
         )
         
         # Create access token
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
-            data={"sub": user["id"], "username": user["username"]},
+            data={"sub": existing_user["id"], "username": existing_user["username"]},
             expires_delta=access_token_expires
         )
         
-        user_obj = User(**parse_from_mongo(user))
+        user_obj = User(**parse_from_mongo(existing_user))
         user_response_data = {k: v for k, v in user_obj.dict().items() 
                              if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
         
