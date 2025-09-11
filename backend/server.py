@@ -1854,21 +1854,50 @@ async def send_appointment_reminder(event_id: str, reminder_type: str = "sms"):
 
 # Advanced HRMS Routes
 @api_router.post("/hrms/face-checkin")
-async def face_recognition_checkin(employee_id: str, face_image: str, location: str):
-    """Face recognition check-in"""
+async def face_recognition_checkin(checkin_data: dict):
+    """Enhanced face recognition check-in with camera capture"""
     try:
-        result = await complete_hrms_service.process_face_recognition_checkin(employee_id, face_image, location)
+        employee_id = checkin_data.get("employee_id")
+        face_image = checkin_data.get("face_image")
+        location = checkin_data.get("location", {})
+        timestamp = checkin_data.get("timestamp")
+        device_info = checkin_data.get("device_info", {})
+        
+        if not employee_id or not face_image:
+            raise HTTPException(status_code=400, detail="Employee ID and face image are required")
+        
+        # Enhanced validation and processing
+        result = await complete_hrms_service.process_face_recognition_checkin(
+            employee_id, 
+            face_image, 
+            location,
+            timestamp=timestamp,
+            device_info=device_info
+        )
         
         if result["status"] == "success":
-            # Create attendance record
+            # Create enhanced attendance record
             attendance = Attendance(
                 employee_id=employee_id,
                 date=datetime.now(timezone.utc).date(),
                 check_in=result["check_in_time"],
-                location=location,
+                location=location.get("address", "Office") if isinstance(location, dict) else str(location),
                 status="Present"
             )
             attendance_dict = prepare_for_mongo(attendance.dict())
+            
+            # Add enhanced metadata
+            attendance_dict.update({
+                "face_image_captured": True,
+                "location_accuracy": location.get("accuracy") if isinstance(location, dict) else None,
+                "coordinates": {
+                    "lat": location.get("lat"),
+                    "lng": location.get("lng")
+                } if isinstance(location, dict) else None,
+                "device_info": device_info,
+                "verification_method": "face_recognition_camera"
+            })
+            
             await db.attendance.insert_one(attendance_dict)
         
         return result
