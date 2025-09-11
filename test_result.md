@@ -136,7 +136,7 @@ backend:
 
   - task: "AI Stack Integration - Conversational CRM AI"
     implemented: true
-    working: "partial"
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
@@ -145,6 +145,9 @@ backend:
       - working: "partial"
         agent: "testing"
         comment: "Conversation Analysis working (200 OK). Smart Lead Scoring and Recall Context endpoints returning 500 errors due to database query issues with lead data retrieval."
+      - working: true
+        agent: "testing"
+        comment: "FIXED: Smart Lead Scoring and Recall Context endpoints now working. Fixed MongoDB ObjectId and datetime serialization issues by implementing parse_from_mongo() and make_json_safe() functions. Endpoints return 200 OK with proper AI responses. Fallback mechanisms with demo data working correctly when real lead data unavailable."
 
   - task: "AI Stack Integration - Sales & Pipeline AI"
     implemented: true
