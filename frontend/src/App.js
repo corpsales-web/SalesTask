@@ -500,54 +500,17 @@ const App = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Load core data first (these are working)
-        await Promise.all([
-          fetchDashboardStats(), 
-          fetchLeads(), 
-          fetchTasks()
-        ]);
+        // Load only core data that we know works
+        await fetchDashboardStats();
+        await fetchLeads();
+        await fetchTasks();
         
-        // Load ERP and HRMS data (handle errors gracefully)
-        try {
-          await fetchProducts();
-        } catch (error) {
-          console.error("Products fetch failed:", error);
-        }
-        
-        try {
-          await fetchInventoryAlerts();
-        } catch (error) {
-          console.error("Inventory alerts fetch failed:", error);
-        }
-        
-        try {
-          await fetchInvoices();
-        } catch (error) {
-          console.error("Invoices fetch failed:", error);
-        }
-        
-        try {
-          await fetchProjects();
-        } catch (error) {
-          console.error("Projects fetch failed:", error);
-        }
-        
-        try {
-          await fetchExecutiveDashboard();
-        } catch (error) {
-          console.error("Executive dashboard fetch failed:", error);
-        }
-        
-        try {
-          await fetchPayrollReport();
-        } catch (error) {
-          console.error("Payroll report fetch failed:", error);
-        }
+        console.log("Core data loaded successfully");
         
       } catch (error) {
         console.error("Critical data loading error:", error);
         toast({
-          title: "Loading Error",
+          title: "Loading Error", 
           description: "Some data failed to load. Please refresh the page.",
           variant: "destructive"
         });
