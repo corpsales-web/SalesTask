@@ -515,6 +515,72 @@ async def cleanup_expired_otps(db):
         "expires_at": {"$lt": datetime.now(timezone.utc)}
     })
 
+def get_user_permissions(user_role: UserRole, custom_permissions: List[str] = None) -> List[str]:
+    """Get all permissions for a user based on role and custom permissions"""
+    base_permissions = ROLE_PERMISSIONS.get(user_role, [])
+    
+    if custom_permissions:
+        # Combine role permissions with custom permissions
+        all_permissions = set(base_permissions + custom_permissions)
+        return list(all_permissions)
+    
+    return base_permissions
+
+def has_permission(user_permissions: List[str], required_permission: str) -> bool:
+    """Check if user has a specific permission"""
+    return required_permission in user_permissions
+
+def require_permission(required_permission: str):
+    """Decorator to require specific permission for endpoint access"""
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            # Extract current_user from kwargs or args
+            current_user = None
+            for key, value in kwargs.items():
+                if hasattr(value, 'permissions') and hasattr(value, 'role'):
+                    current_user = value
+                    break
+            
+            if not current_user:
+                raise HTTPException(status_code=401, detail="Authentication required")
+            
+            user_permissions = get_user_permissions(current_user.role, current_user.permissions)
+            
+            if not has_permission(user_permissions, required_permission):
+                raise HTTPException(
+                    status_code=403, 
+                    detail=f"Permission denied. Required: {required_permission}"
+                )
+            
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+async def update_user_permissions(user_id: str, new_permissions: List[str], db) -> bool:
+    """Update user's custom permissions"""
+    try:
+        # Validate permissions
+        valid_permissions = [perm.value for perm in Permission]
+        invalid_permissions = [perm for perm in new_permissions if perm not in valid_permissions]
+        
+        if invalid_permissions:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid permissions: {invalid_permissions}"
+            )
+        
+        result = await db.users.update_one(
+            {"id": user_id},
+            {"$set": {
+                "permissions": new_permissions,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+        
+        return result.modified_count > 0
+    except Exception as e:
+        return False
+
 # Helper functions
 def prepare_for_mongo(data):
     if isinstance(data, dict):
