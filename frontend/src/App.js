@@ -4626,6 +4626,202 @@ const App = () => {
           </div>
         )}
       
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Admin Login</h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowLoginModal(false)}
+                className="text-gray-500"
+              >
+                ✕
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="identifier">Username, Email, or Phone</Label>
+                <Input
+                  id="identifier"
+                  type="text"
+                  value={loginData.identifier}
+                  onChange={(e) => setLoginData({...loginData, identifier: e.target.value})}
+                  placeholder="Enter your username, email, or phone"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={loginData.password}
+                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                  placeholder="Enter your password"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowLoginModal(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => login(loginData)}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  disabled={!loginData.identifier || !loginData.password}
+                >
+                  Login
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add User Modal */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Add New User</h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAddUserModal(false)}
+                className="text-gray-500"
+              >
+                ✕
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="username">Username *</Label>
+                  <Input
+                    id="username"
+                    value={newUser.username}
+                    onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                    placeholder="Enter username"
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="full_name">Full Name *</Label>
+                  <Input
+                    id="full_name"
+                    value={newUser.full_name}
+                    onChange={(e) => setNewUser({...newUser, full_name: e.target.value})}
+                    placeholder="Enter full name"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                  placeholder="Enter email address"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={newUser.phone}
+                    onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                    placeholder="Enter phone number"
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="department">Department</Label>
+                  <Input
+                    id="department"
+                    value={newUser.department}
+                    onChange={(e) => setNewUser({...newUser, department: e.target.value})}
+                    placeholder="Enter department"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="role">Role *</Label>
+                <Select
+                  value={newUser.role}
+                  onValueChange={(value) => setNewUser({...newUser, role: value})}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Employee">Employee</SelectItem>
+                    <SelectItem value="Sales Executive">Sales Executive</SelectItem>
+                    <SelectItem value="Sales Manager">Sales Manager</SelectItem>
+                    <SelectItem value="Marketing Manager">Marketing Manager</SelectItem>
+                    <SelectItem value="HR Manager">HR Manager</SelectItem>
+                    <SelectItem value="Admin">Admin</SelectItem>
+                    {currentUser?.role === 'Super Admin' && (
+                      <SelectItem value="Super Admin">Super Admin</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                  placeholder="Enter password"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={() => setShowAddUserModal(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => createUser(newUser)}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  disabled={!newUser.username || !newUser.full_name || !newUser.email || !newUser.password}
+                >
+                  Create User
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Toaster />
     </div>
   );
