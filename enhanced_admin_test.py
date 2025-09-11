@@ -142,10 +142,23 @@ class EnhancedAdminFeaturesTester:
             print("⚠️ Skipping test - no test phone available")
             return False, {}
         
-        # Use a mock OTP for testing
+        # First request a new OTP to get the demo OTP
+        phone_data = {"phone": self.test_phone, "resend": True}
+        success, otp_response = self.run_test(
+            "Request OTP for Verification Test", 
+            "POST", 
+            "auth/phone-request-otp", 
+            200, 
+            data=phone_data
+        )
+        
+        if not success or 'demo_otp' not in otp_response:
+            return False, {}
+        
+        # Use the actual demo OTP from the response
         verify_data = {
             "phone": self.test_phone,
-            "otp": "123456"
+            "otp": otp_response['demo_otp']
         }
         return self.run_test(
             "Phone OTP Verify (Valid)", 
