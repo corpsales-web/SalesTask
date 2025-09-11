@@ -2758,6 +2758,127 @@ const App = () => {
         </Tabs>
       </main>
       
+      {/* Floating AI Chat Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={() => setShowAiChat(!showAiChat)}
+          className="h-14 w-14 rounded-full bg-emerald-600 hover:bg-emerald-700 shadow-lg"
+        >
+          <Bot className="h-6 w-6 text-white" />
+        </Button>
+      </div>
+
+      {/* AI Chat Interface */}
+      {showAiChat && (
+        <div className="fixed bottom-24 right-6 w-80 h-96 bg-white rounded-lg shadow-2xl border border-emerald-200 z-50 flex flex-col">
+          <div className="bg-emerald-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+            <div className="flex items-center">
+              <Bot className="h-5 w-5 mr-2" />
+              <span className="font-medium">AI Assistant</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAiChat(false)}
+              className="text-white hover:bg-emerald-700 h-6 w-6 p-0"
+            >
+              ×
+            </Button>
+          </div>
+          
+          <div className="flex-1 p-4 overflow-y-auto space-y-3">
+            {aiChatHistory.length === 0 ? (
+              <div className="text-center text-gray-500 mt-8">
+                <Bot className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                <p className="text-sm">Hi! I'm your AI assistant.</p>
+                <p className="text-xs mt-1">Ask me about leads, tasks, business insights, or marketing!</p>
+              </div>
+            ) : (
+              aiChatHistory.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[70%] p-3 rounded-lg text-sm ${
+                      msg.type === 'user'
+                        ? 'bg-emerald-600 text-white rounded-br-sm'
+                        : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                    }`}
+                  >
+                    {msg.type === 'ai' && (
+                      <div className="flex items-center mb-1">
+                        <Bot className="h-3 w-3 mr-1 text-emerald-600" />
+                        <span className="text-xs text-emerald-600 font-medium">AI</span>
+                      </div>
+                    )}
+                    <div className="whitespace-pre-wrap">{msg.message}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          
+          <div className="p-4 border-t border-gray-200">
+            <div className="flex space-x-2">
+              <Input
+                placeholder="Ask AI anything..."
+                value={aiChatMessage}
+                onChange={(e) => setAiChatMessage(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    sendAiMessage();
+                  }
+                }}
+                className="flex-1"
+              />
+              <Button
+                onClick={sendAiMessage}
+                className="bg-emerald-600 hover:bg-emerald-700"
+                size="sm"
+              >
+                <Sparkles className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs py-1 px-2 h-6"
+                onClick={() => {
+                  setAiChatMessage("How can I improve lead conversion?");
+                  setTimeout(sendAiMessage, 100);
+                }}
+              >
+                💡 Lead Tips
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs py-1 px-2 h-6"
+                onClick={() => {
+                  setAiChatMessage("Create social media content for plant business");
+                  setTimeout(sendAiMessage, 100);
+                }}
+              >
+                📱 Social Media
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs py-1 px-2 h-6"
+                onClick={() => {
+                  setAiChatMessage("Suggest business growth strategies");
+                  setTimeout(sendAiMessage, 100);
+                }}
+              >
+                📈 Growth
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Toaster />
     </div>
   );
