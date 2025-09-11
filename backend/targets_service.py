@@ -106,8 +106,9 @@ class TargetsService:
             if not await self._has_permission(target.created_by, "create_targets"):
                 raise HTTPException(status_code=403, detail="Insufficient permissions")
             
-            # Calculate period dates
-            target.start_date, target.end_date = self._calculate_period_dates(target.period)
+            # Calculate period dates if not provided
+            if not target.start_date or not target.end_date:
+                target.start_date, target.end_date = self._calculate_period_dates(target.period)
             
             # Store in database
             target_dict = target.dict()
