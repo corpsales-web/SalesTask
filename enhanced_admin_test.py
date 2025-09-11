@@ -266,7 +266,7 @@ class EnhancedAdminFeaturesTester:
             "email": f"permtest{timestamp}@example.com",
             "phone": f"987654{timestamp[-4:]}",
             "full_name": "Permission Test User",
-            "role": "Sales_Executive",
+            "role": "Sales Executive",
             "password": "SecurePass123!",
             "department": "Sales"
         }
