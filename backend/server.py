@@ -2304,71 +2304,169 @@ async def login_user(login_data: UserLogin):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
 
+@api_router.post("/auth/phone-request-otp")
+async def request_phone_otp(otp_request: PhoneOTPRequest):
+    """Request OTP for phone authentication"""
+    try:
+        # Format and validate phone number
+        formatted_phone = format_phone_number(otp_request.phone)
+        
+        if len(formatted_phone) < 10:
+            raise HTTPException(status_code=400, detail="Invalid phone number format")
+        
+        # Clean up expired OTPs first
+        await cleanup_expired_otps(db)
+        
+        # Check rate limiting
+        if not await check_otp_rate_limit(formatted_phone, db):
+            raise HTTPException(
+                status_code=429, 
+                detail="Too many OTP requests. Please wait 15 minutes before requesting again."
+            )
+        
+        # Check if there's already a valid OTP
+        existing_otp = await db.temp_otps.find_one({
+            "phone": formatted_phone,
+            "expires_at": {"$gt": datetime.now(timezone.utc)}
+        })
+        
+        if existing_otp and not otp_request.resend:
+            time_remaining = int((existing_otp["expires_at"] - datetime.now(timezone.utc)).total_seconds())
+            return {
+                "message": "OTP already sent",
+                "time_remaining": time_remaining,
+                "can_resend": time_remaining < 60  # Allow resend in last minute
+            }
+        
+        # Generate new OTP
+        otp = generate_otp()
+        
+        # Store OTP with metadata
+        otp_data = {
+            "phone": formatted_phone,
+            "otp": otp,
+            "created_at": datetime.now(timezone.utc),
+            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "attempts": 0,
+            "max_attempts": 3
+        }
+        
+        # Remove existing OTP if resending
+        if existing_otp:
+            await db.temp_otps.delete_one({"_id": existing_otp["_id"]})
+        
+        await db.temp_otps.insert_one(otp_data)
+        
+        # In production, send SMS via Exotel/Twilio
+        # await telephony_service.send_sms(formatted_phone, f"Your Aavana Greens login OTP is: {otp}. Valid for 5 minutes.")
+        
+        return {
+            "message": "OTP sent successfully",
+            "phone": formatted_phone,
+            "expires_in": 300,  # 5 minutes
+            "demo_otp": otp  # Remove in production
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OTP request failed: {str(e)}")
+
+@api_router.post("/auth/phone-verify-otp", response_model=TokenResponse)
+async def verify_phone_otp(otp_verify: PhoneOTPVerify):
+    """Verify OTP and login user"""
+    try:
+        # Format phone number
+        formatted_phone = format_phone_number(otp_verify.phone)
+        
+        # Find OTP record
+        otp_record = await db.temp_otps.find_one({
+            "phone": formatted_phone,
+            "expires_at": {"$gt": datetime.now(timezone.utc)}
+        })
+        
+        if not otp_record:
+            raise HTTPException(status_code=401, detail="OTP expired or not found")
+        
+        # Check attempt limit
+        if otp_record.get("attempts", 0) >= otp_record.get("max_attempts", 3):
+            await db.temp_otps.delete_one({"_id": otp_record["_id"]})
+            raise HTTPException(status_code=401, detail="Too many invalid attempts. Please request a new OTP.")
+        
+        # Verify OTP
+        if otp_record["otp"] != otp_verify.otp:
+            # Increment attempt counter
+            await db.temp_otps.update_one(
+                {"_id": otp_record["_id"]},
+                {"$inc": {"attempts": 1}}
+            )
+            remaining_attempts = otp_record.get("max_attempts", 3) - otp_record.get("attempts", 0) - 1
+            raise HTTPException(
+                status_code=401, 
+                detail=f"Invalid OTP. {remaining_attempts} attempts remaining."
+            )
+        
+        # Find or create user
+        existing_user = await db.users.find_one({"phone": formatted_phone})
+        if not existing_user:
+            # Create new user with phone
+            user_data = {
+                "username": f"user_{formatted_phone[-10:]}",  # Last 10 digits
+                "email": f"{formatted_phone}@phone.login",
+                "phone": formatted_phone,
+                "full_name": f"User {formatted_phone[-10:]}",
+                "role": UserRole.EMPLOYEE.value,
+                "status": UserStatus.ACTIVE.value,
+                "password_hash": hash_password(secrets.token_urlsafe(16)),
+                "department": "Phone Users",
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc)
+            }
+            
+            user = User(**user_data)
+            user_dict = prepare_for_mongo(user.dict())
+            await db.users.insert_one(user_dict)
+            existing_user = user_dict
+        
+        # Update last login
+        await db.users.update_one(
+            {"id": existing_user["id"]}, 
+            {"$set": {"last_login": datetime.now(timezone.utc)}}
+        )
+        
+        # Create access token
+        access_token = create_access_token(
+            data={"sub": existing_user["id"], "username": existing_user["username"]}
+        )
+        
+        # Clean up OTP
+        await db.temp_otps.delete_one({"_id": otp_record["_id"]})
+        
+        user_obj = User(**parse_from_mongo(existing_user))
+        user_response_data = {k: v for k, v in user_obj.dict().items() 
+                             if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
+        
+        return TokenResponse(
+            access_token=access_token,
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            user=UserResponse(**user_response_data)
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OTP verification failed: {str(e)}")
+
 @api_router.post("/auth/phone-login")
 async def phone_login(phone_data: PhoneLogin):
-    """Phone-based authentication (simplified for demo)"""
+    """Legacy phone-based authentication (simplified for demo) - DEPRECATED"""
     try:
         if not phone_data.otp:
-            # Generate OTP and send via SMS (demo implementation)
-            otp = str(secrets.randbelow(999999)).zfill(6)
-            
-            # In production, send SMS via Exotel/Twilio
-            # await telephony_service.send_sms(phone_data.phone, f"Your Aavana Greens OTP is: {otp}")
-            
-            # For demo, store OTP in temporary collection with expiry
-            await db.temp_otps.insert_one({
-                "phone": phone_data.phone,
-                "otp": otp,
-                "expires_at": datetime.now(timezone.utc) + timedelta(minutes=5)
-            })
-            
-            return {"message": "OTP sent successfully", "demo_otp": otp}  # Remove demo_otp in production
-        
+            # Redirect to new OTP request endpoint
+            return await request_phone_otp(PhoneOTPRequest(phone=phone_data.phone))
         else:
-            # Verify OTP
-            otp_record = await db.temp_otps.find_one({
-                "phone": phone_data.phone,
-                "otp": phone_data.otp,
-                "expires_at": {"$gt": datetime.now(timezone.utc)}
-            })
-            
-            if not otp_record:
-                raise HTTPException(status_code=401, detail="Invalid or expired OTP")
-            
-            # Find or create user
-            existing_user = await db.users.find_one({"phone": phone_data.phone})
-            if not existing_user:
-                # Create new user with phone
-                user_data = {
-                    "username": f"user_{phone_data.phone}",
-                    "email": f"{phone_data.phone}@phone.login",
-                    "phone": phone_data.phone,
-                    "full_name": f"User {phone_data.phone}",
-                    "role": UserRole.EMPLOYEE.value,  # Use .value for string conversion
-                    "status": UserStatus.ACTIVE.value,  # Use .value for string conversion
-                    "password_hash": hash_password(secrets.token_urlsafe(16))  # Random password
-                }
-                
-                user = User(**user_data)
-                user_dict = prepare_for_mongo(user.dict())
-                await db.users.insert_one(user_dict)
-                existing_user = user_dict
-            
-            # Create access token
-            access_token = create_access_token(data={"sub": existing_user["id"], "username": existing_user["username"]})
-            
-            # Clean up OTP
-            await db.temp_otps.delete_one({"_id": otp_record["_id"]})
-            
-            user_obj = User(**parse_from_mongo(existing_user))
-            user_response_data = {k: v for k, v in user_obj.dict().items() 
-                                 if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
-            
-            return TokenResponse(
-                access_token=access_token,
-                expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-                user=UserResponse(**user_response_data)
-            )
+            # Redirect to new OTP verify endpoint
+            return await verify_phone_otp(PhoneOTPVerify(phone=phone_data.phone, otp=phone_data.otp))
             
     except HTTPException:
         raise
