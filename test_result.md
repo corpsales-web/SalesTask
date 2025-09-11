@@ -284,7 +284,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Panel Backend - User Authentication System"
     - "Admin Panel Frontend - Add New User Button Integration"
   stuck_tasks:
     - "ResizeObserver visual errors (non-functional issue)"
