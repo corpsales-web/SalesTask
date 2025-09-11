@@ -558,7 +558,50 @@ def main():
     print("\n📊 Testing Dashboard Stats...")
     tester.test_dashboard_stats()
 
-    # Test 3: Create multiple leads with different data
+    # Test 3: Admin Panel Authentication System Tests
+    print("\n🔐 Testing Admin Panel Authentication System...")
+    print("=" * 60)
+    
+    # User Registration Tests
+    print("\n👤 Testing User Registration...")
+    tester.test_user_registration_valid()
+    tester.test_user_registration_duplicate()
+    tester.test_user_registration_invalid_email()
+    tester.test_user_registration_missing_fields()
+    
+    # User Login Tests
+    print("\n🔑 Testing User Login...")
+    tester.test_user_login_username()
+    tester.test_user_login_email()
+    tester.test_user_login_phone()
+    tester.test_user_login_invalid_credentials()
+    
+    # Phone-based Login Tests
+    print("\n📱 Testing Phone-based Login...")
+    tester.test_phone_login_otp_generation()
+    tester.test_phone_login_otp_verification()
+    tester.test_phone_login_invalid_otp()
+    
+    # Password Reset Tests
+    print("\n🔄 Testing Password Reset Flow...")
+    tester.test_forgot_password_request()
+    tester.test_reset_password_valid_token()
+    tester.test_reset_password_invalid_token()
+    
+    # Authentication Middleware Tests
+    print("\n🛡️ Testing Authentication Middleware...")
+    tester.test_get_current_user_valid_token()
+    tester.test_get_current_user_invalid_token()
+    
+    # User Management CRUD Tests
+    print("\n👥 Testing User Management CRUD...")
+    tester.test_unauthorized_access()
+    tester.test_get_users_list()
+    tester.test_create_user_admin()
+    tester.test_update_user()
+    tester.test_delete_user_admin()
+
+    # Test 4: Create multiple leads with different data
     print("\n👥 Testing Lead Management...")
     
     test_leads = [
@@ -599,14 +642,14 @@ def main():
         if success:
             created_lead_ids.append(response['id'])
 
-    # Test 4: Get all leads
+    # Test 5: Get all leads
     tester.test_get_leads()
 
-    # Test 5: Get specific lead
+    # Test 6: Get specific lead
     if created_lead_ids:
         tester.test_get_lead_by_id(created_lead_ids[0])
 
-    # Test 6: Update lead status (simulate pipeline progression)
+    # Test 7: Update lead status (simulate pipeline progression)
     if created_lead_ids:
         print("\n🔄 Testing Lead Status Updates...")
         statuses = ["Qualified", "Proposal", "Negotiation", "Won"]
@@ -615,7 +658,7 @@ def main():
             if i < len(created_lead_ids):
                 tester.test_update_lead(created_lead_ids[i], {"status": status})
 
-    # Test 7: Create tasks
+    # Test 8: Create tasks
     print("\n📋 Testing Task Management...")
     
     test_tasks = [
@@ -649,25 +692,25 @@ def main():
         if success:
             created_task_ids.append(response['id'])
 
-    # Test 8: Get all tasks
+    # Test 9: Get all tasks
     tester.test_get_tasks()
 
-    # Test 9: Update task status
+    # Test 10: Update task status
     if created_task_ids:
         print("\n✅ Testing Task Status Updates...")
         tester.test_update_task(created_task_ids[0], {"status": "In Progress"})
         if len(created_task_ids) > 1:
             tester.test_update_task(created_task_ids[1], {"status": "Completed"})
 
-    # Test 10: Dashboard stats after changes
+    # Test 11: Dashboard stats after changes
     print("\n📊 Testing Dashboard Stats After Changes...")
     tester.test_dashboard_stats()
 
-    # Test 11: Error handling - invalid lead ID
+    # Test 12: Error handling - invalid lead ID
     print("\n🚫 Testing Error Handling...")
     tester.run_test("Get Invalid Lead", "GET", "leads/invalid-id", 404)
 
-    # Test 12: Delete a lead
+    # Test 13: Delete a lead
     if created_lead_ids:
         print("\n🗑️ Testing Lead Deletion...")
         tester.test_delete_lead(created_lead_ids[-1])
