@@ -598,6 +598,156 @@ async def update_user_permissions(user_id: str, new_permissions: List[str], db) 
     except Exception as e:
         return False
 
+# Email Functions
+async def send_password_reset_email(email: str, reset_token: str, user_name: str = "User"):
+    """Send password reset email"""
+    try:
+        # Create reset link (in production, use your domain)
+        reset_link = f"https://aavana-ai-hub.preview.emergentagent.com/reset-password?token={reset_token}"
+        
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #10b981, #059669); padding: 30px; text-align: center; color: white; border-radius: 10px 10px 0 0; }}
+                .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .button {{ display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; }}
+                .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🌿 Aavana Greens</h1>
+                    <p>Password Reset Request</p>
+                </div>
+                <div class="content">
+                    <h2>Hello {user_name},</h2>
+                    <p>We received a request to reset your password for your Aavana Greens CRM account.</p>
+                    <p>Click the button below to reset your password:</p>
+                    <p style="text-align: center; margin: 30px 0;">
+                        <a href="{reset_link}" class="button">Reset Password</a>
+                    </p>
+                    <p><strong>This link will expire in 1 hour.</strong></p>
+                    <p>If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
+                    <p>For security reasons, this link can only be used once.</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 Aavana Greens CRM. All rights reserved.</p>
+                    <p>This is an automated message, please do not reply.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        text_body = f"""
+        Aavana Greens - Password Reset Request
+        
+        Hello {user_name},
+        
+        We received a request to reset your password for your Aavana Greens CRM account.
+        
+        Please click on the following link to reset your password:
+        {reset_link}
+        
+        This link will expire in 1 hour.
+        
+        If you didn't request this password reset, please ignore this email.
+        
+        © 2024 Aavana Greens CRM
+        """
+        
+        message = MessageSchema(
+            subject="Reset Your Aavana Greens Password",
+            recipients=[email],
+            body=text_body,
+            html=html_body,
+            subtype=MessageType.html
+        )
+        
+        await fastmail.send_message(message)
+        return True
+        
+    except Exception as e:
+        print(f"Failed to send password reset email: {str(e)}")
+        return False
+
+async def send_welcome_email(email: str, user_name: str, username: str, temporary_password: str = None):
+    """Send welcome email to new users"""
+    try:
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #10b981, #059669); padding: 30px; text-align: center; color: white; border-radius: 10px 10px 0 0; }}
+                .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .credentials {{ background: #e6f7ff; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+                .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🌿 Welcome to Aavana Greens!</h1>
+                    <p>Your CRM Account is Ready</p>
+                </div>
+                <div class="content">
+                    <h2>Hello {user_name},</h2>
+                    <p>Welcome to Aavana Greens CRM! Your account has been successfully created.</p>
+                    
+                    <div class="credentials">
+                        <h3>Your Login Credentials:</h3>
+                        <p><strong>Username:</strong> {username}</p>
+                        <p><strong>Email:</strong> {email}</p>
+                        {"<p><strong>Temporary Password:</strong> " + temporary_password + "</p>" if temporary_password else ""}
+                    </div>
+                    
+                    <p>Please log in to your account and {"change your password" if temporary_password else "explore the features"}:</p>
+                    <p style="text-align: center; margin: 30px 0;">
+                        <a href="https://aavana-ai-hub.preview.emergentagent.com" style="display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Login to Your Account</a>
+                    </p>
+                    
+                    <h3>What you can do:</h3>
+                    <ul>
+                        <li>Manage leads and customer relationships</li>
+                        <li>Track tasks and follow-ups</li>
+                        <li>Use AI-powered insights</li>
+                        <li>Generate reports and analytics</li>
+                        <li>Collaborate with your team</li>
+                    </ul>
+                    
+                    <p>If you have any questions, please contact your administrator.</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 Aavana Greens CRM. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        message = MessageSchema(
+            subject="Welcome to Aavana Greens CRM!",
+            recipients=[email],
+            body=f"Welcome to Aavana Greens CRM, {user_name}! Your username is: {username}",
+            html=html_body,
+            subtype=MessageType.html
+        )
+        
+        await fastmail.send_message(message)
+        return True
+        
+    except Exception as e:
+        print(f"Failed to send welcome email: {str(e)}")
+        return False
+
 # Helper functions
 def prepare_for_mongo(data):
     if isinstance(data, dict):
