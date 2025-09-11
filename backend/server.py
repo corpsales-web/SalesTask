@@ -2805,12 +2805,15 @@ async def phone_login(phone_data: PhoneLogin):
 
 @api_router.post("/auth/forgot-password")
 async def forgot_password(reset_data: PasswordReset):
-    """Request password reset"""
+    """Request password reset with email notification"""
     try:
         existing_user = await db.users.find_one({"email": reset_data.email})
+        
+        # Always return success message to prevent email enumeration
+        success_message = "If the email exists in our system, a password reset link has been sent."
+        
         if not existing_user:
-            # Don't reveal if email exists
-            return {"message": "If the email exists, a reset link has been sent"}
+            return {"message": success_message}
         
         # Generate reset token
         reset_token = generate_reset_token()
@@ -2825,12 +2828,21 @@ async def forgot_password(reset_data: PasswordReset):
             }}
         )
         
-        # In production, send email with reset link
-        # await send_password_reset_email(existing_user["email"], reset_token)
+        # Send password reset email
+        email_sent = await send_password_reset_email(
+            existing_user["email"], 
+            reset_token, 
+            existing_user.get("full_name", "User")
+        )
+        
+        if not email_sent:
+            # Log the error but don't reveal it to user
+            print(f"Failed to send password reset email to {existing_user['email']}")
         
         return {
-            "message": "If the email exists, a reset link has been sent",
-            "demo_token": reset_token  # Remove in production
+            "message": success_message,
+            "email_sent": email_sent,
+            "demo_token": reset_token if os.environ.get('ENVIRONMENT') == 'development' else None
         }
         
     except Exception as e:
