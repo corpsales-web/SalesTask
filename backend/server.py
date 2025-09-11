@@ -202,6 +202,31 @@ def parse_from_mongo(item):
                     pass
     return item
 
+def make_json_safe(data):
+    """Convert data to JSON-safe format by handling datetime objects"""
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            if isinstance(value, datetime):
+                result[key] = value.isoformat()
+            elif isinstance(value, dict):
+                result[key] = make_json_safe(value)
+            elif isinstance(value, list):
+                result[key] = [make_json_safe(item) if isinstance(item, (dict, list)) else 
+                              item.isoformat() if isinstance(item, datetime) else item 
+                              for item in value]
+            else:
+                result[key] = value
+        return result
+    elif isinstance(data, list):
+        return [make_json_safe(item) if isinstance(item, (dict, list)) else 
+                item.isoformat() if isinstance(item, datetime) else item 
+                for item in data]
+    elif isinstance(data, datetime):
+        return data.isoformat()
+    else:
+        return data
+
 # Routes
 @api_router.get("/")
 async def root():
