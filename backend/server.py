@@ -581,6 +581,9 @@ async def ai_proposal_generator(lead_id: str, service_type: str):
                 "category": "Individual",
                 "notes": "Interested in complete balcony transformation with green solutions"
             }
+        else:
+            # Parse MongoDB data to remove ObjectId
+            lead = parse_from_mongo(lead)
         
         proposal_prompt = f"""
         Generate a comprehensive proposal for Aavana Greens client:
