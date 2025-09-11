@@ -786,12 +786,14 @@ const App = () => {
                     Add Lead
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto pointer-events-auto">
                   <DialogHeader>
                     <DialogTitle>Add New Lead</DialogTitle>
                     <DialogDescription>Create a new lead with comprehensive information</DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={createLead} className="space-y-4">
+                  <form onSubmit={createLead} className="space-y-4 pointer-events-auto"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {/* Basic Information */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
