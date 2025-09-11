@@ -497,7 +497,7 @@ async def ai_lead_scoring(lead_id: str):
         scoring_prompt = f"""
         Analyze this lead for Aavana Greens and provide AI-powered lead scoring:
         
-        Lead Data: {json.dumps(lead)}
+        Lead Data: {json.dumps(make_json_safe(lead))}
         
         Please provide:
         1. Lead Score (0-100)
