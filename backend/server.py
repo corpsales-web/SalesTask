@@ -3204,6 +3204,219 @@ async def check_user_permission(
         "user_role": current_user.role
     }
 
+# Project Types Management Routes
+@api_router.get("/project-types", response_model=List[ProjectTypeResponse])
+async def get_project_types(
+    active_only: bool = True,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get all project types"""
+    try:
+        # Check permissions
+        if not hasPermission(current_user.role, current_user.permissions, "system:config"):
+            # Allow all users to view active project types
+            query = {"is_active": True} if active_only else {}
+        else:
+            # Admins can see all project types
+            query = {"is_active": True} if active_only else {}
+        
+        project_types = await db.project_types.find(query).sort("sort_order", 1).to_list(length=None)
+        
+        result = []
+        for pt in project_types:
+            pt_obj = ProjectType(**parse_from_mongo(pt))
+            result.append(ProjectTypeResponse(**pt_obj.dict()))
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve project types: {str(e)}")
+
+@api_router.post("/project-types", response_model=ProjectTypeResponse)
+async def create_project_type(
+    project_type_data: ProjectTypeCreate,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Create a new project type (admin only)"""
+    try:
+        # Check permissions
+        if not hasPermission(current_user.role, current_user.permissions, "system:config"):
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        # Check if project type name already exists
+        existing = await db.project_types.find_one({
+            "name": {"$regex": f"^{project_type_data.name}$", "$options": "i"},
+            "is_active": True
+        })
+        
+        if existing:
+            raise HTTPException(status_code=400, detail="Project type with this name already exists")
+        
+        # Create project type
+        project_type_dict = project_type_data.dict()
+        project_type_dict["created_by"] = current_user.id
+        
+        project_type = ProjectType(**project_type_dict)
+        project_type_dict = prepare_for_mongo(project_type.dict())
+        
+        await db.project_types.insert_one(project_type_dict)
+        
+        return ProjectTypeResponse(**project_type.dict())
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Project type creation failed: {str(e)}")
+
+@api_router.put("/project-types/{project_type_id}", response_model=ProjectTypeResponse)
+async def update_project_type(
+    project_type_id: str,
+    project_type_update: ProjectTypeUpdate,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Update a project type (admin only)"""
+    try:
+        # Check permissions
+        if not hasPermission(current_user.role, current_user.permissions, "system:config"):
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        # Check if project type exists
+        existing = await db.project_types.find_one({"id": project_type_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Project type not found")
+        
+        # If updating name, check for duplicates
+        if project_type_update.name:
+            duplicate = await db.project_types.find_one({
+                "name": {"$regex": f"^{project_type_update.name}$", "$options": "i"},
+                "id": {"$ne": project_type_id},
+                "is_active": True
+            })
+            
+            if duplicate:
+                raise HTTPException(status_code=400, detail="Project type with this name already exists")
+        
+        # Update project type
+        update_data = {k: v for k, v in project_type_update.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.now(timezone.utc)
+        update_data = prepare_for_mongo(update_data)
+        
+        result = await db.project_types.update_one(
+            {"id": project_type_id}, 
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Project type not found")
+        
+        # Get updated project type
+        updated_pt = await db.project_types.find_one({"id": project_type_id})
+        pt_obj = ProjectType(**parse_from_mongo(updated_pt))
+        
+        return ProjectTypeResponse(**pt_obj.dict())
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Project type update failed: {str(e)}")
+
+@api_router.delete("/project-types/{project_type_id}")
+async def delete_project_type(
+    project_type_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Delete a project type (soft delete - admin only)"""
+    try:
+        # Check permissions
+        if not hasPermission(current_user.role, current_user.permissions, "system:config"):
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        # Soft delete by setting is_active to False
+        result = await db.project_types.update_one(
+            {"id": project_type_id},
+            {"$set": {
+                "is_active": False,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Project type not found")
+        
+        return {"message": "Project type deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Project type deletion failed: {str(e)}")
+
+@api_router.post("/project-types/bulk-create")
+async def bulk_create_project_types(
+    project_types_data: List[ProjectTypeCreate],
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Bulk create project types (admin only)"""
+    try:
+        # Check permissions
+        if not hasPermission(current_user.role, current_user.permissions, "system:config"):
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        created_types = []
+        errors = []
+        
+        for i, pt_data in enumerate(project_types_data):
+            try:
+                # Check if name already exists
+                existing = await db.project_types.find_one({
+                    "name": {"$regex": f"^{pt_data.name}$", "$options": "i"},
+                    "is_active": True
+                })
+                
+                if existing:
+                    errors.append(f"Row {i+1}: Project type '{pt_data.name}' already exists")
+                    continue
+                
+                # Create project type
+                project_type_dict = pt_data.dict()
+                project_type_dict["created_by"] = current_user.id
+                
+                project_type = ProjectType(**project_type_dict)
+                project_type_dict = prepare_for_mongo(project_type.dict())
+                
+                await db.project_types.insert_one(project_type_dict)
+                created_types.append(ProjectTypeResponse(**project_type.dict()))
+                
+            except Exception as e:
+                errors.append(f"Row {i+1}: {str(e)}")
+        
+        return {
+            "created_count": len(created_types),
+            "error_count": len(errors),
+            "created_types": created_types,
+            "errors": errors
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Bulk creation failed: {str(e)}")
+
+def hasPermission(user_role: str, user_permissions: List[str], required_permission: str) -> bool:
+    """Helper function to check if user has specific permission"""
+    # Super Admin always has access
+    if user_role == "Super Admin":
+        return True
+    
+    # Admin has most permissions except user deletion
+    if user_role == "Admin" and required_permission != "users:delete":
+        return True
+    
+    # Check custom permissions
+    if user_permissions and required_permission in user_permissions:
+        return True
+    
+    return False
+
 # Include the router in the main app
 app.include_router(api_router)
 
