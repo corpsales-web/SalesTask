@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Progress } from "./components/ui/progress";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
+import ResizeObserverErrorBoundary from "./components/ResizeObserverErrorBoundary";
 import { 
   Users, 
   TrendingUp, 
