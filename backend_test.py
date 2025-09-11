@@ -179,6 +179,369 @@ class AavanaGreensCRMTester:
         }
         return self.run_test("Aavana 2.0 WhatsApp Integration", "POST", "aavana/whatsapp", 200, data=mock_whatsapp_data)
 
+    # Admin Panel Authentication Tests
+    def test_user_registration_valid(self):
+        """Test user registration with valid data"""
+        user_data = {
+            "username": "testuser123",
+            "email": "testuser@example.com",
+            "phone": "9876543210",
+            "full_name": "Test User",
+            "role": "Employee",
+            "password": "SecurePass123!",
+            "department": "Sales"
+        }
+        success, response = self.run_test("User Registration (Valid)", "POST", "auth/register", 200, data=user_data)
+        if success and 'access_token' in response:
+            self.auth_token = response['access_token']
+            self.test_user_id = response.get('user', {}).get('id')
+            return True, response
+        return False, {}
+
+    def test_user_registration_duplicate(self):
+        """Test user registration with duplicate username/email"""
+        user_data = {
+            "username": "testuser123",  # Same as above
+            "email": "testuser@example.com",  # Same as above
+            "phone": "9876543211",
+            "full_name": "Duplicate User",
+            "role": "Employee",
+            "password": "SecurePass123!"
+        }
+        return self.run_test("User Registration (Duplicate)", "POST", "auth/register", 400, data=user_data)
+
+    def test_user_registration_invalid_email(self):
+        """Test user registration with invalid email format"""
+        user_data = {
+            "username": "testuser456",
+            "email": "invalid-email-format",
+            "phone": "9876543212",
+            "full_name": "Invalid Email User",
+            "role": "Employee",
+            "password": "SecurePass123!"
+        }
+        return self.run_test("User Registration (Invalid Email)", "POST", "auth/register", 422, data=user_data)
+
+    def test_user_registration_missing_fields(self):
+        """Test user registration with missing required fields"""
+        user_data = {
+            "username": "testuser789",
+            # Missing email, full_name, password
+            "phone": "9876543213",
+            "role": "Employee"
+        }
+        return self.run_test("User Registration (Missing Fields)", "POST", "auth/register", 422, data=user_data)
+
+    def test_user_login_username(self):
+        """Test user login with username/password"""
+        login_data = {
+            "identifier": "testuser123",
+            "password": "SecurePass123!"
+        }
+        success, response = self.run_test("User Login (Username)", "POST", "auth/login", 200, data=login_data)
+        if success and 'access_token' in response:
+            self.auth_token = response['access_token']
+            return True, response
+        return False, {}
+
+    def test_user_login_email(self):
+        """Test user login with email/password"""
+        login_data = {
+            "identifier": "testuser@example.com",
+            "password": "SecurePass123!"
+        }
+        success, response = self.run_test("User Login (Email)", "POST", "auth/login", 200, data=login_data)
+        if success and 'access_token' in response:
+            self.auth_token = response['access_token']
+            return True, response
+        return False, {}
+
+    def test_user_login_phone(self):
+        """Test user login with phone/password"""
+        login_data = {
+            "identifier": "9876543210",
+            "password": "SecurePass123!"
+        }
+        success, response = self.run_test("User Login (Phone)", "POST", "auth/login", 200, data=login_data)
+        if success and 'access_token' in response:
+            self.auth_token = response['access_token']
+            return True, response
+        return False, {}
+
+    def test_user_login_invalid_credentials(self):
+        """Test user login with invalid credentials"""
+        login_data = {
+            "identifier": "testuser123",
+            "password": "WrongPassword123!"
+        }
+        return self.run_test("User Login (Invalid Credentials)", "POST", "auth/login", 401, data=login_data)
+
+    def test_phone_login_otp_generation(self):
+        """Test phone-based login OTP generation"""
+        phone_data = {
+            "phone": "9876543210"
+            # No OTP field - should generate OTP
+        }
+        return self.run_test("Phone Login (OTP Generation)", "POST", "auth/phone-login", 200, data=phone_data)
+
+    def test_phone_login_otp_verification(self):
+        """Test phone-based login OTP verification"""
+        phone_data = {
+            "phone": "9876543210",
+            "otp": "123456"  # Mock OTP
+        }
+        return self.run_test("Phone Login (OTP Verification)", "POST", "auth/phone-login", 200, data=phone_data)
+
+    def test_phone_login_invalid_otp(self):
+        """Test phone-based login with invalid OTP"""
+        phone_data = {
+            "phone": "9876543210",
+            "otp": "000000"  # Invalid OTP
+        }
+        return self.run_test("Phone Login (Invalid OTP)", "POST", "auth/phone-login", 400, data=phone_data)
+
+    def test_forgot_password_request(self):
+        """Test forgot password request"""
+        forgot_data = {
+            "email": "testuser@example.com"
+        }
+        return self.run_test("Forgot Password Request", "POST", "auth/forgot-password", 200, data=forgot_data)
+
+    def test_reset_password_valid_token(self):
+        """Test reset password with valid token"""
+        reset_data = {
+            "token": "mock_reset_token_123",
+            "new_password": "NewSecurePass123!"
+        }
+        return self.run_test("Reset Password (Valid Token)", "POST", "auth/reset-password", 200, data=reset_data)
+
+    def test_reset_password_invalid_token(self):
+        """Test reset password with invalid/expired token"""
+        reset_data = {
+            "token": "invalid_token_xyz",
+            "new_password": "NewSecurePass123!"
+        }
+        return self.run_test("Reset Password (Invalid Token)", "POST", "auth/reset-password", 400, data=reset_data)
+
+    def test_get_current_user_valid_token(self):
+        """Test getting current user profile with valid token"""
+        if not hasattr(self, 'auth_token'):
+            print("⚠️ Skipping test - no auth token available")
+            return False, {}
+        
+        headers = {'Authorization': f'Bearer {self.auth_token}'}
+        url = f"{self.base_url}/auth/me"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Get Current User (Valid Token)...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.get(url, headers=headers)
+            success = response.status_code == 200
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                try:
+                    response_data = response.json()
+                    print(f"   Response: User profile retrieved")
+                    return True, response_data
+                except:
+                    return True, {}
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                try:
+                    error_data = response.json()
+                    print(f"   Error: {error_data}")
+                except:
+                    print(f"   Error: {response.text}")
+                return False, {}
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_get_current_user_invalid_token(self):
+        """Test getting current user profile with invalid token"""
+        headers = {'Authorization': 'Bearer invalid_token_xyz'}
+        url = f"{self.base_url}/auth/me"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Get Current User (Invalid Token)...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.get(url, headers=headers)
+            success = response.status_code == 401
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                return True, {}
+            else:
+                print(f"❌ Failed - Expected 401, got {response.status_code}")
+                return False, {}
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_get_users_list(self):
+        """Test getting users list (requires authentication)"""
+        if not hasattr(self, 'auth_token'):
+            print("⚠️ Skipping test - no auth token available")
+            return False, {}
+        
+        headers = {'Authorization': f'Bearer {self.auth_token}'}
+        url = f"{self.base_url}/users"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Get Users List...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.get(url, headers=headers)
+            success = response.status_code == 200
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                try:
+                    response_data = response.json()
+                    print(f"   Response: List with {len(response_data)} users")
+                    return True, response_data
+                except:
+                    return True, {}
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                try:
+                    error_data = response.json()
+                    print(f"   Error: {error_data}")
+                except:
+                    print(f"   Error: {response.text}")
+                return False, {}
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_create_user_admin(self):
+        """Test creating new user (admin only)"""
+        if not hasattr(self, 'auth_token'):
+            print("⚠️ Skipping test - no auth token available")
+            return False, {}
+        
+        user_data = {
+            "username": "newemployee123",
+            "email": "newemployee@example.com",
+            "phone": "9876543214",
+            "full_name": "New Employee",
+            "role": "Employee",
+            "password": "SecurePass123!",
+            "department": "Marketing"
+        }
+        
+        headers = {'Authorization': f'Bearer {self.auth_token}', 'Content-Type': 'application/json'}
+        url = f"{self.base_url}/users"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Create User (Admin)...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.post(url, json=user_data, headers=headers)
+            success = response.status_code in [200, 201]
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                try:
+                    response_data = response.json()
+                    if 'id' in response_data:
+                        self.created_user_id = response_data['id']
+                    return True, response_data
+                except:
+                    return True, {}
+            else:
+                print(f"❌ Failed - Expected 200/201, got {response.status_code}")
+                try:
+                    error_data = response.json()
+                    print(f"   Error: {error_data}")
+                except:
+                    print(f"   Error: {response.text}")
+                return False, {}
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_update_user(self):
+        """Test updating user information"""
+        if not hasattr(self, 'auth_token') or not hasattr(self, 'created_user_id'):
+            print("⚠️ Skipping test - no auth token or user ID available")
+            return False, {}
+        
+        update_data = {
+            "full_name": "Updated Employee Name",
+            "department": "Sales",
+            "status": "Active"
+        }
+        
+        headers = {'Authorization': f'Bearer {self.auth_token}', 'Content-Type': 'application/json'}
+        url = f"{self.base_url}/users/{self.created_user_id}"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Update User...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.put(url, json=update_data, headers=headers)
+            success = response.status_code == 200
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                return True, {}
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                try:
+                    error_data = response.json()
+                    print(f"   Error: {error_data}")
+                except:
+                    print(f"   Error: {response.text}")
+                return False, {}
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_delete_user_admin(self):
+        """Test deleting user (admin only)"""
+        if not hasattr(self, 'auth_token') or not hasattr(self, 'created_user_id'):
+            print("⚠️ Skipping test - no auth token or user ID available")
+            return False, {}
+        
+        headers = {'Authorization': f'Bearer {self.auth_token}'}
+        url = f"{self.base_url}/users/{self.created_user_id}"
+        
+        self.tests_run += 1
+        print(f"\n🔍 Testing Delete User (Admin)...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.delete(url, headers=headers)
+            success = response.status_code == 200
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                return True, {}
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                try:
+                    error_data = response.json()
+                    print(f"   Error: {error_data}")
+                except:
+                    print(f"   Error: {response.text}")
+                return False, {}
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_unauthorized_access(self):
+        """Test accessing protected endpoints without authentication"""
+        return self.run_test("Unauthorized Access to Users", "GET", "users", 401)
+
 def main():
     print("🚀 Starting Aavana Greens CRM API Tests")
     print("=" * 50)
