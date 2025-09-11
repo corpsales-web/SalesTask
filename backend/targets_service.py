@@ -47,8 +47,8 @@ class Target(BaseModel):
     period: TargetPeriod
     target_value: float
     current_value: float = 0.0
-    start_date: datetime
-    end_date: datetime
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
     created_by: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
