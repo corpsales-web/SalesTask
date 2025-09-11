@@ -2162,7 +2162,7 @@ async def track_site_visit(event_id: str, gps_coordinates: str):
         raise HTTPException(status_code=500, detail=f"GPS tracking failed: {str(e)}")
 
 # Authentication Routes
-@api_router.post("/auth/register", response_model=User)
+@api_router.post("/auth/register", response_model=UserResponse)
 async def register_user(user_data: UserCreate):
     """Register a new user"""
     try:
@@ -2193,7 +2193,10 @@ async def register_user(user_data: UserCreate):
         user_dict = prepare_for_mongo(user.dict())
         await db.users.insert_one(user_dict)
         
-        return user
+        # Return user response without sensitive fields
+        user_response_data = {k: v for k, v in user.dict().items() 
+                             if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
+        return UserResponse(**user_response_data)
     except HTTPException:
         raise
     except Exception as e:
