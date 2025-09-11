@@ -162,6 +162,182 @@ const App = () => {
     });
   };
 
+  // Authentication & User Management Functions
+  const login = async (credentials) => {
+    try {
+      const response = await axios.post(`${API}/auth/login`, credentials);
+      const { access_token, user } = response.data;
+      
+      setAuthToken(access_token);
+      setCurrentUser(user);
+      localStorage.setItem('authToken', access_token);
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${user.full_name}!`
+      });
+      
+      setShowLoginModal(false);
+      setLoginData({ identifier: "", password: "" });
+      
+      // Load users if admin
+      if (user.role === 'Super Admin' || user.role === 'Admin' || user.role === 'HR Manager') {
+        loadUsers();
+      }
+      
+      return true;
+    } catch (error) {
+      toast({
+        title: "Login Failed",
+        description: error.response?.data?.detail || "Invalid credentials",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const logout = () => {
+    setAuthToken(null);
+    setCurrentUser(null);
+    setUsers([]);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+    
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out"
+    });
+  };
+
+  const loadUsers = async () => {
+    if (!authToken) return;
+    
+    try {
+      const response = await axios.get(`${API}/users`, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+      if (error.response?.status === 401) {
+        logout();
+      }
+    }
+  };
+
+  const createUser = async (userData) => {
+    if (!authToken) return false;
+    
+    try {
+      const response = await axios.post(`${API}/users`, userData, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      
+      toast({
+        title: "User Created",
+        description: `${userData.full_name} has been successfully created`
+      });
+      
+      setShowAddUserModal(false);
+      setNewUser({
+        username: "",
+        email: "",
+        phone: "",
+        full_name: "",
+        role: "Employee",
+        department: "",
+        password: ""
+      });
+      
+      // Reload users list
+      loadUsers();
+      return true;
+    } catch (error) {
+      toast({
+        title: "Failed to Create User",
+        description: error.response?.data?.detail || "User creation failed",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const deleteUser = async (userId, userName) => {
+    if (!authToken) return false;
+    
+    try {
+      await axios.delete(`${API}/users/${userId}`, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      
+      toast({
+        title: "User Deleted",
+        description: `${userName} has been successfully deleted`
+      });
+      
+      // Reload users list
+      loadUsers();
+      return true;
+    } catch (error) {
+      toast({
+        title: "Failed to Delete User",
+        description: error.response?.data?.detail || "User deletion failed",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const updateUserStatus = async (userId, newStatus) => {
+    if (!authToken) return false;
+    
+    try {
+      await axios.put(`${API}/users/${userId}`, { status: newStatus }, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      
+      toast({
+        title: "User Status Updated",
+        description: `Status changed to ${newStatus}`
+      });
+      
+      // Reload users list
+      loadUsers();
+      return true;
+    } catch (error) {
+      toast({
+        title: "Failed to Update Status",
+        description: error.response?.data?.detail || "Status update failed",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  // Load current user from localStorage on app start
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    const storedToken = localStorage.getItem('authToken');
+    
+    if (storedUser && storedToken) {
+      try {
+        const user = JSON.parse(storedUser);
+        setCurrentUser(user);
+        setAuthToken(storedToken);
+        
+        // Load users if admin
+        if (user.role === 'Super Admin' || user.role === 'Admin' || user.role === 'HR Manager') {
+          loadUsers();
+        }
+      } catch (error) {
+        // Clear invalid stored data
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken');
+      }
+    }
+  }, []);
+
   // Location Management
   const handleLocationChange = () => {
     if (selectedState && selectedCity) {
