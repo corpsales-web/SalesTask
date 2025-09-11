@@ -461,7 +461,7 @@ async def recall_client_context(client_id: str, query: str = ""):
             "query": query or "Provide complete client context and interaction history"
         }
         
-        result = await ai_service.recall_client_context(client_id, json.dumps(context))
+        result = await ai_service.recall_client_context(client_id, json.dumps(make_json_safe(context)))
         return {"context": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Context recall failed: {str(e)}")
