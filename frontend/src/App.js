@@ -1831,10 +1831,13 @@ const App = () => {
                 AI
               </TabsTrigger>
             )}
-            <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-              <Settings className="h-3 w-3 mr-1" />
-              Admin
-            </TabsTrigger>
+            {/* Admin Tab - Only show if user has admin access */}
+            {currentUser && hasAdminAccess(currentUser) && (
+              <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+                <Settings className="h-3 w-3 mr-1" />
+                Admin
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Dashboard Tab */}
