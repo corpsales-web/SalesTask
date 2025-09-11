@@ -2145,6 +2145,365 @@ async def track_site_visit(event_id: str, gps_coordinates: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"GPS tracking failed: {str(e)}")
 
+# Authentication Routes
+@api_router.post("/auth/register", response_model=User)
+async def register_user(user_data: UserCreate):
+    """Register a new user"""
+    try:
+        # Check if user already exists
+        existing_user = await db.users.find_one({
+            "$or": [
+                {"username": user_data.username},
+                {"email": user_data.email},
+                {"phone": user_data.phone} if user_data.phone else {}
+            ]
+        })
+        
+        if existing_user:
+            raise HTTPException(
+                status_code=400, 
+                detail="User with this username, email, or phone already exists"
+            )
+        
+        # Hash the password
+        hashed_password = hash_password(user_data.password)
+        
+        # Create user
+        user_dict = user_data.dict()
+        user_dict.pop("password")  # Remove plain password
+        user_dict["password_hash"] = hashed_password
+        
+        user = User(**user_dict)
+        user_dict = prepare_for_mongo(user.dict())
+        await db.users.insert_one(user_dict)
+        
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"User registration failed: {str(e)}")
+
+@api_router.post("/auth/login", response_model=TokenResponse)
+async def login_user(login_data: UserLogin):
+    """Authenticate user and return access token"""
+    try:
+        # Find user by username, email, or phone
+        user = await db.users.find_one({
+            "$or": [
+                {"username": login_data.identifier},
+                {"email": login_data.identifier},
+                {"phone": login_data.identifier}
+            ]
+        })
+        
+        if not user or not verify_password(login_data.password, user["password_hash"]):
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid credentials"
+            )
+        
+        # Check if user is active
+        if user.get("status") != UserStatus.ACTIVE:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Account is {user.get('status', 'inactive').lower()}"
+            )
+        
+        # Update last login
+        await db.users.update_one(
+            {"id": user["id"]}, 
+            {"$set": {"last_login": datetime.now(timezone.utc)}}
+        )
+        
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user["id"], "username": user["username"]},
+            expires_delta=access_token_expires
+        )
+        
+        user_obj = User(**parse_from_mongo(user))
+        
+        return TokenResponse(
+            access_token=access_token,
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            user=user_obj
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
+
+@api_router.post("/auth/phone-login")
+async def phone_login(phone_data: PhoneLogin):
+    """Phone-based authentication (simplified for demo)"""
+    try:
+        if not phone_data.otp:
+            # Generate OTP and send via SMS (demo implementation)
+            otp = str(secrets.randbelow(999999)).zfill(6)
+            
+            # In production, send SMS via Exotel/Twilio
+            # await telephony_service.send_sms(phone_data.phone, f"Your Aavana Greens OTP is: {otp}")
+            
+            # For demo, store OTP in temporary collection with expiry
+            await db.temp_otps.insert_one({
+                "phone": phone_data.phone,
+                "otp": otp,
+                "expires_at": datetime.now(timezone.utc) + timedelta(minutes=5)
+            })
+            
+            return {"message": "OTP sent successfully", "demo_otp": otp}  # Remove demo_otp in production
+        
+        else:
+            # Verify OTP
+            otp_record = await db.temp_otps.find_one({
+                "phone": phone_data.phone,
+                "otp": phone_data.otp,
+                "expires_at": {"$gt": datetime.now(timezone.utc)}
+            })
+            
+            if not otp_record:
+                raise HTTPException(status_code=401, detail="Invalid or expired OTP")
+            
+            # Find or create user
+            user = await db.users.find_one({"phone": phone_data.phone})
+            if not user:
+                # Create new user with phone
+                user_data = {
+                    "username": f"user_{phone_data.phone}",
+                    "email": f"{phone_data.phone}@phone.login",
+                    "phone": phone_data.phone,
+                    "full_name": f"User {phone_data.phone}",
+                    "role": UserRole.EMPLOYEE,
+                    "status": UserStatus.ACTIVE,
+                    "password_hash": hash_password(secrets.token_urlsafe(16))  # Random password
+                }
+                
+                user = User(**user_data)
+                user_dict = prepare_for_mongo(user.dict())
+                await db.users.insert_one(user_dict)
+                user = user_dict
+            
+            # Create access token
+            access_token = create_access_token(data={"sub": user["id"], "username": user["username"]})
+            
+            # Clean up OTP
+            await db.temp_otps.delete_one({"_id": otp_record["_id"]})
+            
+            user_obj = User(**parse_from_mongo(user))
+            
+            return TokenResponse(
+                access_token=access_token,
+                expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+                user=user_obj
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Phone login failed: {str(e)}")
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(reset_data: PasswordReset):
+    """Request password reset"""
+    try:
+        user = await db.users.find_one({"email": reset_data.email})
+        if not user:
+            # Don't reveal if email exists
+            return {"message": "If the email exists, a reset link has been sent"}
+        
+        # Generate reset token
+        reset_token = generate_reset_token()
+        reset_expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        
+        # Update user with reset token
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": {
+                "reset_token": reset_token,
+                "reset_token_expires": reset_expires
+            }}
+        )
+        
+        # In production, send email with reset link
+        # await send_password_reset_email(user["email"], reset_token)
+        
+        return {
+            "message": "If the email exists, a reset link has been sent",
+            "demo_token": reset_token  # Remove in production
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Password reset failed: {str(e)}")
+
+@api_router.post("/auth/reset-password")
+async def reset_password(reset_data: PasswordResetConfirm):
+    """Confirm password reset"""
+    try:
+        user = await db.users.find_one({
+            "reset_token": reset_data.token,
+            "reset_token_expires": {"$gt": datetime.now(timezone.utc)}
+        })
+        
+        if not user:
+            raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+        
+        # Hash new password
+        new_password_hash = hash_password(reset_data.new_password)
+        
+        # Update user password and clear reset token
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": {
+                "password_hash": new_password_hash,
+                "reset_token": None,
+                "reset_token_expires": None,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+        
+        return {"message": "Password reset successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Password reset confirmation failed: {str(e)}")
+
+# User Management Routes
+@api_router.get("/users", response_model=List[User])
+async def get_users(current_user: User = Depends(get_current_user), limit: int = 100):
+    """Get all users (requires authentication)"""
+    try:
+        # Check if user has permission to view users
+        if current_user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.HR_MANAGER]:
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        users = await db.users.find({}).limit(limit).to_list(length=limit)
+        return [User(**parse_from_mongo(user)) for user in users]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve users: {str(e)}")
+
+@api_router.get("/users/{user_id}", response_model=User)
+async def get_user(user_id: str, current_user: User = Depends(get_current_user)):
+    """Get specific user details"""
+    try:
+        # Users can view their own profile or admins can view any profile
+        if user_id != current_user.id and current_user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.HR_MANAGER]:
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        user = await db.users.find_one({"id": user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return User(**parse_from_mongo(user))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve user: {str(e)}")
+
+@api_router.post("/users", response_model=User)
+async def create_user(user_data: UserCreate, current_user: User = Depends(get_current_user)):
+    """Create a new user (admin only)"""
+    try:
+        # Check permissions
+        if current_user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.HR_MANAGER]:
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        # Check if user already exists
+        existing_user = await db.users.find_one({
+            "$or": [
+                {"username": user_data.username},
+                {"email": user_data.email},
+                {"phone": user_data.phone} if user_data.phone else {}
+            ]
+        })
+        
+        if existing_user:
+            raise HTTPException(
+                status_code=400, 
+                detail="User with this username, email, or phone already exists"
+            )
+        
+        # Hash the password
+        hashed_password = hash_password(user_data.password)
+        
+        # Create user
+        user_dict = user_data.dict()
+        user_dict.pop("password")  # Remove plain password
+        user_dict["password_hash"] = hashed_password
+        user_dict["created_by"] = current_user.id
+        
+        user = User(**user_dict)
+        user_dict = prepare_for_mongo(user.dict())
+        await db.users.insert_one(user_dict)
+        
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"User creation failed: {str(e)}")
+
+@api_router.put("/users/{user_id}", response_model=User)
+async def update_user(user_id: str, user_update: UserUpdate, current_user: User = Depends(get_current_user)):
+    """Update user information"""
+    try:
+        # Users can update their own profile or admins can update any profile
+        if user_id != current_user.id and current_user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.HR_MANAGER]:
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        # Non-admin users can't change role or status
+        if user_id == current_user.id and current_user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
+            if user_update.role is not None or user_update.status is not None:
+                raise HTTPException(status_code=403, detail="Cannot change role or status")
+        
+        update_data = {k: v for k, v in user_update.dict().items() if v is not None}
+        if not update_data:
+            raise HTTPException(status_code=400, detail="No data to update")
+        
+        update_data["updated_at"] = datetime.now(timezone.utc)
+        update_data = prepare_for_mongo(update_data)
+        
+        result = await db.users.update_one({"id": user_id}, {"$set": update_data})
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        user = await db.users.find_one({"id": user_id})
+        return User(**parse_from_mongo(user))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"User update failed: {str(e)}")
+
+@api_router.delete("/users/{user_id}")
+async def delete_user(user_id: str, current_user: User = Depends(get_current_user)):
+    """Delete a user (admin only)"""
+    try:
+        # Check permissions
+        if current_user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+        
+        # Prevent self-deletion
+        if user_id == current_user.id:
+            raise HTTPException(status_code=400, detail="Cannot delete your own account")
+        
+        result = await db.users.delete_one({"id": user_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {"message": "User deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"User deletion failed: {str(e)}")
+
+@api_router.get("/auth/me", response_model=User)
+async def get_current_user_profile(current_user: User = Depends(get_current_user)):
+    """Get current authenticated user's profile"""
+    return current_user
+
 # Include the router in the main app
 app.include_router(api_router)
 
