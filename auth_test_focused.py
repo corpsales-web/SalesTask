@@ -9,10 +9,10 @@ def test_auth_flow():
     # Test 1: Register a new user
     print("\n1. Testing User Registration...")
     user_data = {
-        "username": "authtest456",
-        "email": "authtest456@example.com",
-        "phone": "9876543216",
-        "full_name": "Auth Test User 2",
+        "username": "authtest789",
+        "email": "authtest789@example.com",
+        "phone": "9876543217",
+        "full_name": "Auth Test User 3",
         "role": "Employee",
         "password": "SecurePass123!",
         "department": "Testing"
