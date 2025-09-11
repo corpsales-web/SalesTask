@@ -2242,11 +2242,13 @@ async def login_user(login_data: UserLogin):
         )
         
         user_obj = User(**parse_from_mongo(user))
+        user_response_data = {k: v for k, v in user_obj.dict().items() 
+                             if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
         
         return TokenResponse(
             access_token=access_token,
             expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            user=user_obj
+            user=UserResponse(**user_response_data)
         )
     except HTTPException:
         raise
