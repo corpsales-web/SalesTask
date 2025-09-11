@@ -239,9 +239,25 @@ class User(BaseModel):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_login: Optional[datetime] = None
     created_by: Optional[str] = None
-    password_hash: str = Field(exclude=True)  # Exclude from API responses
-    reset_token: Optional[str] = Field(default=None, exclude=True)
-    reset_token_expires: Optional[datetime] = Field(default=None, exclude=True)
+    password_hash: str  # Keep for database operations
+    reset_token: Optional[str] = Field(default=None)
+    reset_token_expires: Optional[datetime] = Field(default=None)
+
+class UserResponse(BaseModel):
+    """User model for API responses (excludes sensitive fields)"""
+    id: str
+    username: str
+    email: EmailStr
+    phone: Optional[str] = None
+    full_name: str
+    role: UserRole = UserRole.EMPLOYEE
+    status: UserStatus = UserStatus.PENDING
+    department: Optional[str] = None
+    permissions: List[str] = []
+    created_at: datetime
+    updated_at: datetime
+    last_login: Optional[datetime] = None
+    created_by: Optional[str] = None
 
 class UserCreate(BaseModel):
     username: str
