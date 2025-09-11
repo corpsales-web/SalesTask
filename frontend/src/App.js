@@ -14,6 +14,7 @@ import { Progress } from "./components/ui/progress";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
 import ResizeObserverErrorBoundary from "./components/ResizeObserverErrorBoundary";
+import { suppressResizeObserverErrors, handleUncaughtResizeObserverErrors } from "./utils/suppressResizeObserverErrors";
 import { 
   Users, 
   TrendingUp, 
