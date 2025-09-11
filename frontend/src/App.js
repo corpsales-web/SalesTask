@@ -1671,12 +1671,13 @@ const App = () => {
                     <div>
                       <Label>Location *</Label>
                       <div className="space-y-3">
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <Button
                             type="button"
                             variant={!isCustomLocation ? "default" : "outline"}
                             size="sm"
                             onClick={() => setIsCustomLocation(false)}
+                            className="flex-1"
                           >
                             Select from List
                           </Button>
@@ -1685,6 +1686,7 @@ const App = () => {
                             variant={isCustomLocation ? "default" : "outline"}
                             size="sm"
                             onClick={() => setIsCustomLocation(true)}
+                            className="flex-1"
                           >
                             Enter Manually
                           </Button>
