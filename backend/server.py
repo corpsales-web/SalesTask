@@ -2524,8 +2524,8 @@ async def delete_user(user_id: str, current_user: User = Depends(get_current_use
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"User deletion failed: {str(e)}")
 
-@api_router.get("/auth/me", response_model=User)
-async def get_current_user_profile(current_user: User = Depends(get_current_user)):
+@api_router.get("/auth/me", response_model=UserResponse)
+async def get_current_user_profile(current_user: UserResponse = Depends(get_current_user)):
     """Get current authenticated user's profile"""
     return current_user
 
