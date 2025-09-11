@@ -287,7 +287,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Panel Frontend - User Management Integration"
+    - "All high priority tasks completed"
   stuck_tasks:
     - "ResizeObserver visual errors (non-functional issue)"
   test_all: false
