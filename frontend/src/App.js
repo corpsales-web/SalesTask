@@ -1918,10 +1918,27 @@ const App = () => {
     // Note: ResizeObserver error handling is now managed by unified handler in index.js
     // This ensures consistent error suppression across all browsers and environments
     
-    return () => {
-      // Cleanup on unmount if needed
+    // Set up online/offline listeners for target queue processing
+    const handleOnline = () => {
+      console.log('Application back online - processing offline target queue');
+      if (authToken) {
+        processOfflineTargetQueue();
+      }
     };
-  }, []);
+    
+    const handleOffline = () => {
+      console.log('Application offline - targets will be queued locally');
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      // Cleanup listeners on unmount
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [authToken]); // Re-run when auth token changes
 
   useEffect(() => {
     const loadData = async () => {
