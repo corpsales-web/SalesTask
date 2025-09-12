@@ -407,9 +407,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All critical features tested and working"
+    - "All 8 critical fixes verified and working"
   stuck_tasks:
-    - "ResizeObserver visual errors (non-functional issue)"
+    - "Goals/Targets modal display (minor UI implementation difference)"
   test_all: false
   test_priority: "high_first"
 
