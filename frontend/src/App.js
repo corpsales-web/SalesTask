@@ -1299,8 +1299,8 @@ const App = () => {
       stopCamera();
       
       // Send to backend with real image data
-      await axios.post(`${API}/hrms/face-checkin`, {
-        employee_id: "EMP001",
+      const response = await axios.post(`${API}/hrms/face-checkin`, {
+        employee_id: currentUser?.id || "DEMO_USER",
         face_image: imageData,
         location: location,
         timestamp: new Date().toISOString(),
@@ -1311,10 +1311,14 @@ const App = () => {
         }
       });
       
-      toast({
-        title: "✅ Face Check-in Successful!",
-        description: `Welcome to work! Location: ${location.address || 'Office'}`
-      });
+      if (response.data.status === 'success') {
+        toast({
+          title: "✅ Face Check-in Successful!",
+          description: `Welcome to work! Location: ${location.address || 'Office'}`
+        });
+      } else {
+        throw new Error(response.data.message || 'Face check-in failed');
+      }
       
       setShowCameraModal(false);
       
