@@ -1720,97 +1720,13 @@ const App = () => {
     }
   };
 
-  // Fix ResizeObserver loop errors with comprehensive error handling
+  // Enhanced error handling and data fetching
   useEffect(() => {
-    // Comprehensive ResizeObserver error suppression
-    const originalError = console.error;
-    const originalWarn = console.warn;
+    // Note: ResizeObserver error handling is now managed by unified handler in index.js
+    // This ensures consistent error suppression across all browsers and environments
     
-    // Override console methods to filter ResizeObserver errors
-    console.error = (...args) => {
-      const message = args[0];
-      if (
-        typeof message === 'string' &&
-        (message.includes('ResizeObserver loop completed with undelivered notifications') ||
-         message.includes('ResizeObserver loop limit exceeded'))
-      ) {
-        return; // Suppress ResizeObserver errors
-      }
-      originalError.apply(console, args);
-    };
-
-    console.warn = (...args) => {
-      const message = args[0];
-      if (
-        typeof message === 'string' &&
-        message.includes('ResizeObserver')
-      ) {
-        return; // Suppress ResizeObserver warnings
-      }
-      originalWarn.apply(console, args);
-    };
-
-    // Global error event handler
-    const handleError = (event) => {
-      if (event.error && event.error.message) {
-        const message = event.error.message;
-        if (message.includes('ResizeObserver loop completed with undelivered notifications') ||
-            message.includes('ResizeObserver loop limit exceeded')) {
-          event.preventDefault();
-          event.stopPropagation();
-          return false;
-        }
-      }
-      if (event.message) {
-        if (event.message.includes('ResizeObserver loop completed with undelivered notifications') ||
-            event.message.includes('ResizeObserver loop limit exceeded')) {
-          event.preventDefault();
-          event.stopPropagation();
-          return false;
-        }
-      }
-    };
-
-    // Global unhandled rejection handler
-    const handleUnhandledRejection = (event) => {
-      if (event.reason && event.reason.message) {
-        const message = event.reason.message;
-        if (message.includes('ResizeObserver')) {
-          event.preventDefault();
-          return false;
-        }
-      }
-    };
-
-    // Override window.onerror
-    const originalOnError = window.onerror;
-    window.onerror = (message, source, lineno, colno, error) => {
-      if (typeof message === 'string' && message.includes('ResizeObserver loop completed with undelivered notifications')) {
-        return true; // Prevent default error handling
-      }
-      return originalOnError ? originalOnError(message, source, lineno, colno, error) : false;
-    };
-
-    // Add event listeners
-    window.addEventListener('error', handleError, true);
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
-    // Override React error boundary handling for ResizeObserver
-    const originalReportError = window.reportError || console.error;
-    window.reportError = (error) => {
-      if (error && error.message && error.message.includes('ResizeObserver')) {
-        return; // Suppress ResizeObserver errors in React error boundaries
-      }
-      originalReportError(error);
-    };
-
     return () => {
-      // Cleanup
-      console.error = originalError;
-      console.warn = originalWarn;
-      window.onerror = originalOnError;
-      window.removeEventListener('error', handleError, true);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      // Cleanup on unmount if needed
     };
   }, []);
 
