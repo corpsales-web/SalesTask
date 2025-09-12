@@ -1658,7 +1658,16 @@ const App = () => {
       
       if (isOnline) {
         try {
-          response = await axios.post(`${API}/targets/create`, targetPayload, { headers });
+          // Convert to query parameters as expected by backend
+          const queryParams = new URLSearchParams({
+            user_id: targetPayload.user_id,
+            target_type: targetPayload.target_type,
+            period: targetPayload.period,
+            target_value: targetPayload.target_value.toString(),
+            created_by: targetPayload.created_by
+          });
+          
+          response = await axios.post(`${API}/targets/create?${queryParams}`, {}, { headers });
           
           // Success - clear any offline queue for this target type
           await clearOfflineTargetQueue(data.target_type, data.period);
