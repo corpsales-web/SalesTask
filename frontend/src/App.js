@@ -1449,27 +1449,46 @@ const App = () => {
     }
   };
 
+  // Leave Management State
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [leaveForm, setLeaveForm] = useState({
+    type: "Sick Leave",
+    start_date: "",
+    end_date: "",
+    reason: ""
+  });
+
   const handleApplyLeave = async () => {
     try {
       const leaveData = {
-        employee_id: "EMP001",
-        leave_type: "Casual",
-        start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 24*60*60*1000).toISOString(),
-        days_count: 1,
-        reason: "Personal work"
+        employee_id: currentUser?.id || "DEMO_USER",
+        type: leaveForm.type,
+        start_date: leaveForm.start_date,
+        end_date: leaveForm.end_date,
+        reason: leaveForm.reason || "Personal work"
       };
       
-      await axios.post(`${API}/hrms/apply-leave`, leaveData);
+      const response = await axios.post(`${API}/hrms/apply-leave`, leaveData);
+      
       toast({
-        title: "Success",
-        description: "Leave application submitted successfully."
+        title: "✅ Leave Application Submitted",
+        description: `${leaveForm.type} request from ${leaveForm.start_date} to ${leaveForm.end_date} has been submitted for approval.`
       });
+      
+      // Reset form and close modal
+      setLeaveForm({
+        type: "Sick Leave",
+        start_date: "",
+        end_date: "",
+        reason: ""
+      });
+      setShowLeaveModal(false);
+      
     } catch (error) {
       console.error("Error applying leave:", error);
       toast({
         title: "Error",
-        description: "Failed to submit leave application.",
+        description: error.response?.data?.detail || "Failed to submit leave application.",
         variant: "destructive"
       });
     }
