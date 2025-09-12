@@ -1614,35 +1614,219 @@ const App = () => {
     monthly: { sales: { target: 300000, achieved: 75000 }, leads: { target: 150, achieved: 45 }, tasks: { target: 300, achieved: 120 } }
   });
 
-  const createTarget = async (targetType, period, value) => {
+  const createTarget = async (targetData = null) => {
     try {
+      // Use form data if no targetData provided
+      const data = targetData || newTargetForm;
+      
+      // Validate required fields
+      if (!data.target_type || !data.period || !data.target_value) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields",
+          variant: "destructive"
+        });
+        return false;
+      }
+
       const headers = {};
       if (authToken) {
         headers.Authorization = `Bearer ${authToken}`;
       }
-      
-      const response = await axios.post(`${API}/targets/create`, {
+
+      // Prepare target creation payload
+      const targetPayload = {
         user_id: currentUser?.id || "current_user",
-        target_type: targetType,
-        period: period,
-        target_value: value,
-        created_by: currentUser?.username || "frontend_user"
-      }, { headers });
+        target_type: data.target_type,
+        period: data.period,
+        target_value: parseFloat(data.target_value),
+        deadline: data.deadline || null,
+        reminder_frequency: data.reminder_frequency || "daily",
+        created_by: currentUser?.username || "frontend_user",
+        metadata: {
+          created_from: "frontend",
+          browser: navigator.userAgent,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      // Try online creation first
+      let response;
+      let isOnline = navigator.onLine;
       
-      toast({
-        title: "🎯 Target Created",
-        description: `${targetType} target set for ${period}: ₹${value}`
+      if (isOnline) {
+        try {
+          response = await axios.post(`${API}/targets/create`, targetPayload, { headers });
+          
+          // Success - clear any offline queue for this target type
+          await clearOfflineTargetQueue(data.target_type, data.period);
+          
+          toast({
+            title: "🎯 Target Created Successfully",
+            description: `${data.target_type.charAt(0).toUpperCase() + data.target_type.slice(1)} target set for ${data.period}: ${data.target_value}${data.target_type === 'sales' ? ' ₹' : ''}`
+          });
+
+          // Create reminder entry
+          await scheduleTargetReminder(response.data);
+          
+        } catch (networkError) {
+          console.warn("Network error, falling back to offline queue:", networkError);
+          isOnline = false; // Treat as offline
+        }
+      }
+
+      // Handle offline scenario
+      if (!isOnline) {
+        await queueTargetOffline(targetPayload);
+        
+        toast({
+          title: "🎯 Target Queued (Offline)",
+          description: `Target saved locally and will be created when connection is restored`,
+          variant: "warning"
+        });
+      }
+
+      // Reset form and close modal
+      setNewTargetForm({
+        target_type: "sales",
+        period: "daily", 
+        target_value: "",
+        deadline: "",
+        reminder_frequency: "daily"
       });
+      setShowCreateTargetModal(false);
       
+      // Refresh targets data
       await fetchTargetsData();
+      return true;
       
     } catch (error) {
       console.error("Error creating target:", error);
       toast({
-        title: "Error",
-        description: error.response?.data?.detail || "Failed to create target. Please try again.",
+        title: "Target Creation Failed",
+        description: error.response?.data?.detail || error.message || "Failed to create target. Please try again.",
         variant: "destructive"
       });
+      return false;
+    }
+  };
+
+  // Offline queueing functions
+  const queueTargetOffline = async (targetData) => {
+    try {
+      const offlineQueue = JSON.parse(localStorage.getItem('aavana_offline_targets') || '[]');
+      const queueItem = {
+        id: `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ...targetData,
+        queued_at: new Date().toISOString(),
+        status: 'pending'
+      };
+      
+      offlineQueue.push(queueItem);
+      localStorage.setItem('aavana_offline_targets', JSON.stringify(offlineQueue));
+      
+      console.log('Target queued offline:', queueItem);
+    } catch (error) {
+      console.error('Failed to queue target offline:', error);
+    }
+  };
+
+  const clearOfflineTargetQueue = async (targetType, period) => {
+    try {
+      const offlineQueue = JSON.parse(localStorage.getItem('aavana_offline_targets') || '[]');
+      const filteredQueue = offlineQueue.filter(item => 
+        !(item.target_type === targetType && item.period === period)
+      );
+      localStorage.setItem('aavana_offline_targets', JSON.stringify(filteredQueue));
+    } catch (error) {
+      console.error('Failed to clear offline queue:', error);
+    }
+  };
+
+  const processOfflineTargetQueue = async () => {
+    if (!navigator.onLine || !authToken) return;
+
+    try {
+      const offlineQueue = JSON.parse(localStorage.getItem('aavana_offline_targets') || '[]');
+      const pendingTargets = offlineQueue.filter(item => item.status === 'pending');
+      
+      if (pendingTargets.length === 0) return;
+
+      console.log(`Processing ${pendingTargets.length} offline targets...`);
+      
+      for (const target of pendingTargets) {
+        try {
+          const headers = { Authorization: `Bearer ${authToken}` };
+          const response = await axios.post(`${API}/targets/create`, target, { headers });
+          
+          // Mark as processed
+          target.status = 'completed';
+          target.processed_at = new Date().toISOString();
+          target.server_id = response.data.id;
+          
+          console.log('Offline target processed:', target.id);
+          
+        } catch (error) {
+          console.warn('Failed to process offline target:', target.id, error);
+          target.status = 'failed';
+          target.error = error.message;
+        }
+      }
+      
+      // Update offline queue
+      localStorage.setItem('aavana_offline_targets', JSON.stringify(offlineQueue));
+      
+      // Show success message
+      const completedCount = pendingTargets.filter(t => t.status === 'completed').length;
+      if (completedCount > 0) {
+        toast({
+          title: "📡 Offline Targets Synced",
+          description: `${completedCount} targets synchronized with server`
+        });
+      }
+      
+    } catch (error) {
+      console.error('Failed to process offline target queue:', error);
+    }
+  };
+
+  const scheduleTargetReminder = async (targetData) => {
+    try {
+      if (!targetData || !authToken) return;
+
+      const headers = { Authorization: `Bearer ${authToken}` };
+      const reminderPayload = {
+        target_id: targetData.id,
+        user_id: currentUser?.id || "current_user",
+        frequency: targetData.reminder_frequency || "daily",
+        next_reminder: calculateNextReminder(targetData.reminder_frequency),
+        message: `Reminder: Your ${targetData.target_type} target for ${targetData.period} is ${targetData.target_value}`,
+        is_active: true
+      };
+
+      await axios.post(`${API}/targets/schedule-reminder`, reminderPayload, { headers });
+      
+      console.log('Target reminder scheduled:', reminderPayload);
+      
+    } catch (error) {
+      console.warn('Failed to schedule reminder:', error);
+      // Don't show error to user as this is non-critical
+    }
+  };
+
+  const calculateNextReminder = (frequency) => {
+    const now = new Date();
+    switch (frequency) {
+      case 'hourly':
+        return new Date(now.getTime() + 60 * 60 * 1000);
+      case 'daily':
+        return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      case 'weekly':
+        return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      case 'monthly':
+        return new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      default:
+        return new Date(now.getTime() + 24 * 60 * 60 * 1000);
     }
   };
 
