@@ -4321,6 +4321,102 @@ const App = () => {
         </Button>
       </main>
       
+      {/* Leave Application Modal */}
+      {showLeaveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Apply for Leave</h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowLeaveModal(false)}
+                className="text-gray-500"
+              >
+                ✕
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="leave-type">Leave Type</Label>
+                <Select
+                  value={leaveForm.type}
+                  onValueChange={(value) => setLeaveForm({...leaveForm, type: value})}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select leave type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sick Leave">Sick Leave</SelectItem>
+                    <SelectItem value="Casual Leave">Casual Leave</SelectItem>
+                    <SelectItem value="Annual Leave">Annual Leave</SelectItem>
+                    <SelectItem value="Emergency Leave">Emergency Leave</SelectItem>
+                    <SelectItem value="Maternity Leave">Maternity Leave</SelectItem>
+                    <SelectItem value="Paternity Leave">Paternity Leave</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="start-date">Start Date</Label>
+                  <Input
+                    id="start-date"
+                    type="date"
+                    value={leaveForm.start_date}
+                    onChange={(e) => setLeaveForm({...leaveForm, start_date: e.target.value})}
+                    className="mt-1"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="end-date">End Date</Label>
+                  <Input
+                    id="end-date"
+                    type="date"
+                    value={leaveForm.end_date}
+                    onChange={(e) => setLeaveForm({...leaveForm, end_date: e.target.value})}
+                    className="mt-1"
+                    min={leaveForm.start_date || new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="reason">Reason</Label>
+                <Textarea
+                  id="reason"
+                  value={leaveForm.reason}
+                  onChange={(e) => setLeaveForm({...leaveForm, reason: e.target.value})}
+                  placeholder="Please provide reason for leave..."
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={() => setShowLeaveModal(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleApplyLeave}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  disabled={!leaveForm.start_date || !leaveForm.end_date}
+                >
+                  Submit Application
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Login Modal */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
