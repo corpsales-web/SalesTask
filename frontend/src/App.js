@@ -1492,6 +1492,7 @@ const App = () => {
 
   // Targets & Progress State
   const [showTargets, setShowTargets] = useState(false);
+  const [showCreateTargetModal, setShowCreateTargetModal] = useState(false);
   const [targets, setTargets] = useState({
     daily: { sales: 10000, leads: 5, tasks: 10 },
     weekly: { sales: 70000, leads: 35, tasks: 70 },
@@ -1501,6 +1502,13 @@ const App = () => {
     daily: { sales: 0, leads: 0, tasks: 0 },
     weekly: { sales: 0, leads: 0, tasks: 0 },
     monthly: { sales: 0, leads: 0, tasks: 0 }
+  });
+  const [newTargetForm, setNewTargetForm] = useState({
+    target_type: "sales",
+    period: "daily",
+    target_value: "",
+    deadline: "",
+    reminder_frequency: "daily"
   });
 
   // Aavana 2.0 Chat Functions
