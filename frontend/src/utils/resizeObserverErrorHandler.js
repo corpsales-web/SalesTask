@@ -3,19 +3,14 @@
  * 
  * ROOT CAUSE: Multiple initializations + DOM timing issues during rapid viewport changes
  * SOLUTION: Singleton pattern + DOM timing controls + ResizeObserver polyfill fallback
- * 
- * Features:
- * - Prevents multiple initializations (singleton with global check)
- * - Debounced ResizeObserver callbacks to prevent loops
- * - Custom ResizeObserver polyfill for problematic scenarios
- * - DOM timing controls to prevent rapid layout thrashing
- * - Browser-specific optimizations
  */
 
 // Global singleton check to prevent multiple instances
-if (window.__AAVANA_RESIZE_OBSERVER_HANDLER_INITIALIZED__) {
-  console.warn('[ResizeObserver] Handler already exists globally - skipping initialization');
-  export default window.__AAVANA_RESIZE_OBSERVER_HANDLER__;
+let permanentHandler = null;
+
+if (typeof window !== 'undefined' && window.__AAVANA_RESIZE_OBSERVER_HANDLER__) {
+  console.debug('[ResizeObserver] Using existing global handler');
+  permanentHandler = window.__AAVANA_RESIZE_OBSERVER_HANDLER__;
 } else {
 
 class PermanentResizeObserverHandler {
@@ -23,7 +18,7 @@ class PermanentResizeObserverHandler {
     this.isInitialized = false;
     this.suppressedCount = 0;
     this.debounceTimers = new Map();
-    this.originalResizeObserver = window.ResizeObserver;
+    this.originalResizeObserver = typeof window !== 'undefined' ? window.ResizeObserver : null;
     this.originalConsoleError = console.error;
     this.originalConsoleWarn = console.warn;
     
@@ -32,7 +27,9 @@ class PermanentResizeObserverHandler {
     this.isDevelopment = process.env.NODE_ENV === 'development';
     
     // Mark as global singleton
-    window.__AAVANA_RESIZE_OBSERVER_HANDLER__ = this;
+    if (typeof window !== 'undefined') {
+      window.__AAVANA_RESIZE_OBSERVER_HANDLER__ = this;
+    }
   }
 
   detectBrowser() {
@@ -180,6 +177,8 @@ class PermanentResizeObserverHandler {
   }
 
   setupWindowErrorHandlers() {
+    if (typeof window === 'undefined') return;
+
     // Global error handler
     window.addEventListener('error', (event) => {
       if (this.isResizeObserverError(event.error, event.message)) {
@@ -201,14 +200,15 @@ class PermanentResizeObserverHandler {
   }
 
   setupResizeObserverPolyfill() {
+    if (typeof window === 'undefined') return;
+
     // Replace ResizeObserver with our safe version
     const SafeResizeObserver = this.createSafeResizeObserver();
     
     if (SafeResizeObserver) {
       window.ResizeObserver = SafeResizeObserver;
       
-      // Also handle any existing instances
-      if (window.ResizeObserver !== this.originalResizeObserver) {
+      if (this.isDevelopment) {
         this.logSuppression('polyfill-installed', 'Safe ResizeObserver polyfill active');
       }
     }
@@ -251,7 +251,7 @@ class PermanentResizeObserverHandler {
 
     try {
       // Restore original ResizeObserver
-      if (this.originalResizeObserver) {
+      if (this.originalResizeObserver && typeof window !== 'undefined') {
         window.ResizeObserver = this.originalResizeObserver;
       }
       
@@ -264,8 +264,11 @@ class PermanentResizeObserverHandler {
       this.debounceTimers.clear();
 
       this.isInitialized = false;
-      delete window.__AAVANA_RESIZE_OBSERVER_HANDLER_INITIALIZED__;
-      delete window.__AAVANA_RESIZE_OBSERVER_HANDLER__;
+      
+      if (typeof window !== 'undefined') {
+        delete window.__AAVANA_RESIZE_OBSERVER_HANDLER_INITIALIZED__;
+        delete window.__AAVANA_RESIZE_OBSERVER_HANDLER__;
+      }
       
       if (this.isDevelopment) {
         console.info(`[ResizeObserver] Handler destroyed. Suppressed ${this.suppressedCount} errors.`);
@@ -286,8 +289,8 @@ class PermanentResizeObserverHandler {
   }
 }
 
-// Create and export singleton instance
-const permanentHandler = new PermanentResizeObserverHandler();
+// Create singleton instance
+permanentHandler = new PermanentResizeObserverHandler();
 
 // Auto-initialize
 if (typeof window !== 'undefined') {
@@ -299,6 +302,6 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export default permanentHandler;
-
 } // End of singleton check
+
+export default permanentHandler;
