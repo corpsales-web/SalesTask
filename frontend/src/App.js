@@ -2517,6 +2517,49 @@ const App = () => {
                       <DialogDescription>Add a new task to your workflow</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={createTask} className="space-y-4">
+                      {/* Voice Input Integration */}
+                      <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+                        <Label className="text-emerald-800 font-medium">🎤 Voice Input</Label>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Button
+                            type="button"
+                            onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                            variant={isRecording ? "destructive" : "outline"}
+                            size="sm"
+                            className="flex-shrink-0"
+                          >
+                            {isRecording ? <MicOff className="h-4 w-4 mr-1" /> : <Mic className="h-4 w-4 mr-1" />}
+                            {isRecording ? "Stop" : "Record"}
+                          </Button>
+                          {voiceInput && (
+                            <Button
+                              type="button"
+                              onClick={() => {
+                                // Auto-populate task fields from voice input
+                                const words = voiceInput.split(' ');
+                                const title = words.slice(0, 5).join(' '); // First 5 words as title
+                                const description = voiceInput; // Full voice input as description
+                                setNewTask({
+                                  ...newTask,
+                                  title: title || newTask.title,
+                                  description: description || newTask.description
+                                });
+                                setVoiceInput(""); // Clear voice input after use
+                              }}
+                              size="sm"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0"
+                            >
+                              Use Voice
+                            </Button>
+                          )}
+                        </div>
+                        {voiceInput && (
+                          <div className="mt-2 p-2 bg-white rounded border text-sm text-gray-700">
+                            <strong>Voice Input:</strong> {voiceInput}
+                          </div>
+                        )}
+                      </div>
+
                       <div>
                         <Label htmlFor="task-title">Title *</Label>
                         <Input
