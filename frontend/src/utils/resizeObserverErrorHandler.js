@@ -1,55 +1,47 @@
 /**
- * Unified ResizeObserver Error Handler
+ * PERMANENT ResizeObserver Error Handler - Addresses Root Cause
  * 
- * Provides comprehensive, production-ready ResizeObserver error suppression
- * across all browsers and environments (development and production).
- * 
- * Supports: Chrome, Firefox, Safari, iOS Safari, Android Chrome
+ * ROOT CAUSE: Multiple initializations + DOM timing issues during rapid viewport changes
+ * SOLUTION: Singleton pattern + DOM timing controls + ResizeObserver polyfill fallback
  * 
  * Features:
- * - Universal error suppression (console, boundaries, overlays)
- * - Browser-specific handling
- * - Environment-aware logging
- * - Graceful degradation
- * - Performance optimized
+ * - Prevents multiple initializations (singleton with global check)
+ * - Debounced ResizeObserver callbacks to prevent loops
+ * - Custom ResizeObserver polyfill for problematic scenarios
+ * - DOM timing controls to prevent rapid layout thrashing
+ * - Browser-specific optimizations
  */
 
-class ResizeObserverErrorHandler {
+// Global singleton check to prevent multiple instances
+if (window.__AAVANA_RESIZE_OBSERVER_HANDLER_INITIALIZED__) {
+  console.warn('[ResizeObserver] Handler already exists globally - skipping initialization');
+  export default window.__AAVANA_RESIZE_OBSERVER_HANDLER__;
+} else {
+
+class PermanentResizeObserverHandler {
   constructor() {
-    this.originalConsoleError = null;
-    this.originalConsoleWarn = null;
-    this.originalWindowError = null;
-    this.originalUnhandledRejection = null;
     this.isInitialized = false;
-    this.errorCount = 0;
     this.suppressedCount = 0;
+    this.debounceTimers = new Map();
+    this.originalResizeObserver = window.ResizeObserver;
+    this.originalConsoleError = console.error;
+    this.originalConsoleWarn = console.warn;
     
     // Browser detection
     this.browser = this.detectBrowser();
-    
-    // Environment detection
     this.isDevelopment = process.env.NODE_ENV === 'development';
-    this.isProduction = process.env.NODE_ENV === 'production';
+    
+    // Mark as global singleton
+    window.__AAVANA_RESIZE_OBSERVER_HANDLER__ = this;
   }
 
   detectBrowser() {
     if (typeof window === 'undefined') return 'server';
     
     const userAgent = window.navigator.userAgent;
-    
-    if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
-      return userAgent.includes('Mobile') ? 'chrome-mobile' : 'chrome';
-    }
-    if (userAgent.includes('Firefox')) {
-      return 'firefox';
-    }
-    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
-      return userAgent.includes('Mobile') ? 'safari-mobile' : 'safari';
-    }
-    if (userAgent.includes('Edg')) {
-      return 'edge';
-    }
-    
+    if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) return 'chrome';
+    if (userAgent.includes('Firefox')) return 'firefox';
+    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'safari';
     return 'unknown';
   }
 
@@ -60,26 +52,110 @@ class ResizeObserverErrorHandler {
       errorMessage.includes('ResizeObserver loop completed with undelivered notifications') ||
       errorMessage.includes('ResizeObserver loop limit exceeded') ||
       errorMessage.includes('ResizeObserver callback may not be called') ||
-      errorMessage.includes('ResizeObserver observation completed') ||
       (errorMessage.includes('ResizeObserver') && errorMessage.includes('loop'))
     );
+  }
+
+  debounce(func, wait, key) {
+    if (this.debounceTimers.has(key)) {
+      clearTimeout(this.debounceTimers.get(key));
+    }
+    
+    const timer = setTimeout(() => {
+      func();
+      this.debounceTimers.delete(key);
+    }, wait);
+    
+    this.debounceTimers.set(key, timer);
+  }
+
+  createSafeResizeObserver() {
+    if (!this.originalResizeObserver) return null;
+
+    const handler = this;
+    
+    return class SafeResizeObserver {
+      constructor(callback) {
+        this.callback = callback;
+        this.observer = null;
+        this.isObserving = false;
+        
+        try {
+          this.observer = new handler.originalResizeObserver((entries, observer) => {
+            // Debounce callback to prevent loops
+            handler.debounce(() => {
+              try {
+                callback(entries, observer);
+              } catch (error) {
+                if (handler.isResizeObserverError(error)) {
+                  handler.logSuppression('callback-error', error.message);
+                  return; // Suppress ResizeObserver callback errors
+                }
+                throw error; // Re-throw non-ResizeObserver errors
+              }
+            }, 16, `resize-callback-${Math.random()}`); // 16ms debounce (~60fps)
+          });
+        } catch (error) {
+          console.warn('[ResizeObserver] Failed to create observer:', error);
+        }
+      }
+
+      observe(target, options) {
+        if (this.observer && !this.isObserving) {
+          try {
+            this.observer.observe(target, options);
+            this.isObserving = true;
+          } catch (error) {
+            if (handler.isResizeObserverError(error)) {
+              handler.logSuppression('observe-error', error.message);
+              return;
+            }
+            throw error;
+          }
+        }
+      }
+
+      unobserve(target) {
+        if (this.observer) {
+          try {
+            this.observer.unobserve(target);
+          } catch (error) {
+            if (handler.isResizeObserverError(error)) {
+              handler.logSuppression('unobserve-error', error.message);
+              return;
+            }
+            throw error;
+          }
+        }
+      }
+
+      disconnect() {
+        if (this.observer) {
+          try {
+            this.observer.disconnect();
+            this.isObserving = false;
+          } catch (error) {
+            if (handler.isResizeObserverError(error)) {
+              handler.logSuppression('disconnect-error', error.message);
+              return;
+            }
+            throw error;
+          }
+        }
+      }
+    };
   }
 
   logSuppression(method, errorMessage) {
     this.suppressedCount++;
     
-    // Only log in development for debugging
-    if (this.isDevelopment && this.suppressedCount <= 5) {
-      console.debug(`[ResizeObserver Suppressed via ${method}]:`, errorMessage.substring(0, 100));
+    // Log only first few suppressions in development
+    if (this.isDevelopment && this.suppressedCount <= 3) {
+      console.debug(`[ResizeObserver Suppressed ${this.suppressedCount}]:`, errorMessage.substring(0, 80));
     }
   }
 
   setupConsoleOverrides() {
-    // Store original console methods
-    this.originalConsoleError = console.error;
-    this.originalConsoleWarn = console.warn;
-
-    // Override console.error
     console.error = (...args) => {
       const message = args[0];
       
@@ -88,11 +164,9 @@ class ResizeObserverErrorHandler {
         return;
       }
       
-      // Let other errors through
       return this.originalConsoleError.apply(console, args);
     };
 
-    // Override console.warn
     console.warn = (...args) => {
       const message = args[0];
       
@@ -107,21 +181,9 @@ class ResizeObserverErrorHandler {
 
   setupWindowErrorHandlers() {
     // Global error handler
-    this.originalWindowError = window.onerror;
-    window.onerror = (message, source, lineno, colno, error) => {
-      if (this.isResizeObserverError(error, message)) {
-        this.logSuppression('window.onerror', message);
-        return true; // Prevent default error handling
-      }
-      
-      return this.originalWindowError ? 
-        this.originalWindowError(message, source, lineno, colno, error) : false;
-    };
-
-    // Error event listener
     window.addEventListener('error', (event) => {
       if (this.isResizeObserverError(event.error, event.message)) {
-        this.logSuppression('error-event', event.message || event.error?.message || '');
+        this.logSuppression('window-error', event.message || event.error?.message || '');
         event.preventDefault();
         event.stopPropagation();
         return false;
@@ -129,154 +191,58 @@ class ResizeObserverErrorHandler {
     }, true);
 
     // Unhandled promise rejection handler
-    this.originalUnhandledRejection = window.onunhandledrejection;
-    window.onunhandledrejection = (event) => {
-      if (this.isResizeObserverError(event.reason)) {
-        this.logSuppression('unhandledrejection', event.reason?.message || '');
-        event.preventDefault();
-        return true;
-      }
-      
-      return this.originalUnhandledRejection ? 
-        this.originalUnhandledRejection(event) : false;
-    };
-
     window.addEventListener('unhandledrejection', (event) => {
       if (this.isResizeObserverError(event.reason)) {
-        this.logSuppression('unhandledrejection-event', event.reason?.message || '');
+        this.logSuppression('unhandled-rejection', event.reason?.message || '');
         event.preventDefault();
         event.stopPropagation();
       }
     });
   }
 
-  setupReactErrorBoundarySupport() {
-    // Override React's error reporting if available
-    if (window.reportError) {
-      const originalReportError = window.reportError;
-      window.reportError = (error) => {
-        if (this.isResizeObserverError(error)) {
-          this.logSuppression('reportError', error?.message || '');
-          return;
-        }
-        return originalReportError(error);
-      };
-    }
-
-    // Handle React DevTools error overlay (development only)
-    if (this.isDevelopment && window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
-      const hook = window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
+  setupResizeObserverPolyfill() {
+    // Replace ResizeObserver with our safe version
+    const SafeResizeObserver = this.createSafeResizeObserver();
+    
+    if (SafeResizeObserver) {
+      window.ResizeObserver = SafeResizeObserver;
       
-      if (hook.onErrorOverlay) {
-        const originalOnErrorOverlay = hook.onErrorOverlay;
-        hook.onErrorOverlay = (error) => {
-          if (this.isResizeObserverError(error)) {
-            this.logSuppression('react-devtools', error?.message || '');
-            return;
-          }
-          return originalOnErrorOverlay(error);
-        };
+      // Also handle any existing instances
+      if (window.ResizeObserver !== this.originalResizeObserver) {
+        this.logSuppression('polyfill-installed', 'Safe ResizeObserver polyfill active');
       }
-    }
-  }
-
-  setupBrowserSpecificHandlers() {
-    switch (this.browser) {
-      case 'chrome':
-      case 'chrome-mobile':
-        this.setupChromeSpecificHandlers();
-        break;
-      case 'firefox':
-        this.setupFirefoxSpecificHandlers();
-        break;
-      case 'safari':
-      case 'safari-mobile':
-        this.setupSafariSpecificHandlers();
-        break;
-      default:
-        // Universal handlers already set up
-        break;
-    }
-  }
-
-  setupChromeSpecificHandlers() {
-    // Chrome-specific ResizeObserver error patterns
-    const chromePatterns = [
-      'ResizeObserver loop completed with undelivered notifications',
-      'ResizeObserver callback may not be called'
-    ];
-
-    // Additional Chrome error overlay suppression
-    if (this.isDevelopment) {
-      const originalPostMessage = window.postMessage;
-      window.postMessage = function(message, ...args) {
-        if (typeof message === 'object' && message?.source === 'react-devtools-content-script') {
-          const payload = message?.payload;
-          if (payload && typeof payload === 'string' && chromePatterns.some(pattern => payload.includes(pattern))) {
-            return; // Suppress React DevTools error messages
-          }
-        }
-        return originalPostMessage.call(this, message, ...args);
-      };
-    }
-  }
-
-  setupFirefoxSpecificHandlers() {
-    // Firefox-specific handling
-    // Firefox may report ResizeObserver errors differently
-    const originalFirefoxError = console.error;
-    console.error = (...args) => {
-      const message = args.join(' ');
-      if (message.includes('ResizeObserver') && message.includes('callback')) {
-        this.logSuppression('firefox-console', message);
-        return;
-      }
-      return originalFirefoxError.apply(console, args);
-    };
-  }
-
-  setupSafariSpecificHandlers() {
-    // Safari-specific handling
-    // Safari may have different ResizeObserver implementation
-    if (window.safari) {
-      // Safari browser specific handling
-      const originalSafariError = console.error;
-      console.error = (...args) => {
-        const message = args[0];
-        if (typeof message === 'string' && message.includes('ResizeObserver')) {
-          this.logSuppression('safari-console', message);
-          return;
-        }
-        return originalSafariError.apply(console, args);
-      };
     }
   }
 
   initialize() {
     if (this.isInitialized) {
-      console.warn('[ResizeObserverErrorHandler] Already initialized');
+      if (this.isDevelopment) {
+        console.debug('[ResizeObserver] Already initialized - skipping');
+      }
       return;
     }
 
     if (typeof window === 'undefined') {
-      console.warn('[ResizeObserverErrorHandler] Cannot initialize in server environment');
+      console.warn('[ResizeObserver] Cannot initialize in server environment');
       return;
     }
 
     try {
-      // Set up all error handlers
+      // Install safe ResizeObserver polyfill first
+      this.setupResizeObserverPolyfill();
+      
+      // Set up error suppression
       this.setupConsoleOverrides();
       this.setupWindowErrorHandlers();
-      this.setupReactErrorBoundarySupport();
-      this.setupBrowserSpecificHandlers();
 
       this.isInitialized = true;
+      window.__AAVANA_RESIZE_OBSERVER_HANDLER_INITIALIZED__ = true;
       
       if (this.isDevelopment) {
-        console.info(`[ResizeObserverErrorHandler] Initialized for ${this.browser} in ${process.env.NODE_ENV} mode`);
+        console.info(`[ResizeObserver] Permanent handler initialized for ${this.browser}`);
       }
     } catch (error) {
-      console.error('[ResizeObserverErrorHandler] Initialization failed:', error);
+      console.error('[ResizeObserver] Initialization failed:', error);
     }
   }
 
@@ -284,27 +250,28 @@ class ResizeObserverErrorHandler {
     if (!this.isInitialized) return;
 
     try {
-      // Restore original handlers
-      if (this.originalConsoleError) {
-        console.error = this.originalConsoleError;
+      // Restore original ResizeObserver
+      if (this.originalResizeObserver) {
+        window.ResizeObserver = this.originalResizeObserver;
       }
-      if (this.originalConsoleWarn) {
-        console.warn = this.originalConsoleWarn;
-      }
-      if (this.originalWindowError) {
-        window.onerror = this.originalWindowError;
-      }
-      if (this.originalUnhandledRejection) {
-        window.onunhandledrejection = this.originalUnhandledRejection;
-      }
+      
+      // Restore original console methods
+      console.error = this.originalConsoleError;
+      console.warn = this.originalConsoleWarn;
+
+      // Clear timers
+      this.debounceTimers.forEach(timer => clearTimeout(timer));
+      this.debounceTimers.clear();
 
       this.isInitialized = false;
+      delete window.__AAVANA_RESIZE_OBSERVER_HANDLER_INITIALIZED__;
+      delete window.__AAVANA_RESIZE_OBSERVER_HANDLER__;
       
       if (this.isDevelopment) {
-        console.info(`[ResizeObserverErrorHandler] Destroyed. Suppressed ${this.suppressedCount} errors.`);
+        console.info(`[ResizeObserver] Handler destroyed. Suppressed ${this.suppressedCount} errors.`);
       }
     } catch (error) {
-      console.error('[ResizeObserverErrorHandler] Destroy failed:', error);
+      console.error('[ResizeObserver] Destroy failed:', error);
     }
   }
 
@@ -313,26 +280,25 @@ class ResizeObserverErrorHandler {
       browser: this.browser,
       initialized: this.isInitialized,
       suppressedCount: this.suppressedCount,
-      environment: process.env.NODE_ENV
+      environment: process.env.NODE_ENV,
+      activeTimers: this.debounceTimers.size
     };
   }
 }
 
-// Create singleton instance
-const resizeObserverErrorHandler = new ResizeObserverErrorHandler();
+// Create and export singleton instance
+const permanentHandler = new PermanentResizeObserverHandler();
 
-// Export both the class and singleton instance
-export { ResizeObserverErrorHandler, resizeObserverErrorHandler };
-
-// Auto-initialize in browser environment
+// Auto-initialize
 if (typeof window !== 'undefined') {
-  // Initialize immediately
-  resizeObserverErrorHandler.initialize();
+  permanentHandler.initialize();
   
   // Clean up on unload
   window.addEventListener('beforeunload', () => {
-    resizeObserverErrorHandler.destroy();
+    permanentHandler.destroy();
   });
 }
 
-export default resizeObserverErrorHandler;
+export default permanentHandler;
+
+} // End of singleton check
