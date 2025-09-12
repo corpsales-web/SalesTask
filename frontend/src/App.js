@@ -4670,7 +4670,7 @@ const App = () => {
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select frequency" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[10000]">
                       <SelectItem value="hourly">⏰ Hourly</SelectItem>
                       <SelectItem value="daily">📅 Daily</SelectItem>
                       <SelectItem value="weekly">📊 Weekly</SelectItem>
