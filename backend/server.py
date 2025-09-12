@@ -3424,6 +3424,93 @@ def hasPermission(user_role: str, user_permissions: List[str], required_permissi
     
     return False
 
+# Target Reminder Management Routes
+@api_router.post("/targets/schedule-reminder")
+async def schedule_target_reminder(reminder_data: dict):
+    """Schedule reminder for a target"""
+    try:
+        reminder = {
+            "id": str(uuid.uuid4()),
+            "target_id": reminder_data.get("target_id"),
+            "user_id": reminder_data.get("user_id"),
+            "frequency": reminder_data.get("frequency", "daily"),
+            "next_reminder": reminder_data.get("next_reminder"),
+            "message": reminder_data.get("message"),
+            "is_active": reminder_data.get("is_active", True),
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        reminder_dict = prepare_for_mongo(reminder)
+        await db.target_reminders.insert_one(reminder_dict)
+        
+        return {
+            "id": reminder["id"],
+            "message": "Reminder scheduled successfully",
+            "next_reminder": reminder["next_reminder"],
+            "frequency": reminder["frequency"]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to schedule reminder: {str(e)}")
+
+@api_router.get("/targets/reminders/{user_id}")
+async def get_user_reminders(user_id: str):
+    """Get all reminders for a user"""
+    try:
+        reminders = await db.target_reminders.find({
+            "user_id": user_id,
+            "is_active": True
+        }).to_list(length=None)
+        
+        return [parse_from_mongo(reminder) for reminder in reminders]
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch reminders: {str(e)}")
+
+@api_router.put("/targets/reminders/{reminder_id}/process")
+async def process_reminder(reminder_id: str):
+    """Mark reminder as processed and schedule next one"""
+    try:
+        reminder = await db.target_reminders.find_one({"id": reminder_id})
+        if not reminder:
+            raise HTTPException(status_code=404, detail="Reminder not found")
+        
+        # Calculate next reminder time based on frequency
+        now = datetime.now(timezone.utc)
+        frequency = reminder.get("frequency", "daily")
+        
+        if frequency == "hourly":
+            next_reminder = now + timedelta(hours=1)
+        elif frequency == "daily":
+            next_reminder = now + timedelta(days=1)
+        elif frequency == "weekly":
+            next_reminder = now + timedelta(weeks=1)
+        elif frequency == "monthly":
+            next_reminder = now + timedelta(days=30)
+        else:
+            next_reminder = now + timedelta(days=1)
+        
+        # Update reminder
+        await db.target_reminders.update_one(
+            {"id": reminder_id},
+            {"$set": {
+                "last_sent": now,
+                "next_reminder": next_reminder,
+                "updated_at": now
+            }}
+        )
+        
+        return {
+            "message": "Reminder processed",
+            "next_reminder": next_reminder
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process reminder: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
