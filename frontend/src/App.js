@@ -558,8 +558,7 @@ const App = () => {
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [aiChatMessage, setAiChatMessage] = useState("");
   const [aiChatHistory, setAiChatHistory] = useState([]);
-  const [showAiChat, setShowAiChat] = useState(false);
-
+  
   // Fetch data functions
   const fetchDashboardStats = async () => {
     try {
