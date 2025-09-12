@@ -4458,6 +4458,35 @@ const App = () => {
                 />
               </div>
               
+              {/* Master Login Quick Access */}
+              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <p className="text-xs text-blue-700 font-medium mb-2">Quick Master Access:</p>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setLoginData({identifier: "master", password: "master123"});
+                    }}
+                    className="text-xs border-blue-300 hover:bg-blue-100"
+                  >
+                    Master Login
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setLoginData({identifier: "admin", password: "admin123"});
+                    }}
+                    className="text-xs border-green-300 hover:bg-green-100"
+                  >
+                    Admin Login
+                  </Button>
+                </div>
+              </div>
+              
               <div className="flex gap-2">
                 <Button
                   onClick={() => setShowLoginModal(false)}
