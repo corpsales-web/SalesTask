@@ -314,7 +314,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All high priority tasks completed and tested"
+    - "HRMS Face Check-in Error Fix"
   stuck_tasks:
     - "ResizeObserver visual errors (non-functional issue)"
   test_all: false
