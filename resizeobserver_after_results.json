@@ -1,0 +1,199 @@
+{
+  "timestamp": "2025-09-12T11:38:42.857Z",
+  "afterFix": true,
+  "unifiedHandler": true,
+  "browsers": {
+    "Chromium": {
+      "totalConsoleMessages": 7,
+      "resizeObserverConsoleErrors": 2,
+      "resizeObserverPageErrors": 0,
+      "allConsoleMessages": [
+        {
+          "type": "info",
+          "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+          "timestamp": "2025-09-12T11:38:43.761Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "info",
+          "text": "[ResizeObserverErrorHandler] Initialized for chrome in development mode",
+          "timestamp": "2025-09-12T11:38:43.806Z",
+          "isResizeObserver": true
+        },
+        {
+          "type": "warning",
+          "text": "[ResizeObserverErrorHandler] Already initialized",
+          "timestamp": "2025-09-12T11:38:43.807Z",
+          "isResizeObserver": true
+        },
+        {
+          "type": "log",
+          "text": "Core data loaded successfully",
+          "timestamp": "2025-09-12T11:38:44.215Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "log",
+          "text": "Core data loaded successfully",
+          "timestamp": "2025-09-12T11:38:44.601Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "log",
+          "text": "Additional data loaded in background",
+          "timestamp": "2025-09-12T11:38:45.302Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "log",
+          "text": "Additional data loaded in background",
+          "timestamp": "2025-09-12T11:38:45.565Z",
+          "isResizeObserver": false
+        }
+      ],
+      "resizeObserverErrors": [
+        {
+          "type": "info",
+          "text": "[ResizeObserverErrorHandler] Initialized for chrome in development mode",
+          "timestamp": "2025-09-12T11:38:43.806Z",
+          "isResizeObserver": true
+        },
+        {
+          "type": "warning",
+          "text": "[ResizeObserverErrorHandler] Already initialized",
+          "timestamp": "2025-09-12T11:38:43.807Z",
+          "isResizeObserver": true
+        }
+      ],
+      "testCompleted": true
+    },
+    "Firefox": {
+      "totalConsoleMessages": 8,
+      "resizeObserverConsoleErrors": 2,
+      "resizeObserverPageErrors": 0,
+      "allConsoleMessages": [
+        {
+          "type": "error",
+          "text": "[JavaScript Error: \"Cookie “dmn_chk_01993db8-9c09-7064-9d7d-8f2e92a1742b” has been rejected for invalid domain.\" {file: \"https://aavana-ai-hub.preview.emergentagent.com/\" line: 0}]",
+          "timestamp": "2025-09-12T11:38:52.889Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "info",
+          "text": "Download the React DevTools for a better development experience: https://react.dev/link/react-devtools",
+          "timestamp": "2025-09-12T11:38:53.037Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "info",
+          "text": "[ResizeObserverErrorHandler] Initialized for firefox in development mode",
+          "timestamp": "2025-09-12T11:38:53.114Z",
+          "isResizeObserver": true
+        },
+        {
+          "type": "warning",
+          "text": "[ResizeObserverErrorHandler] Already initialized",
+          "timestamp": "2025-09-12T11:38:53.114Z",
+          "isResizeObserver": true
+        },
+        {
+          "type": "log",
+          "text": "Core data loaded successfully",
+          "timestamp": "2025-09-12T11:38:53.806Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "log",
+          "text": "Core data loaded successfully",
+          "timestamp": "2025-09-12T11:38:53.809Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "log",
+          "text": "Additional data loaded in background",
+          "timestamp": "2025-09-12T11:38:54.951Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "log",
+          "text": "Additional data loaded in background",
+          "timestamp": "2025-09-12T11:38:55.099Z",
+          "isResizeObserver": false
+        }
+      ],
+      "resizeObserverErrors": [
+        {
+          "type": "info",
+          "text": "[ResizeObserverErrorHandler] Initialized for firefox in development mode",
+          "timestamp": "2025-09-12T11:38:53.114Z",
+          "isResizeObserver": true
+        },
+        {
+          "type": "warning",
+          "text": "[ResizeObserverErrorHandler] Already initialized",
+          "timestamp": "2025-09-12T11:38:53.114Z",
+          "isResizeObserver": true
+        }
+      ],
+      "testCompleted": true
+    },
+    "WebKit": {
+      "totalConsoleMessages": 6,
+      "resizeObserverConsoleErrors": 2,
+      "resizeObserverPageErrors": 0,
+      "allConsoleMessages": [
+        {
+          "type": "info",
+          "text": "[ResizeObserverErrorHandler] Initialized for safari in development mode",
+          "timestamp": "2025-09-12T11:39:01.417Z",
+          "isResizeObserver": true
+        },
+        {
+          "type": "warning",
+          "text": "[ResizeObserverErrorHandler] Already initialized",
+          "timestamp": "2025-09-12T11:39:01.417Z",
+          "isResizeObserver": true
+        },
+        {
+          "type": "log",
+          "text": "Core data loaded successfully",
+          "timestamp": "2025-09-12T11:39:01.815Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "log",
+          "text": "Core data loaded successfully",
+          "timestamp": "2025-09-12T11:39:01.815Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "log",
+          "text": "Additional data loaded in background",
+          "timestamp": "2025-09-12T11:39:04.313Z",
+          "isResizeObserver": false
+        },
+        {
+          "type": "log",
+          "text": "Additional data loaded in background",
+          "timestamp": "2025-09-12T11:39:04.401Z",
+          "isResizeObserver": false
+        }
+      ],
+      "resizeObserverErrors": [
+        {
+          "type": "info",
+          "text": "[ResizeObserverErrorHandler] Initialized for safari in development mode",
+          "timestamp": "2025-09-12T11:39:01.417Z",
+          "isResizeObserver": true
+        },
+        {
+          "type": "warning",
+          "text": "[ResizeObserverErrorHandler] Already initialized",
+          "timestamp": "2025-09-12T11:39:01.417Z",
+          "isResizeObserver": true
+        }
+      ],
+      "testCompleted": true
+    }
+  }
+}
