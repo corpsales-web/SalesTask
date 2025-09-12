@@ -50,7 +50,8 @@ import {
   Archive,
   Clock2,
   AlertTriangle,
-  Award
+  Award,
+  AlertCircle
 } from "lucide-react";
 
 // Import location and category data
