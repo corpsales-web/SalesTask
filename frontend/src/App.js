@@ -1506,7 +1506,7 @@ const App = () => {
     monthly: { sales: 0, leads: 0, tasks: 0 }
   });
   const [newTargetForm, setNewTargetForm] = useState({
-    target_type: "sales",
+    target_type: "sales_amount",
     period: "daily",
     target_value: "",
     deadline: "",
