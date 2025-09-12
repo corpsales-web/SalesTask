@@ -4609,11 +4609,9 @@ const App = () => {
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="sales">💰 Sales Revenue</SelectItem>
-                        <SelectItem value="leads">👤 New Leads</SelectItem>
-                        <SelectItem value="tasks">✅ Tasks Completed</SelectItem>
-                        <SelectItem value="calls">📞 Calls Made</SelectItem>
-                        <SelectItem value="meetings">🤝 Meetings</SelectItem>
+                        <SelectItem value="sales_amount">💰 Sales Revenue</SelectItem>
+                        <SelectItem value="leads_count">👤 New Leads</SelectItem>
+                        <SelectItem value="tasks_count">✅ Tasks Completed</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
