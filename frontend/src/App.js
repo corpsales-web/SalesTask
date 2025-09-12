@@ -1940,20 +1940,16 @@ const App = () => {
               <UserCheck className="h-3 w-3 mr-1" />
               HRMS
             </TabsTrigger>
-            {/* AI Tab - Only show if user has AI permissions */}
-            {currentUser && hasAIPermission(currentUser) && (
-              <TabsTrigger value="ai" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-                <Brain className="h-3 w-3 mr-1" />
-                AI
-              </TabsTrigger>
-            )}
-            {/* Admin Tab - Only show if user has admin access */}
-            {currentUser && hasAdminAccess(currentUser) && (
-              <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
-                <Settings className="h-3 w-3 mr-1" />
-                Admin
-              </TabsTrigger>
-            )}
+            {/* AI Tab - Show to all users, with enhanced features for authenticated users */}
+            <TabsTrigger value="ai" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+              <Brain className="h-3 w-3 mr-1" />
+              AI
+            </TabsTrigger>
+            {/* Admin Tab - Show to all users, but functionality requires authentication */}
+            <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+              <Settings className="h-3 w-3 mr-1" />
+              Admin
+            </TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
