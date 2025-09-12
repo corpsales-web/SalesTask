@@ -1934,6 +1934,11 @@ const App = () => {
         
         console.log("Core data loaded successfully");
         
+        // Process offline targets queue if online and authenticated
+        if (navigator.onLine && authToken) {
+          processOfflineTargetQueue();
+        }
+        
         // Set default data for ERP and HRMS to make tabs work immediately
         setProducts([{
           id: "default-1",
