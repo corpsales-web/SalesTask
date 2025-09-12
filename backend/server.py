@@ -3442,6 +3442,55 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_event():
+    """Create default users on startup if they don't exist"""
+    try:
+        # Create master user if doesn't exist
+        master_user = await db.users.find_one({"username": "master"})
+        if not master_user:
+            master_data = {
+                "username": "master",
+                "email": "master@aavanagreens.com",
+                "phone": "9999999999",
+                "full_name": "Master Administrator",
+                "role": UserRole.SUPER_ADMIN,
+                "status": UserStatus.ACTIVE,
+                "department": "Administration",
+                "permissions": [],
+                "password_hash": hash_password("master123"),
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc)
+            }
+            
+            master_user_obj = User(**master_data)
+            await db.users.insert_one(prepare_for_mongo(master_user_obj.dict()))
+            print("✅ Master user created: master/master123")
+        
+        # Create admin user if doesn't exist
+        admin_user = await db.users.find_one({"username": "admin"})
+        if not admin_user:
+            admin_data = {
+                "username": "admin",
+                "email": "admin@aavanagreens.com", 
+                "phone": "8888888888",
+                "full_name": "System Administrator",
+                "role": UserRole.ADMIN,
+                "status": UserStatus.ACTIVE,
+                "department": "Administration",
+                "permissions": [],
+                "password_hash": hash_password("admin123"),
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc)
+            }
+            
+            admin_user_obj = User(**admin_data)
+            await db.users.insert_one(prepare_for_mongo(admin_user_obj.dict()))
+            print("✅ Admin user created: admin/admin123")
+            
+    except Exception as e:
+        print(f"Error creating default users: {str(e)}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
