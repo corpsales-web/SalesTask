@@ -4443,6 +4443,256 @@ const App = () => {
             </div>
           )}
         </Button>
+
+        {/* Targets & Progress Panel */}
+        {showTargets && (
+          <div className="fixed bottom-24 left-6 w-96 h-[500px] bg-white border-2 border-blue-200 rounded-lg shadow-2xl z-[9998] flex flex-col">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-t-lg">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-bold text-lg flex items-center">
+                    <Target className="h-5 w-5 mr-2" />
+                    Targets & Progress
+                  </h3>
+                  <p className="text-xs opacity-90">Track your goals and achievements</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTargets(false)}
+                  className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                >
+                  ×
+                </Button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="space-y-4">
+                {/* Quick Actions */}
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowCreateTargetModal(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Create Target
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => fetchTargetsData()}
+                    className="border-blue-300 hover:bg-blue-50"
+                  >
+                    <Award className="h-4 w-4 mr-1" />
+                    Refresh
+                  </Button>
+                </div>
+
+                {/* Targets Display */}
+                {Object.entries(targetsData).map(([period, data]) => (
+                  <div key={period} className="bg-gray-50 rounded-lg p-3">
+                    <h4 className="font-medium text-gray-800 mb-3 capitalize flex items-center">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {period} Targets
+                    </h4>
+                    
+                    <div className="space-y-2">
+                      {Object.entries(data).map(([type, metrics]) => {
+                        const progress = metrics.achieved || 0;
+                        const target = metrics.target || 0;
+                        const percentage = target > 0 ? Math.round((progress / target) * 100) : 0;
+                        
+                        return (
+                          <div key={type} className="bg-white rounded p-2 border">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-sm font-medium capitalize text-gray-700">
+                                {type === 'sales' ? '💰 Sales' : type === 'leads' ? '👤 Leads' : '✅ Tasks'}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {progress} / {target} ({percentage}%)
+                              </span>
+                            </div>
+                            <Progress value={percentage} className="h-2" />
+                            <div className="flex justify-between mt-1">
+                              <span className="text-xs text-gray-600">
+                                {type === 'sales' ? `₹${progress.toLocaleString()}` : progress}
+                              </span>
+                              <span className="text-xs text-gray-600">
+                                {type === 'sales' ? `₹${target.toLocaleString()}` : target}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Offline Queue Status */}
+                {(() => {
+                  const offlineQueue = JSON.parse(localStorage.getItem('aavana_offline_targets') || '[]');
+                  const pendingCount = offlineQueue.filter(item => item.status === 'pending').length;
+                  
+                  if (pendingCount > 0) {
+                    return (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <div className="flex items-center">
+                          <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
+                          <span className="text-sm text-yellow-800">
+                            {pendingCount} target{pendingCount > 1 ? 's' : ''} queued offline
+                          </span>
+                        </div>
+                        {!navigator.onLine && (
+                          <p className="text-xs text-yellow-700 mt-1">
+                            Will sync when connection is restored
+                          </p>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Create Target Modal */}
+        {showCreateTargetModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <Target className="h-5 w-5 mr-2 text-blue-600" />
+                  Create New Target
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCreateTargetModal(false)}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const success = await createTarget();
+                if (success) {
+                  console.log('Target created successfully');
+                }
+              }} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="target-type">Target Type *</Label>
+                    <Select
+                      value={newTargetForm.target_type}
+                      onValueChange={(value) => setNewTargetForm({...newTargetForm, target_type: value})}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sales">💰 Sales Revenue</SelectItem>
+                        <SelectItem value="leads">👤 New Leads</SelectItem>
+                        <SelectItem value="tasks">✅ Tasks Completed</SelectItem>
+                        <SelectItem value="calls">📞 Calls Made</SelectItem>
+                        <SelectItem value="meetings">🤝 Meetings</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="period">Period *</Label>
+                    <Select
+                      value={newTargetForm.period}
+                      onValueChange={(value) => setNewTargetForm({...newTargetForm, period: value})}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">📅 Daily</SelectItem>
+                        <SelectItem value="weekly">📊 Weekly</SelectItem>
+                        <SelectItem value="monthly">📈 Monthly</SelectItem>
+                        <SelectItem value="quarterly">📋 Quarterly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="target-value">Target Value *</Label>
+                  <Input
+                    id="target-value"
+                    type="number"
+                    value={newTargetForm.target_value}
+                    onChange={(e) => setNewTargetForm({...newTargetForm, target_value: e.target.value})}
+                    placeholder={newTargetForm.target_type === 'sales' ? 'Enter amount (₹)' : 'Enter quantity'}
+                    className="mt-1"
+                    min="1"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="deadline">Deadline (Optional)</Label>
+                  <Input
+                    id="deadline"
+                    type="date"
+                    value={newTargetForm.deadline}
+                    onChange={(e) => setNewTargetForm({...newTargetForm, deadline: e.target.value})}
+                    className="mt-1"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="reminder-frequency">Reminder Frequency</Label>
+                  <Select
+                    value={newTargetForm.reminder_frequency}
+                    onValueChange={(value) => setNewTargetForm({...newTargetForm, reminder_frequency: value})}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hourly">⏰ Hourly</SelectItem>
+                      <SelectItem value="daily">📅 Daily</SelectItem>
+                      <SelectItem value="weekly">📊 Weekly</SelectItem>
+                      <SelectItem value="monthly">📈 Monthly</SelectItem>
+                      <SelectItem value="none">🔕 No Reminders</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    type="button"
+                    onClick={() => setShowCreateTargetModal(false)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    disabled={!newTargetForm.target_type || !newTargetForm.period || !newTargetForm.target_value}
+                  >
+                    <Target className="h-4 w-4 mr-2" />
+                    Create Target
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
       
       {/* Leave Application Modal */}
