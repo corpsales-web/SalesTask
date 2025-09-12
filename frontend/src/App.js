@@ -1699,7 +1699,7 @@ const App = () => {
 
       // Reset form and close modal
       setNewTargetForm({
-        target_type: "sales",
+        target_type: "sales_amount",
         period: "daily", 
         target_value: "",
         deadline: "",
