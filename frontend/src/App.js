@@ -3275,14 +3275,22 @@ const App = () => {
                   </div>
 
                   <div className="mt-4 flex gap-2">
-                    <Button className="bg-emerald-600 hover:bg-emerald-700">
+                    <Button 
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                      onClick={() => setShowLeaveModal(true)}
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       Apply Leave
                     </Button>
                     <Button 
                       variant="outline" 
                       className="border-emerald-300 hover:bg-emerald-50"
-                      onClick={handleApplyLeave}
+                      onClick={() => {
+                        toast({
+                          title: "Leave Requests",
+                          description: "Feature coming soon - will show all leave requests"
+                        });
+                      }}
                     >
                       <Archive className="h-4 w-4 mr-2" />
                       View Requests
