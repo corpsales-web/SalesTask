@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import axios from "axios";
 import "./styles/badgeVisibilityFix.css"; // Badge visibility fix
+import { autoSaveManager } from './utils/autosave';
 
 // Import new components
 import FileUploadComponent from './components/FileUploadComponent';
