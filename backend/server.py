@@ -3629,3 +3629,533 @@ async def shutdown_event():
         logger.info("Application shutdown completed")
     except Exception as e:
         logger.error(f"Error during shutdown: {e}")
+
+# ============== FILE UPLOAD ENDPOINTS ==============
+
+@app.post("/api/upload/file")
+async def upload_file(
+    file: UploadFile = File(...),
+    project_id: Optional[str] = Form(None),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Upload a single file"""
+    try:
+        result = await file_upload_service.upload_file(file, project_id, current_user.id)
+        return result
+    except Exception as e:
+        logger.error(f"File upload error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/upload/multiple")
+async def upload_multiple_files(
+    files: List[UploadFile] = File(...),
+    project_id: Optional[str] = Form(None),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Upload multiple files"""
+    try:
+        result = await file_upload_service.upload_multiple_files(files, project_id, current_user.id)
+        return result
+    except Exception as e:
+        logger.error(f"Multiple file upload error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/upload/presigned-url")
+async def generate_presigned_url(
+    request: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Generate presigned URL for direct client upload"""
+    try:
+        filename = request.get('filename')
+        content_type = request.get('content_type')
+        
+        if not filename or not content_type:
+            raise HTTPException(status_code=400, detail="Filename and content_type required")
+        
+        result = file_upload_service.generate_presigned_upload_url(filename, content_type)
+        return result
+    except Exception as e:
+        logger.error(f"Presigned URL generation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/upload/{s3_key:path}")
+async def delete_file(s3_key: str, current_user: UserResponse = Depends(get_current_user)):
+    """Delete a file from S3"""
+    try:
+        success = await file_upload_service.delete_file(s3_key)
+        if success:
+            return {"message": "File deleted successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="File not found or could not be deleted")
+    except Exception as e:
+        logger.error(f"File deletion error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============== ROLE & DEPARTMENT MANAGEMENT ENDPOINTS ==============
+
+@app.post("/api/roles")
+async def create_role(
+    role_data: dict,
+    current_user: UserResponse = Depends(get_current_super_admin)
+):
+    """Create a new role (Super Admin only)"""
+    try:
+        role = await role_management_service.create_role(role_data, current_user.id)
+        return role
+    except Exception as e:
+        logger.error(f"Role creation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/roles")
+async def get_roles(current_user: UserResponse = Depends(get_current_user)):
+    """Get all roles"""
+    try:
+        roles = await role_management_service.get_roles()
+        return roles
+    except Exception as e:
+        logger.error(f"Error fetching roles: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/roles/{role_id}")
+async def update_role(
+    role_id: str,
+    update_data: dict,
+    current_user: UserResponse = Depends(get_current_super_admin)
+):
+    """Update a role (Super Admin only)"""
+    try:
+        role = await role_management_service.update_role(role_id, update_data, current_user.id)
+        if not role:
+            raise HTTPException(status_code=404, detail="Role not found")
+        return role
+    except Exception as e:
+        logger.error(f"Role update error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/roles/{role_id}")
+async def delete_role(
+    role_id: str,
+    current_user: UserResponse = Depends(get_current_super_admin)
+):
+    """Delete a role (Super Admin only)"""
+    try:
+        success = await role_management_service.delete_role(role_id, current_user.id)
+        if success:
+            return {"message": "Role deleted successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Role not found")
+    except Exception as e:
+        logger.error(f"Role deletion error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/departments")
+async def create_department(
+    department_data: dict,
+    current_user: UserResponse = Depends(get_current_admin)
+):
+    """Create a new department"""
+    try:
+        department = await role_management_service.create_department(department_data, current_user.id)
+        return department
+    except Exception as e:
+        logger.error(f"Department creation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/departments")
+async def get_departments(current_user: UserResponse = Depends(get_current_user)):
+    """Get all departments"""
+    try:
+        departments = await role_management_service.get_departments()
+        return departments
+    except Exception as e:
+        logger.error(f"Error fetching departments: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/users/{user_id}/permissions")
+async def get_user_permissions(
+    user_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get user permissions"""
+    try:
+        # Users can only view their own permissions unless they're admin
+        if current_user.id != user_id and current_user.role not in [UserRole.ADMIN, UserRole.SUPER_ADMIN]:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        permissions = await role_management_service.get_user_permissions(user_id)
+        return {"user_id": user_id, "permissions": permissions}
+    except Exception as e:
+        logger.error(f"Error fetching user permissions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============== ENHANCED LEAD MANAGEMENT ENDPOINTS ==============
+
+@app.get("/api/leads/with-actions")
+async def get_leads_with_actions(
+    page: int = 1,
+    limit: int = 20,
+    source: Optional[str] = None,
+    status: Optional[str] = None,
+    assigned_to: Optional[str] = None,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get leads with available actions"""
+    try:
+        filters = {}
+        if source:
+            filters['source'] = source
+        if status:
+            filters['status'] = status
+        if assigned_to:
+            filters['assigned_to'] = assigned_to
+        
+        result = await lead_management_service.get_leads_with_actions(page, limit, filters)
+        return result
+    except Exception as e:
+        logger.error(f"Error fetching leads with actions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/leads/{lead_id}/actions")
+async def execute_lead_action(
+    lead_id: str,
+    action_data: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Execute an action on a lead"""
+    try:
+        action_type = action_data.get('action_type')
+        if not action_type:
+            raise HTTPException(status_code=400, detail="action_type is required")
+        
+        result = await lead_management_service.execute_lead_action(
+            lead_id, action_type, action_data, current_user.id
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Error executing lead action: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/leads/{lead_id}/actions")
+async def get_lead_actions(
+    lead_id: str,
+    limit: int = 20,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get action history for a lead"""
+    try:
+        actions = await lead_management_service.get_lead_actions(lead_id, limit)
+        return {"lead_id": lead_id, "actions": actions}
+    except Exception as e:
+        logger.error(f"Error fetching lead actions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/leads/{lead_id}")
+async def update_lead_enhanced(
+    lead_id: str,
+    update_data: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Update lead information"""
+    try:
+        lead = await lead_management_service.update_lead(lead_id, update_data, current_user.id)
+        if not lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+        return lead
+    except Exception as e:
+        logger.error(f"Error updating lead: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/leads/{lead_id}/remarks")
+async def add_lead_remark(
+    lead_id: str,
+    remark_data: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Add remark to lead (text or voice)"""
+    try:
+        remark = await lead_management_service.add_lead_remark(lead_id, remark_data, current_user.id)
+        return remark
+    except Exception as e:
+        logger.error(f"Error adding lead remark: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/leads/{lead_id}/remarks")
+async def get_lead_remarks(
+    lead_id: str,
+    include_private: bool = False,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get remarks for a lead"""
+    try:
+        remarks = await lead_management_service.get_lead_remarks(lead_id, include_private)
+        return {"lead_id": lead_id, "remarks": remarks}
+    except Exception as e:
+        logger.error(f"Error fetching lead remarks: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============== VOICE & STT ENDPOINTS ==============
+
+@app.post("/api/voice/transcribe")
+async def transcribe_audio(
+    audio_file: UploadFile = File(...),
+    language: str = Form("auto"),
+    provider: Optional[str] = Form(None),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Transcribe audio file"""
+    try:
+        audio_data = await audio_file.read()
+        result = await voice_stt_service.transcribe_audio(audio_data, language, provider)
+        return result
+    except Exception as e:
+        logger.error(f"Audio transcription error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/voice/remark")  
+async def process_voice_remark(
+    lead_id: str = Form(...),
+    audio_file: UploadFile = File(...),
+    language: str = Form("auto"),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Process voice remark for a lead"""
+    try:
+        audio_data = await audio_file.read()
+        result = await voice_stt_service.process_voice_remark(
+            audio_data, lead_id, current_user.id, language
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Voice remark processing error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/voice/extract-tasks")
+async def extract_tasks_from_voice(
+    audio_file: UploadFile = File(...),
+    language: str = Form("auto"),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Extract tasks from voice input"""
+    try:
+        audio_data = await audio_file.read()
+        result = await voice_stt_service.extract_tasks_from_voice(
+            audio_data, current_user.id, language
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Voice task extraction error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/voice/transcriptions")
+async def get_voice_transcriptions(
+    limit: int = 50,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get voice transcription history"""
+    try:
+        transcriptions = await voice_stt_service.get_voice_transcriptions(current_user.id, limit)
+        return {"transcriptions": transcriptions}
+    except Exception as e:
+        logger.error(f"Error fetching voice transcriptions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/voice/tasks")
+async def get_voice_tasks(
+    status: Optional[str] = None,
+    limit: int = 50,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get voice-extracted tasks"""
+    try:
+        tasks = await voice_stt_service.get_voice_tasks(current_user.id, status, limit)
+        return {"tasks": tasks}
+    except Exception as e:
+        logger.error(f"Error fetching voice tasks: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/voice/tasks/{voice_task_id}/task/{task_id}")
+async def update_voice_task_status(
+    voice_task_id: str,
+    task_id: str,
+    request: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Update status of a voice-extracted task"""
+    try:
+        status = request.get('status')
+        if not status:
+            raise HTTPException(status_code=400, detail="Status is required")
+        
+        success = await voice_stt_service.update_task_status(
+            voice_task_id, task_id, status, current_user.id
+        )
+        
+        if success:
+            return {"message": "Task status updated successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Task not found")
+    except Exception as e:
+        logger.error(f"Error updating voice task status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============== OFFLINE SYNC ENDPOINTS ==============
+
+@app.post("/api/offline/queue")
+async def queue_offline_operation(
+    request: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Queue an operation for offline processing"""
+    try:
+        operation_data = request.get('operation_data')
+        entity_type = request.get('entity_type')
+        operation_type = request.get('operation_type')
+        
+        if not all([operation_data, entity_type, operation_type]):
+            raise HTTPException(
+                status_code=400, 
+                detail="operation_data, entity_type, and operation_type are required"
+            )
+        
+        queue_id = await offline_sync_service.queue_offline_operation(
+            operation_data, current_user.id, entity_type, operation_type
+        )
+        
+        return {"queue_id": queue_id, "message": "Operation queued successfully"}
+    except Exception as e:
+        logger.error(f"Error queueing offline operation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/offline/autosave")
+async def autosave_data(
+    request: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Auto-save data for offline editing"""
+    try:
+        data = request.get('data')
+        entity_type = request.get('entity_type')
+        entity_id = request.get('entity_id')
+        
+        if not all([data, entity_type, entity_id]):
+            raise HTTPException(
+                status_code=400,
+                detail="data, entity_type, and entity_id are required"
+            )
+        
+        autosave_id = await offline_sync_service.autosave_data(
+            data, entity_type, entity_id, current_user.id
+        )
+        
+        return {"autosave_id": autosave_id, "message": "Data auto-saved successfully"}
+    except Exception as e:
+        logger.error(f"Error auto-saving data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/offline/autosave/{entity_type}/{entity_id}")
+async def get_autosaved_data(
+    entity_type: str,
+    entity_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Retrieve auto-saved data"""
+    try:
+        autosave = await offline_sync_service.get_autosaved_data(
+            entity_type, entity_id, current_user.id
+        )
+        
+        if autosave:
+            return autosave
+        else:
+            raise HTTPException(status_code=404, detail="No auto-saved data found")
+    except Exception as e:
+        logger.error(f"Error retrieving auto-saved data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/offline/sync-status")
+async def get_sync_status(current_user: UserResponse = Depends(get_current_user)):
+    """Get sync queue status for current user"""
+    try:
+        status = await offline_sync_service.get_sync_queue_status(current_user.id)
+        return status
+    except Exception as e:
+        logger.error(f"Error getting sync status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/offline/conflicts")
+async def get_sync_conflicts(
+    limit: int = 50,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get unresolved sync conflicts"""
+    try:
+        conflicts = await offline_sync_service.get_sync_conflicts(current_user.id, limit)
+        return {"conflicts": conflicts}
+    except Exception as e:
+        logger.error(f"Error getting sync conflicts: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/offline/resolve-conflict/{conflict_id}")
+async def resolve_sync_conflict(
+    conflict_id: str,
+    request: dict,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Resolve a sync conflict"""
+    try:
+        resolution = request.get('resolution')
+        if not resolution:
+            raise HTTPException(status_code=400, detail="Resolution is required")
+        
+        success = await offline_sync_service.resolve_sync_conflict(
+            conflict_id, resolution, current_user.id
+        )
+        
+        if success:
+            return {"message": "Conflict resolved successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Conflict not found")
+    except Exception as e:
+        logger.error(f"Error resolving sync conflict: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============== HEALTH CHECK ENDPOINTS ==============
+
+@app.get("/api/health/services")
+async def get_services_health():
+    """Get health status of all services"""
+    try:
+        health_status = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "services": {}
+        }
+        
+        # Check voice STT service
+        if voice_stt_service:
+            health_status["services"]["voice_stt"] = await voice_stt_service.health_check()
+        
+        # Check file upload service
+        health_status["services"]["file_upload"] = {
+            "status": "healthy",
+            "s3_configured": bool(os.getenv('AWS_ACCESS_KEY_ID'))
+        }
+        
+        # Check database
+        try:
+            await db.command('ping')
+            health_status["services"]["database"] = {"status": "healthy"}
+        except Exception as e:
+            health_status["services"]["database"] = {"status": "unhealthy", "error": str(e)}
+        
+        # Check offline sync service
+        if offline_sync_service:
+            health_status["services"]["offline_sync"] = {
+                "status": "healthy",
+                "is_syncing": offline_sync_service.is_syncing
+            }
+        
+        return health_status
+    except Exception as e:
+        logger.error(f"Error getting services health: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
