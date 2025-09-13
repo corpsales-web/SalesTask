@@ -140,6 +140,29 @@ const App = () => {
     is_active: true,
     sort_order: 0
   });
+
+  // Enhanced File Upload State
+  const [showFileUploadModal, setShowFileUploadModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  
+  // Lead Actions State
+  const [showLeadActionsPanel, setShowLeadActionsPanel] = useState(false);
+  const [selectedLeadForActions, setSelectedLeadForActions] = useState(null);
+  
+  // Voice STT State
+  const [showVoiceSTTModal, setShowVoiceSTTModal] = useState(false);
+  const [extractedTasks, setExtractedTasks] = useState([]);
+  
+  // Role Management State
+  const [showRoleManagementPanel, setShowRoleManagementPanel] = useState(false);
+  
+  // Face Check-in State
+  const [showFaceCheckInModal, setShowFaceCheckInModal] = useState(false);
+  const [lastCheckInTime, setLastCheckInTime] = useState(null);
+  
+  // Offline Sync State
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
   
   const mediaRecorder = useRef(null);
   const { toast } = useToast();
