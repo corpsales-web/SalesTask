@@ -103,6 +103,15 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
       enabled: true
     });
 
+    // Add Remark - always available
+    availableActions.push({
+      type: 'remark',
+      label: 'Add Remark',
+      icon: '💭',
+      color: 'yellow',
+      enabled: true
+    });
+
     setActions(availableActions);
   };
 
