@@ -74,10 +74,10 @@ class FileUploadService:
             
         except NoCredentialsError:
             logger.error("AWS credentials not found")
-            raise HTTPException(status_code=500, detail="AWS credentials not configured")
+            raise Exception("AWS credentials not configured")
         except ClientError as e:
             logger.error(f"Error accessing S3 bucket: {e}")
-            raise HTTPException(status_code=500, detail="S3 bucket access error")
+            raise Exception("S3 bucket access error")
     
     async def validate_file(self, file: UploadFile) -> Dict[str, Any]:
         """Comprehensive file validation"""
