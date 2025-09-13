@@ -5129,6 +5129,142 @@ const App = () => {
         </div>
       )}
       
+      {/* Enhanced File Upload Modal */}
+      {showFileUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">📎 File Upload Manager</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFileUploadModal(false)}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <FileUploadComponent
+                projectId={selectedProject?.id}
+                onUploadComplete={(result) => {
+                  console.log('File uploaded:', result);
+                  // You can add logic here to refresh project files, etc.
+                }}
+                maxFiles={10}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lead Actions Panel Modal */}
+      {showLeadActionsPanel && selectedLeadForActions && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  🔧 Lead Actions - {selectedLeadForActions.name}
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowLeadActionsPanel(false);
+                    setSelectedLeadForActions(null);
+                  }}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <LeadActionsPanel
+                leadId={selectedLeadForActions.id}
+                leadData={selectedLeadForActions}
+                onActionComplete={(result) => {
+                  console.log('Lead action completed:', result);
+                  // Refresh leads data
+                  fetchLeadsData();
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Voice STT Modal */}
+      {showVoiceSTTModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">🎤 Voice Processing</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowVoiceSTTModal(false)}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <VoiceSTTComponent
+                leadId={selectedLeadForActions?.id}
+                onTasksExtracted={(tasks) => {
+                  setExtractedTasks(tasks);
+                  console.log('Tasks extracted:', tasks);
+                }}
+                onRemarkAdded={(remark) => {
+                  console.log('Voice remark added:', remark);
+                  // Refresh lead data if applicable
+                  if (selectedLeadForActions) {
+                    fetchLeadsData();
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Face Check-In Modal */}
+      {showFaceCheckInModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">📷 Face Check-In</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFaceCheckInModal(false)}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <FaceCheckInComponent
+                onCheckInComplete={(result) => {
+                  console.log('Check-in completed:', result);
+                  setLastCheckInTime(new Date().toISOString());
+                  setShowFaceCheckInModal(false);
+                  
+                  toast({
+                    title: "Check-in Successful",
+                    description: "Your attendance has been recorded.",
+                  });
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Toaster />
     </div>
   );
