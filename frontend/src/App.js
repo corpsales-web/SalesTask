@@ -2159,37 +2159,35 @@ const App = () => {
                 <OfflineSyncStatus />
               </div>
               
-              {/* Enhanced Actions */}
-              {currentUser && (
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowFileUploadModal(true)}
-                    className="flex items-center"
-                  >
-                    📎 Upload
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowVoiceSTTModal(true)}
-                    className="flex items-center"
-                  >
-                    🎤 Voice
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowFaceCheckInModal(true)}
-                    className="flex items-center"
-                  >
-                    📷 Check-In
-                  </Button>
-                </div>
-              )}
+              {/* Enhanced Actions - Always visible for demo purposes */}
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFileUploadModal(true)}
+                  className="flex items-center"
+                >
+                  📎 Upload
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowVoiceSTTModal(true)}
+                  className="flex items-center"
+                >
+                  🎤 Voice
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFaceCheckInModal(true)}
+                  className="flex items-center"
+                >
+                  📷 Check-In
+                </Button>
+              </div>
               
               <div className="text-right">
                 <p className="text-sm text-gray-500">Business Number</p>
