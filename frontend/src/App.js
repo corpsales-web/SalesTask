@@ -2633,32 +2633,109 @@ const App = () => {
                         <p className="text-sm text-gray-600 mt-2">{lead.notes}</p>
                       )}
                     </div>
-                    <div className="mt-4 flex gap-2">
-                      <Select onValueChange={(value) => updateLeadStatus(lead.id, value)}>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Update Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="New">New</SelectItem>
-                          <SelectItem value="Qualified">Qualified</SelectItem>
-                          <SelectItem value="Proposal">Proposal</SelectItem>
-                          <SelectItem value="Negotiation">Negotiation</SelectItem>
-                          <SelectItem value="Won">Won</SelectItem>
-                          <SelectItem value="Lost">Lost</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="mt-4 space-y-3">
+                      {/* Individual Action Buttons */}
+                      <div className="flex flex-wrap gap-2">
+                        {lead.phone && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedLeadForActions(lead);
+                              setActionType('call');
+                              setShowLeadActionsPanel(true);
+                            }}
+                            className="bg-blue-50 border-blue-200 hover:bg-blue-100 text-xs flex items-center"
+                          >
+                            📞 Call
+                          </Button>
+                        )}
+                        
+                        {lead.phone && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedLeadForActions(lead);
+                              setActionType('whatsapp');
+                              setShowLeadActionsPanel(true);
+                            }}
+                            className="bg-green-50 border-green-200 hover:bg-green-100 text-xs flex items-center"
+                          >
+                            💬 WhatsApp
+                          </Button>
+                        )}
+                        
+                        {lead.email && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedLeadForActions(lead);
+                              setActionType('email');
+                              setShowLeadActionsPanel(true);
+                            }}
+                            className="bg-red-50 border-red-200 hover:bg-red-100 text-xs flex items-center"
+                          >
+                            📧 Email
+                          </Button>
+                        )}
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLeadForActions(lead);
+                            setActionType('send_images');
+                            setShowLeadActionsPanel(true);
+                          }}
+                          className="bg-purple-50 border-purple-200 hover:bg-purple-100 text-xs flex items-center"
+                        >
+                          🖼️ Images
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLeadForActions(lead);
+                            setActionType('send_catalogue');
+                            setShowLeadActionsPanel(true);
+                          }}
+                          className="bg-orange-50 border-orange-200 hover:bg-orange-100 text-xs flex items-center"
+                        >
+                          📋 Catalogue
+                        </Button>
+                      </div>
                       
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedLeadForActions(lead);
-                          setShowLeadActionsPanel(true);
-                        }}
-                        className="bg-blue-50 border-blue-200 hover:bg-blue-100"
-                      >
-                        🔧 Actions
-                      </Button>
+                      {/* Status Update and More Actions */}
+                      <div className="flex gap-2">
+                        <Select onValueChange={(value) => updateLeadStatus(lead.id, value)}>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Update Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="New">New</SelectItem>
+                            <SelectItem value="Qualified">Qualified</SelectItem>
+                            <SelectItem value="Proposal">Proposal</SelectItem>
+                            <SelectItem value="Negotiation">Negotiation</SelectItem>
+                            <SelectItem value="Won">Won</SelectItem>
+                            <SelectItem value="Lost">Lost</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLeadForActions(lead);
+                            setShowLeadActionsPanel(true);
+                          }}
+                          className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                        >
+                          🔧 More
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
