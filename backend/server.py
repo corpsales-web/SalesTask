@@ -535,6 +535,24 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
                          if k not in ['password_hash', 'reset_token', 'reset_token_expires']}
     return UserResponse(**user_response_data)
 
+async def get_current_super_admin(current_user: UserResponse = Depends(get_current_user)):
+    """Get current user and verify they are a super admin"""
+    if current_user.role != UserRole.SUPER_ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Super admin access required"
+        )
+    return current_user
+
+async def get_current_admin(current_user: UserResponse = Depends(get_current_user)):
+    """Get current user and verify they are an admin or super admin"""
+    if current_user.role not in [UserRole.ADMIN, UserRole.SUPER_ADMIN]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user
+
 def generate_reset_token() -> str:
     """Generate a secure reset token"""
     return secrets.token_urlsafe(32)
