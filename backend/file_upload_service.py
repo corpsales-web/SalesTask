@@ -37,8 +37,14 @@ class FileUploadService:
             'archives': ['.zip', '.rar', '.7z', '.tar', '.gz']
         }
         
-        # Initialize S3 client
-        self._initialize_s3_client()
+        # Initialize S3 client (optional)
+        self.s3_client = None
+        self.s3_enabled = False
+        try:
+            self._initialize_s3_client()
+            self.s3_enabled = True
+        except Exception as e:
+            logger.warning(f"S3 not available: {e}. File upload service will work in local mode.")
         
         # Initialize magic for MIME type detection
         self.magic_mime = magic.Magic(mime=True)
