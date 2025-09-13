@@ -3988,10 +3988,28 @@ const App = () => {
                 <Settings className="h-8 w-8 mr-3 text-emerald-600" />
                 Super Admin Panel
               </h2>
-              <Badge className="bg-red-100 text-red-800 border-red-300">
-                Full Access Mode
-              </Badge>
+              <div className="flex items-center space-x-2">
+                <Badge className="bg-red-100 text-red-800 border-red-300">
+                  Full Access Mode
+                </Badge>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowRoleManagementPanel(!showRoleManagementPanel)}
+                  className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                >
+                  👥 Role Management
+                </Button>
+              </div>
             </div>
+
+            {/* Role Management Panel */}
+            {showRoleManagementPanel && currentUser && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <RoleManagementPanel currentUser={currentUser} />
+              </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Category Management */}
