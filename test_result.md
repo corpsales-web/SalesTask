@@ -506,13 +506,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Enhanced File Upload System"
-    - "Voice STT Component" 
-    - "Role Management Panel"
+    - "Lead Actions UI Integration"
+    - "Enhanced File Upload System Header Integration"
   stuck_tasks:
-    - "Enhanced File Upload System - not integrated into main UI"
-    - "Voice STT Component - not integrated into main UI"
-    - "Role Management Panel - navigation blocked by modal overlay"
+    - "Lead Actions UI - action buttons not found on individual leads"
   test_all: false
   test_priority: "high_first"
 
