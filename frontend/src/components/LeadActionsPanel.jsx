@@ -571,6 +571,58 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
           </div>
         );
 
+      case 'remark':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Remark Type
+              </label>
+              <select
+                value={actionData.type || 'general'}
+                onChange={(e) => setActionData({ ...actionData, type: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="general">General Remark</option>
+                <option value="call_summary">Call Summary</option>
+                <option value="meeting_notes">Meeting Notes</option>
+                <option value="follow_up_note">Follow-up Note</option>
+                <option value="concern">Concern/Issue</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Remark Content *
+              </label>
+              <textarea
+                value={actionData.content || ''}
+                onChange={(e) => setActionData({ ...actionData, content: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                rows="4"
+                placeholder="Enter your remark..."
+                required
+              />
+            </div>
+            
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={actionData.is_private || false}
+                onChange={(e) => setActionData({ ...actionData, is_private: e.target.checked })}
+                className="mr-2"
+              />
+              <label className="text-sm text-gray-700">Private remark (visible only to you)</label>
+            </div>
+            
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                💡 Tip: You can also use voice remarks by clicking the Voice button in the header and selecting "Voice Remark" mode.
+              </p>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="text-center py-4">
