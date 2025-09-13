@@ -4608,7 +4608,7 @@ const App = () => {
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-[10000]">
                         <SelectItem value="sales_amount">💰 Sales Revenue</SelectItem>
                         <SelectItem value="leads_count">👤 New Leads</SelectItem>
                         <SelectItem value="tasks_count">✅ Tasks Completed</SelectItem>
