@@ -119,6 +119,9 @@ class FocusedAavanaBackendTester:
         if 'access_token' in response:
             self.auth_token = response['access_token']
             print("✅ JWT token received and stored")
+            # Also store user info if available
+            if 'user' in response and 'id' in response['user']:
+                self.test_user_id = response['user']['id']
         else:
             print("❌ CRITICAL: No access token in login response")
             return False
