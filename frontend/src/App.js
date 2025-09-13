@@ -4625,7 +4625,7 @@ const App = () => {
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select period" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-[10000]">
                         <SelectItem value="daily">📅 Daily</SelectItem>
                         <SelectItem value="weekly">📊 Weekly</SelectItem>
                         <SelectItem value="monthly">📈 Monthly</SelectItem>
