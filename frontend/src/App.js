@@ -2123,7 +2123,7 @@ const App = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowFileUploadModal(true)}
-                    className="hidden sm:flex"
+                    className="flex items-center"
                   >
                     📎 Upload
                   </Button>
@@ -2132,7 +2132,7 @@ const App = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowVoiceSTTModal(true)}
-                    className="hidden sm:flex"
+                    className="flex items-center"
                   >
                     🎤 Voice
                   </Button>
@@ -2141,7 +2141,7 @@ const App = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowFaceCheckInModal(true)}
-                    className="hidden sm:flex"
+                    className="flex items-center"
                   >
                     📷 Check-In
                   </Button>
