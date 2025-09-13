@@ -2110,6 +2110,43 @@ const App = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Offline Sync Status */}
+              <div className="relative">
+                <OfflineSyncStatus />
+              </div>
+              
+              {/* Enhanced Actions */}
+              {currentUser && (
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowFileUploadModal(true)}
+                    className="hidden sm:flex"
+                  >
+                    📎 Upload
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowVoiceSTTModal(true)}
+                    className="hidden sm:flex"
+                  >
+                    🎤 Voice
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowFaceCheckInModal(true)}
+                    className="hidden sm:flex"
+                  >
+                    📷 Check-In
+                  </Button>
+                </div>
+              )}
+              
               <div className="text-right">
                 <p className="text-sm text-gray-500">Business Number</p>
                 <p className="font-medium text-gray-900">8447475761</p>
