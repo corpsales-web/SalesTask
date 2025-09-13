@@ -145,16 +145,15 @@ class FocusedAavanaBackendTester:
         headers = {'Authorization': f'Bearer {self.auth_token}'}
         
         # Test 1: Create target endpoint
-        target_data = {
+        # The endpoint expects query parameters including user_id
+        params = {
+            "user_id": self.test_user_id or "test_user_123",
             "target_type": "sales_amount",
             "period": "monthly", 
             "target_value": 100000,
-            "deadline": "2024-12-31",
-            "reminder_frequency": "weekly"
+            "created_by": "test_system"
         }
         
-        # Use query parameters as per the backend implementation
-        params = target_data
         success, response = self.run_test("Create Target (POST /api/targets/create)", "POST", "targets/create", 200, params=params, headers=headers)
         if not success:
             print("❌ CRITICAL: Target creation endpoint not working")
