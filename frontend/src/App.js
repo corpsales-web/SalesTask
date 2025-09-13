@@ -178,6 +178,10 @@ const App = () => {
     source: "",
     assigned_to: ""
   });
+  // Offline Sync State
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
+
   // Initialize autosave for lead edit form
   useEffect(() => {
     if (showLeadEditModal && editingLead && currentUser) {
