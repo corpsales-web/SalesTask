@@ -5262,10 +5262,13 @@ const App = () => {
               <LeadActionsPanel
                 leadId={selectedLeadForActions.id}
                 leadData={selectedLeadForActions}
+                initialActionType={actionType}
                 onActionComplete={(result) => {
                   console.log('Lead action completed:', result);
                   // Refresh leads data
                   fetchLeads();
+                  // Reset action type
+                  setActionType(null);
                 }}
               />
             </div>
