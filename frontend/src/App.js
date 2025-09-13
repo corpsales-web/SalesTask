@@ -5187,7 +5187,7 @@ const App = () => {
                 onActionComplete={(result) => {
                   console.log('Lead action completed:', result);
                   // Refresh leads data
-                  fetchLeadsData();
+                  fetchLeads();
                 }}
               />
             </div>
