@@ -2736,6 +2736,31 @@ const App = () => {
                         >
                           🔧 More
                         </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLead(lead);
+                            setShowAddLeadModal(true);
+                          }}
+                          className="bg-gray-50 border-gray-200 hover:bg-gray-100"
+                        >
+                          ✏️ Edit
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLeadForActions(lead);
+                            setActionType('remark');
+                            setShowLeadActionsPanel(true);
+                          }}
+                          className="bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
+                        >
+                          💭 Remark
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
