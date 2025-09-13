@@ -148,6 +148,7 @@ const App = () => {
   // Lead Actions State
   const [showLeadActionsPanel, setShowLeadActionsPanel] = useState(false);
   const [selectedLeadForActions, setSelectedLeadForActions] = useState(null);
+  const [actionType, setActionType] = useState(null);
   
   // Voice STT State
   const [showVoiceSTTModal, setShowVoiceSTTModal] = useState(false);
