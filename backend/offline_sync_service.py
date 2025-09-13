@@ -14,7 +14,7 @@ from enum import Enum
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo import ReturnDocument
-import aioredis
+import redis.asyncio as aioredis
 
 logger = logging.getLogger(__name__)
 
