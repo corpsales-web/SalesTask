@@ -2635,7 +2635,7 @@ const App = () => {
                     </div>
                     <div className="mt-4 flex gap-2">
                       <Select onValueChange={(value) => updateLeadStatus(lead.id, value)}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="flex-1">
                           <SelectValue placeholder="Update Status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -2647,6 +2647,18 @@ const App = () => {
                           <SelectItem value="Lost">Lost</SelectItem>
                         </SelectContent>
                       </Select>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedLeadForActions(lead);
+                          setShowLeadActionsPanel(true);
+                        }}
+                        className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                      >
+                        🔧 Actions
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
