@@ -5222,7 +5222,7 @@ const App = () => {
                   console.log('Voice remark added:', remark);
                   // Refresh lead data if applicable
                   if (selectedLeadForActions) {
-                    fetchLeadsData();
+                    fetchLeads();
                   }
                 }}
               />
