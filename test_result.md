@@ -497,9 +497,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All 8 critical fixes verified and working"
+    - "Enhanced File Upload System"
+    - "Voice STT Component" 
+    - "Role Management Panel"
   stuck_tasks:
-    - "Goals/Targets modal display (minor UI implementation difference)"
+    - "Enhanced File Upload System - not integrated into main UI"
+    - "Voice STT Component - not integrated into main UI"
+    - "Role Management Panel - navigation blocked by modal overlay"
   test_all: false
   test_priority: "high_first"
 
