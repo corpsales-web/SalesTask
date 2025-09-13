@@ -3347,7 +3347,17 @@ const App = () => {
                     <Button 
                       className="w-full bg-emerald-600 hover:bg-emerald-700" 
                       size="sm"
-                      onClick={handleFaceCheckin}
+                      onClick={() => setShowFaceCheckInModal(true)}
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      Face Check-In
+                    </Button>
+                    
+                    {lastCheckInTime && (
+                      <div className="text-xs text-gray-600 text-center">
+                        Last check-in: {new Date(lastCheckInTime).toLocaleString()}
+                      </div>
+                    )}
                       disabled={isCheckingIn}
                     >
                       <Camera className="h-4 w-4 mr-2" />
