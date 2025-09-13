@@ -161,9 +161,22 @@ const App = () => {
   const [showFaceCheckInModal, setShowFaceCheckInModal] = useState(false);
   const [lastCheckInTime, setLastCheckInTime] = useState(null);
   
-  // Offline Sync State
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [pendingSyncCount, setPendingSyncCount] = useState(0);
+  // Lead Edit State
+  const [showLeadEditModal, setShowLeadEditModal] = useState(false);
+  const [editingLead, setEditingLead] = useState(null);
+  const [leadEditForm, setLeadEditForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+    designation: "",
+    location: "",
+    budget: "",
+    requirements: "",
+    notes: "",
+    source: "",
+    assigned_to: ""
+  });
   
   const mediaRecorder = useRef(null);
   const { toast } = useToast();
