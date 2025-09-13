@@ -178,6 +178,31 @@ const App = () => {
     source: "",
     assigned_to: ""
   });
+  // Initialize autosave for lead edit form
+  useEffect(() => {
+    if (showLeadEditModal && editingLead && currentUser) {
+      const getFormData = () => leadEditForm;
+      autoSaveManager.startAutosave('lead', editingLead.id, getFormData, currentUser.id);
+      
+      return () => {
+        autoSaveManager.stopAutosave(`lead_${editingLead.id}`);
+      };
+    }
+  }, [showLeadEditModal, editingLead, leadEditForm, currentUser]);
+
+  // Load draft when editing lead
+  useEffect(() => {
+    if (showLeadEditModal && editingLead && currentUser) {
+      const loadDraft = async () => {
+        const draft = await autoSaveManager.loadDraft('lead', editingLead.id, currentUser.id);
+        if (draft && draft.data) {
+          setLeadEditForm(prev => ({ ...prev, ...draft.data }));
+          console.log('Loaded draft for lead:', editingLead.id);
+        }
+      };
+      loadDraft();
+    }
+  }, [showLeadEditModal, editingLead, currentUser]);
   
   const mediaRecorder = useRef(null);
   const { toast } = useToast();
