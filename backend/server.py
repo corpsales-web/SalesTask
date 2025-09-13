@@ -3538,8 +3538,23 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
 async def startup_event():
-    """Create default users on startup if they don't exist"""
+    """Create default users on startup if they don't exist and initialize services"""
     try:
+        # Initialize new services
+        global role_management_service, lead_management_service, voice_stt_service, offline_sync_service
+        
+        role_management_service = initialize_role_management_service(db)
+        await role_management_service.initialize_default_roles()
+        
+        lead_management_service = initialize_lead_management_service(db)
+        
+        voice_stt_service = initialize_voice_stt_service(db)
+        
+        offline_sync_service = initialize_offline_sync_service(db)
+        await offline_sync_service.start_background_sync()
+        
+        logger.info("All services initialized successfully")
+        
         # Create master user if doesn't exist
         master_user = await db.users.find_one({"username": "master"})
         if not master_user:
@@ -3583,8 +3598,16 @@ async def startup_event():
             print("✅ Admin user created: admin/admin123")
             
     except Exception as e:
-        print(f"Error creating default users: {str(e)}")
+        print(f"Error during startup: {str(e)}")
+        logger.error(f"Startup failed: {e}")
 
 @app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+async def shutdown_event():
+    """Cleanup on application shutdown"""
+    try:
+        if offline_sync_service:
+            await offline_sync_service.stop_background_sync()
+        client.close()
+        logger.info("Application shutdown completed")
+    except Exception as e:
+        logger.error(f"Error during shutdown: {e}")
