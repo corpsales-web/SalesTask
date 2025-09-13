@@ -2754,6 +2754,31 @@ const App = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => {
+                            setEditingLead(lead);
+                            setLeadEditForm({
+                              name: lead.name || "",
+                              email: lead.email || "",
+                              phone: lead.phone || "",
+                              company: lead.company || "",
+                              designation: lead.designation || "",
+                              location: lead.location || "",
+                              budget: lead.budget || "",
+                              requirements: lead.requirements || "",
+                              notes: lead.notes || "",
+                              source: lead.source || "",
+                              assigned_to: lead.assigned_to || ""
+                            });
+                            setShowLeadEditModal(true);
+                          }}
+                          className="bg-gray-50 border-gray-200 hover:bg-gray-100"
+                        >
+                          ✏️ Edit
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
                             setSelectedLeadForActions(lead);
                             setActionType('remark');
                             setShowLeadActionsPanel(true);
