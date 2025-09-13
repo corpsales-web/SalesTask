@@ -182,6 +182,8 @@ const App = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
 
+  // Temporarily disable autosave initialization
+  /*
   // Initialize autosave for lead edit form
   useEffect(() => {
     if (showLeadEditModal && editingLead && currentUser) {
@@ -207,6 +209,7 @@ const App = () => {
       loadDraft();
     }
   }, [showLeadEditModal, editingLead, currentUser]);
+  */
   
   const mediaRecorder = useRef(null);
   const { toast } = useToast();
