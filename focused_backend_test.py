@@ -22,16 +22,22 @@ class FocusedAavanaBackendTester:
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
         print(f"   URL: {url}")
+        if params:
+            print(f"   Params: {params}")
         
         try:
             if method == 'GET':
                 response = requests.get(url, headers=default_headers, params=params)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=default_headers)
+                if params:
+                    # For POST with query parameters
+                    response = requests.post(url, json=data, headers=default_headers, params=params)
+                else:
+                    response = requests.post(url, json=data, headers=default_headers)
             elif method == 'PUT':
-                response = requests.put(url, json=data, headers=default_headers)
+                response = requests.put(url, json=data, headers=default_headers, params=params)
             elif method == 'DELETE':
-                response = requests.delete(url, headers=default_headers)
+                response = requests.delete(url, headers=default_headers, params=params)
 
             success = response.status_code == expected_status
             if success:
