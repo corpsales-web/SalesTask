@@ -169,7 +169,8 @@ class FocusedAavanaBackendTester:
             return False
         
         # Test 2: Get targets dashboard
-        success, response = self.run_test("Get Targets Dashboard (GET /api/targets/dashboard)", "GET", "targets/dashboard", 200, headers=headers)
+        dashboard_endpoint = f"targets/dashboard/{self.test_user_id or 'test_user_123'}"
+        success, response = self.run_test("Get Targets Dashboard (GET /api/targets/dashboard/{user_id})", "GET", dashboard_endpoint, 200, headers=headers)
         if not success:
             print("❌ CRITICAL: Targets dashboard endpoint not working")
             return False
