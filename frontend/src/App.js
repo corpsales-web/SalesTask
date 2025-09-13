@@ -3358,11 +3358,6 @@ const App = () => {
                         Last check-in: {new Date(lastCheckInTime).toLocaleString()}
                       </div>
                     )}
-                      disabled={isCheckingIn}
-                    >
-                      <Camera className="h-4 w-4 mr-2" />
-                      {isCheckingIn ? "Checking In..." : "Face Check-In"}
-                    </Button>
                     <Button 
                       variant="outline" 
                       className="w-full border-emerald-300 hover:bg-emerald-50" 
