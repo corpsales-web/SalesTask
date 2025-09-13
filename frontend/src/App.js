@@ -5397,6 +5397,196 @@ const App = () => {
         </div>
       )}
       
+      {/* Lead Edit Modal */}
+      {showLeadEditModal && editingLead && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">✏️ Edit Lead - {editingLead.name}</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowLeadEditModal(false);
+                    setEditingLead(null);
+                  }}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-name">Full Name *</Label>
+                    <Input
+                      id="edit-name"
+                      value={leadEditForm.name}
+                      onChange={(e) => setLeadEditForm({ ...leadEditForm, name: e.target.value })}
+                      placeholder="Enter full name"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-phone">Phone Number *</Label>
+                    <Input
+                      id="edit-phone"
+                      value={leadEditForm.phone}
+                      onChange={(e) => setLeadEditForm({ ...leadEditForm, phone: e.target.value })}
+                      placeholder="Enter phone number"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-email">Email Address</Label>
+                    <Input
+                      id="edit-email"
+                      type="email"
+                      value={leadEditForm.email}
+                      onChange={(e) => setLeadEditForm({ ...leadEditForm, email: e.target.value })}
+                      placeholder="Enter email address"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-company">Company</Label>
+                    <Input
+                      id="edit-company"
+                      value={leadEditForm.company}
+                      onChange={(e) => setLeadEditForm({ ...leadEditForm, company: e.target.value })}
+                      placeholder="Enter company name"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-designation">Designation</Label>
+                    <Input
+                      id="edit-designation"
+                      value={leadEditForm.designation}
+                      onChange={(e) => setLeadEditForm({ ...leadEditForm, designation: e.target.value })}
+                      placeholder="Enter designation"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-budget">Budget (₹)</Label>
+                    <Input
+                      id="edit-budget"
+                      type="number"
+                      value={leadEditForm.budget}
+                      onChange={(e) => setLeadEditForm({ ...leadEditForm, budget: e.target.value })}
+                      placeholder="Enter budget amount"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="edit-location">Location</Label>
+                  <Input
+                    id="edit-location"
+                    value={leadEditForm.location}
+                    onChange={(e) => setLeadEditForm({ ...leadEditForm, location: e.target.value })}
+                    placeholder="Enter location"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="edit-source">Lead Source</Label>
+                  <Select value={leadEditForm.source} onValueChange={(value) => setLeadEditForm({ ...leadEditForm, source: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select lead source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Website">Website</SelectItem>
+                      <SelectItem value="Referral">Referral</SelectItem>
+                      <SelectItem value="Cold Call">Cold Call</SelectItem>
+                      <SelectItem value="Social Media">Social Media</SelectItem>
+                      <SelectItem value="Advertisement">Advertisement</SelectItem>
+                      <SelectItem value="Trade Show">Trade Show</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="edit-requirements">Requirements</Label>
+                  <Textarea
+                    id="edit-requirements"
+                    value={leadEditForm.requirements}
+                    onChange={(e) => setLeadEditForm({ ...leadEditForm, requirements: e.target.value })}
+                    placeholder="Enter requirements"
+                    rows="3"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="edit-notes">Notes</Label>
+                  <Textarea
+                    id="edit-notes"
+                    value={leadEditForm.notes}
+                    onChange={(e) => setLeadEditForm({ ...leadEditForm, notes: e.target.value })}
+                    placeholder="Enter additional notes"
+                    rows="3"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowLeadEditModal(false);
+                    setEditingLead(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                
+                <Button
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('token');
+                      await axios.put(
+                        `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/leads/${editingLead.id}`,
+                        leadEditForm,
+                        { headers: { 'Authorization': `Bearer ${token}` } }
+                      );
+                      
+                      await fetchLeads();
+                      setShowLeadEditModal(false);
+                      setEditingLead(null);
+                      
+                      toast({
+                        title: "Lead Updated",
+                        description: "Lead information has been updated successfully.",
+                      });
+                    } catch (error) {
+                      console.error('Error updating lead:', error);
+                      toast({
+                        title: "Update Failed",
+                        description: error.response?.data?.detail || "Failed to update lead.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Update Lead
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Toaster />
     </div>
   );
