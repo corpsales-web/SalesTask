@@ -238,6 +238,8 @@ class LeadManagementService:
                 result = await self._execute_meeting_action(lead, action_data, user_id)
             elif action_type == 'follow_up':
                 result = await self._execute_follow_up_action(lead, action_data, user_id)
+            elif action_type == 'remark':
+                result = await self._execute_remark_action(lead, action_data, user_id)
             else:
                 raise ValueError(f"Unknown action type: {action_type}")
             
