@@ -121,7 +121,7 @@ Screenshots captured for all viewport sizes showing:
 
 ## QA Verification
 
-**Staging URL**: https://aavana-ai-hub.preview.emergentagent.com
+**Staging URL**: https://aavana-crm.preview.emergentagent.com
 
 **Test Steps:**
 1. **Desktop Testing (1920x1080)**:

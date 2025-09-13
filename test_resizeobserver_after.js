@@ -50,7 +50,7 @@ async function testUnifiedResizeObserverHandler() {
     });
 
     try {
-      await page.goto('https://aavana-ai-hub.preview.emergentagent.com');
+      await page.goto('https://aavana-crm.preview.emergentagent.com');
       await page.waitForTimeout(3000);
 
       console.log('Testing unified ResizeObserver handler...');
