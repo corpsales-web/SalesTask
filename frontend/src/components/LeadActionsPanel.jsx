@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const LeadActionsPanel = ({ leadId, leadData, onActionComplete }) => {
+const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionType }) => {
   const [actions, setActions] = useState([]);
   const [actionHistory, setActionHistory] = useState([]);
   const [isExecuting, setIsExecuting] = useState(false);
@@ -17,6 +17,16 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete }) => {
       fetchActionHistory();
     }
   }, [leadId]);
+
+  useEffect(() => {
+    // If initialActionType is provided, auto-open the action modal
+    if (initialActionType && actions.length > 0) {
+      const action = actions.find(a => a.type === initialActionType);
+      if (action) {
+        handleActionClick(action);
+      }
+    }
+  }, [initialActionType, actions]);
 
   const fetchAvailableActions = () => {
     // Get available actions based on lead data
