@@ -419,7 +419,7 @@ frontend:
 
   - task: "Enhanced File Upload System"
     implemented: true
-    working: false
+    working: "partial"
     file: "components/FileUploadComponent.jsx"
     stuck_count: 1
     priority: "high"
@@ -428,6 +428,9 @@ frontend:
       - working: false
         agent: "testing"
         comment: "❌ ENHANCED FILE UPLOAD SYSTEM NOT INTEGRATED: Component exists (FileUploadComponent.jsx) with full drag & drop functionality, progress tracking, and thumbnails, but Upload button not found in header. Component may not be integrated into main UI. Features include: drag & drop zone, multi-file uploads, progress bars, file type validation, thumbnails for images, cancel/retry functionality. Backend integration ready with /api/upload/file endpoint."
+      - working: "partial"
+        agent: "testing"
+        comment: "⚠️ ENHANCED FILE UPLOAD PARTIALLY WORKING: Component exists and is integrated in ERP tab. Found upload functionality in ERP Management section. Component has full drag & drop functionality, progress tracking, and thumbnails. However, not integrated into main header as expected. Upload functionality is accessible through ERP > Project Gallery section."
 
   - task: "Lead Actions Panel"
     implemented: true
