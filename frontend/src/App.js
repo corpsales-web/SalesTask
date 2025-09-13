@@ -2,6 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import axios from "axios";
 import "./styles/badgeVisibilityFix.css"; // Badge visibility fix
+
+// Import new components
+import FileUploadComponent from './components/FileUploadComponent';
+import LeadActionsPanel from './components/LeadActionsPanel';
+import VoiceSTTComponent from './components/VoiceSTTComponent';
+import RoleManagementPanel from './components/RoleManagementPanel';
+import OfflineSyncStatus from './components/OfflineSyncStatus';
+import FaceCheckInComponent from './components/FaceCheckInComponent';
+
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
 import { Badge } from "./components/ui/badge";
