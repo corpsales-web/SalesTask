@@ -168,6 +168,9 @@ class FileUploadService:
     async def upload_file(self, file: UploadFile, project_id: Optional[str] = None, 
                          user_id: Optional[str] = None) -> Dict[str, Any]:
         """Upload file to S3 with metadata and thumbnail generation"""
+        if not self.s3_enabled:
+            raise HTTPException(status_code=503, detail="File upload service not available - S3 not configured")
+            
         try:
             # Validate file
             validation = await self.validate_file(file)
