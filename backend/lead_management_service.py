@@ -617,6 +617,31 @@ class LeadManagementService:
             logger.error(f"Error scheduling follow-up: {e}")
             return {'status': 'failed', 'error': str(e)}
     
+    async def _execute_remark_action(self, lead: Dict[str, Any], action_data: Dict[str, Any], 
+                                   user_id: str) -> Dict[str, Any]:
+        """Execute remark action"""
+        try:
+            remark_data = {
+                'type': action_data.get('type', 'text'),
+                'content': action_data.get('content', ''),
+                'voice_file_url': action_data.get('voice_file_url'),
+                'transcription': action_data.get('transcription'),
+                'is_private': action_data.get('is_private', False)
+            }
+            
+            # Add remark using existing method
+            remark = await self.add_lead_remark(lead['id'], remark_data, user_id)
+            
+            return {
+                'status': 'completed',
+                'message': 'Remark added successfully',
+                'remark': remark
+            }
+            
+        except Exception as e:
+            logger.error(f"Error adding remark: {e}")
+            return {'status': 'failed', 'error': str(e)}
+    
     async def get_lead_actions(self, lead_id: str, limit: int = 20) -> List[Dict[str, Any]]:
         """Get action history for a lead"""
         try:
