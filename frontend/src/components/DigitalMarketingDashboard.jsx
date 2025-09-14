@@ -437,8 +437,8 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-green-600">Leads Generated</p>
-                    <p className="text-2xl font-bold text-green-900">{analytics.leads_generated}</p>
-                    <p className="text-xs text-green-700">Cost per lead: {formatCurrency(analytics.cost_per_lead)}</p>
+                    <p className="text-2xl font-bold text-green-900">{analytics.leads_generated || 0}</p>
+                    <p className="text-xs text-green-700">Cost per lead: {formatCurrency(analytics.cost_per_lead || 0)}</p>
                   </div>
                   <Users className="h-8 w-8 text-green-600" />
                 </div>
