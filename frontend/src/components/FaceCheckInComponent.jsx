@@ -570,7 +570,24 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         <p className="text-sm text-gray-600">
           Capture your photo to record attendance
         </p>
+        
+        {/* Device info display for debugging */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-2 text-xs text-gray-400">
+            Device: {deviceType} | Browser: {browserType} | Permission: {cameraPermissionStatus}
+          </div>
+        )}
       </div>
+
+      {/* Initialization status */}
+      {isInitializing && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+            <span className="text-blue-700">Initializing camera...</span>
+          </div>
+        </div>
+      )}
 
       {/* Error Display */}
       {error && (
