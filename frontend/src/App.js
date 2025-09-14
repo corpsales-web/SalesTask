@@ -2528,7 +2528,7 @@ const App = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold text-gray-900">
-                        ₹{dashboardStats.total_revenue.toLocaleString('en-IN')}
+                        ₹{(dashboardStats.total_revenue || 0).toLocaleString('en-IN')}
                       </div>
                       <p className="text-xs text-emerald-600 mt-1">
                         {dashboardStats.won_deals} deals closed
