@@ -165,6 +165,11 @@ const App = () => {
   const [showFaceCheckInModal, setShowFaceCheckInModal] = useState(false);
   const [lastCheckInTime, setLastCheckInTime] = useState(null);
   
+  // New Dashboard Components State
+  const [showDigitalMarketingDashboard, setShowDigitalMarketingDashboard] = useState(false);
+  const [showLeadRoutingPanel, setShowLeadRoutingPanel] = useState(false);
+  const [showWorkflowAuthoringPanel, setShowWorkflowAuthoringPanel] = useState(false);
+  
   // Lead Edit State
   const [showLeadEditModal, setShowLeadEditModal] = useState(false);
   const [editingLead, setEditingLead] = useState(null);
