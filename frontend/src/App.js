@@ -6593,6 +6593,31 @@ const App = () => {
           </div>
         </div>
       )}
+
+      {/* Bulk Excel Upload Modal */}
+      {showBulkExcelUpload && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-7xl mx-4 max-h-[95vh] overflow-y-auto">
+            <BulkExcelUploadComponent
+              onUploadComplete={(data) => {
+                console.log('Bulk upload completed:', data);
+                // Update dashboard stats
+                setDashboardStats(prev => ({
+                  ...prev,
+                  totalLeads: prev.totalLeads + data.valid_leads,
+                  activeLeads: prev.activeLeads + data.valid_leads
+                }));
+                // Show success toast
+                toast({
+                  title: "Bulk Upload Completed",
+                  description: `Successfully imported ${data.valid_leads} leads with ${data.duplicate_leads} duplicates detected.`,
+                });
+              }}
+              onClose={() => setShowBulkExcelUpload(false)}
+            />
+          </div>
+        </div>
+      )}
       
       {/* Lead Edit Modal */}
       {showLeadEditModal && editingLead && (
