@@ -1091,7 +1091,7 @@ const WorkflowAuthoringPanel = ({ isVisible }) => {
                       </div>
                     </div>
                     <div className="text-right text-sm text-gray-500">
-                      {result.tested_at.toLocaleString()}
+                      {result.tested_at ? new Date(result.tested_at).toLocaleString() : 'Unknown time'}
                     </div>
                   </div>
                 ))}
