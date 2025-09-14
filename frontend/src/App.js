@@ -4634,7 +4634,9 @@ const App = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Default Admin Content - Only show when no specific panel is active */}
+            {!activeAdminPanel && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Category Management */}
               <Card className="bg-white border-emerald-200 shadow-lg">
                 <CardHeader>
