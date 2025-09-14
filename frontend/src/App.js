@@ -5567,10 +5567,10 @@ const App = () => {
                             <Progress value={percentage} className="h-2" />
                             <div className="flex justify-between mt-1">
                               <span className="text-xs text-gray-600">
-                                {type === 'sales' ? `₹${(progress || 0).toLocaleString()}` : (progress || 0)}
+                                {type === 'sales' ? `₹${(Number(progress) || 0).toLocaleString()}` : (progress || 0)}
                               </span>
                               <span className="text-xs text-gray-600">
-                                {type === 'sales' ? `₹${(target || 0).toLocaleString()}` : (target || 0)}
+                                {type === 'sales' ? `₹${(Number(target) || 0).toLocaleString()}` : (target || 0)}
                               </span>
                             </div>
                           </div>
