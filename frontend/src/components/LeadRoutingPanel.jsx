@@ -790,7 +790,7 @@ const LeadRoutingPanel = ({ isVisible }) => {
                       </div>
                     </div>
                     <div className="text-right text-sm text-gray-500">
-                      {log.timestamp.toLocaleString()}
+                      {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Unknown time'}
                     </div>
                   </div>
                 ))}
