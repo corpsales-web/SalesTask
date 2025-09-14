@@ -90,6 +90,8 @@ from role_management_service import initialize_role_management_service, role_man
 from lead_management_service import initialize_lead_management_service, lead_management_service
 from voice_stt_service import initialize_voice_stt_service, voice_stt_service
 from offline_sync_service import initialize_offline_sync_service, offline_sync_service
+from lead_routing_service import initialize_lead_routing_service
+from workflow_authoring_service import initialize_workflow_authoring_service
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
