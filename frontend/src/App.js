@@ -82,7 +82,16 @@ const API = `${BACKEND_URL}/api`;
 const App = () => {
   // ResizeObserver error handling now unified in comprehensive useEffect below
 
-  const [dashboardStats, setDashboardStats] = useState(null);
+  const [dashboardStats, setDashboardStats] = useState({
+    totalLeads: 0,
+    activeLeads: 0,
+    completedTasks: 0,
+    pendingTasks: 0,
+    totalRevenue: 0,
+    conversionRate: 0,
+    recentLeads: [],
+    recentTasks: []
+  });
   const [leads, setLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
