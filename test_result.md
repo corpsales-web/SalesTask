@@ -504,7 +504,7 @@ frontend:
     file: "components/RoleManagementPanel.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "testing"
@@ -512,6 +512,18 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ ROLE MANAGEMENT PANEL WORKING: Role Management button found and accessible in Admin tab. Component is properly integrated with comprehensive role and department management features. Admin > Role Management button provides access to role creation, permission management, department management, and granular permission controls across all modules (leads, tasks, users, projects, AI, analytics, HRMS, ERP, system)."
+
+  - task: "Role Management Panel - Comprehensive Examples and Workflows"
+    implemented: true
+    working: "NA"
+    file: "components/RoleManagementPanel.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced RoleManagementPanel.jsx with comprehensive examples for role assignment and delegation workflows. Added Role Assignment & Delegation Workflows section with New Employee Onboarding, Role Promotion, and Temporary Delegation scenarios. Added Permission Matrix Examples section and Quick Assignment Templates for Customer Service, Technical, and Management teams. Current Roles section displays role cards with System Administrator, Sales Manager, Sales Agent, Project Manager, HR Manager, Field Executive roles showing permissions and user counts. Department Management section included. Need to test and verify all features work as expected."
 
   - task: "Face Check-In Component - Cross-Device Overhaul"
     implemented: true
