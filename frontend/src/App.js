@@ -2757,6 +2757,13 @@ const App = () => {
                     <Upload className="h-4 w-4 mr-2" />
                     Upload Files
                   </Button>
+                  <Button 
+                    className="bg-purple-600 hover:bg-purple-700 text-white" 
+                    onClick={() => setShowBulkExcelUpload(true)}
+                  >
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Bulk Excel Upload
+                  </Button>
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
