@@ -513,7 +513,7 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
                       <div className="text-right">
                         <div className="flex items-center">
                           <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                          <span className="text-green-600 font-medium">+{metrics.growth}%</span>
+                          <span className="text-green-600 font-medium">+{metrics?.growth || 0}%</span>
                         </div>
                         <p className="text-sm text-gray-600">{metrics.engagement_rate}% engagement</p>
                       </div>
