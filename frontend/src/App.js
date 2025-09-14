@@ -175,10 +175,8 @@ const App = () => {
   const [showFaceCheckInModal, setShowFaceCheckInModal] = useState(false);
   const [lastCheckInTime, setLastCheckInTime] = useState(null);
   
-  // New Dashboard Components State
-  const [showDigitalMarketingDashboard, setShowDigitalMarketingDashboard] = useState(false);
-  const [showLeadRoutingPanel, setShowLeadRoutingPanel] = useState(false);
-  const [showWorkflowAuthoringPanel, setShowWorkflowAuthoringPanel] = useState(false);
+  // Admin Panel State - Only one panel should be active at a time
+  const [activeAdminPanel, setActiveAdminPanel] = useState(null); // null, 'marketing', 'routing', 'workflow', 'roles'
   
   // Lead Sync State
   const [leadSyncDate, setLeadSyncDate] = useState(new Date().toISOString().split('T')[0]);
