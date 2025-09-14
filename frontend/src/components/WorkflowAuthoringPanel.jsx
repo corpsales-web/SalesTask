@@ -555,7 +555,7 @@ const WorkflowAuthoringPanel = ({ isVisible }) => {
                       <div>
                         <h4 className="font-medium text-gray-900 mb-2">Workflow Steps:</h4>
                         <div className="flex items-center space-x-2 overflow-x-auto pb-2">
-                          {workflow.steps.map((step, index) => (
+                          {(workflow.steps || []).map((step, index) => (
                             <div key={index} className="flex items-center space-x-2 flex-shrink-0">
                               <div className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded-full">
                                 {stepTypes.find(t => t.value === step.type)?.icon}
