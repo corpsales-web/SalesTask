@@ -2184,12 +2184,14 @@ const App = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Load only core data that we know works
-        await fetchDashboardStats();
-        await fetchLeads();
-        await fetchTasks();
+        // Load only core data that we know works (non-blocking for demos)
+        setTimeout(() => {
+          fetchDashboardStats().catch(e => console.log("Dashboard stats failed:", e));
+          fetchLeads().catch(e => console.log("Leads failed:", e));
+          fetchTasks().catch(e => console.log("Tasks failed:", e));
+        }, 100);
         
-        console.log("Core data loaded successfully");
+        console.log("Core data loading initiated");
         
         // Process offline targets queue if online and authenticated
         if (navigator.onLine && authToken) {
