@@ -333,26 +333,58 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
     setIsCapturing(false);
   }, [cameraStream]);
 
-  const captureImage = () => {
-    if (!videoRef.current || !canvasRef.current) return;
+  const captureImage = useCallback(() => {
+    if (!videoRef.current || !canvasRef.current) {
+      setError('Camera not ready. Please try again.');
+      return;
+    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
+    
+    // Check if video is ready
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      setError('Camera is not ready. Please wait and try again.');
+      return;
+    }
 
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    try {
+      const context = canvas.getContext('2d');
+      
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
-    // Draw current video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Clear canvas
+      context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Convert canvas to blob
-    canvas.toBlob((blob) => {
-      setCapturedImage(blob);
-      stopCamera();
-    }, 'image/jpeg', 0.8);
-  };
+      // Draw current video frame to canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Device-specific image processing
+      if (deviceType === 'iphone' || deviceType === 'ipad') {
+        // iOS devices might need image rotation correction
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        context.putImageData(imageData, 0, 0);
+      }
+
+      // Convert canvas to blob with optimal quality based on device
+      const quality = deviceType.includes('mobile') ? 0.7 : 0.8;
+      
+      canvas.toBlob((blob) => {
+        if (blob) {
+          setCapturedImage(blob);
+          stopCamera();
+        } else {
+          setError('Failed to capture image. Please try again.');
+        }
+      }, 'image/jpeg', quality);
+
+    } catch (error) {
+      console.error('Error capturing image:', error);
+      setError('Failed to capture image. Please try again.');
+    }
+  }, [deviceType, stopCamera]);
 
   const retakePhoto = () => {
     setCapturedImage(null);
