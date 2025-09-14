@@ -2957,7 +2957,7 @@ const App = () => {
                       {lead.budget && (
                         <p className="text-sm text-gray-600 flex items-center">
                           <DollarSign className="h-3 w-3 mr-1" />
-                          ₹{lead.budget.toLocaleString('en-IN')}
+                          ₹{(lead.budget || 0).toLocaleString('en-IN')}
                         </p>
                       )}
                       {lead.notes && (
@@ -3146,7 +3146,7 @@ const App = () => {
                             <p className="text-xs text-gray-600">{lead.phone}</p>
                             {lead.budget && (
                               <p className="text-xs text-emerald-600 font-medium mt-1">
-                                ₹{lead.budget.toLocaleString('en-IN')}
+                                ₹{(lead.budget || 0).toLocaleString('en-IN')}
                               </p>
                             )}
                           </div>
