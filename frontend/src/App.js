@@ -2497,13 +2497,24 @@ const App = () => {
           <TabsContent value="leads" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">Lead Management</h2>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Lead
-                  </Button>
-                </DialogTrigger>
+              <div className="flex gap-2">
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white" 
+                  onClick={() => {
+                    setSelectedProject(null);
+                    setShowFileUploadModal(true);
+                  }}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Files
+                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Lead
+                    </Button>
+                  </DialogTrigger>
                   <DialogContent className="max-w-2xl sm:max-w-lg md:max-w-2xl w-[95vw] max-h-[95vh] overflow-y-auto pointer-events-auto">
                     <DialogHeader>
                       <DialogTitle>Add New Lead</DialogTitle>
