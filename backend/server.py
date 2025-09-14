@@ -3562,6 +3562,7 @@ async def startup_event():
     try:
         # Initialize new services
         global role_management_service, lead_management_service, voice_stt_service, offline_sync_service
+        global lead_routing_service, workflow_authoring_service
         
         role_management_service = initialize_role_management_service(db)
         await role_management_service.initialize_default_roles()
@@ -3572,6 +3573,10 @@ async def startup_event():
         
         offline_sync_service = initialize_offline_sync_service(db)
         await offline_sync_service.start_background_sync()
+        
+        # Initialize new routing and authoring services
+        lead_routing_service = initialize_lead_routing_service(db)
+        workflow_authoring_service = initialize_workflow_authoring_service(db)
         
         logger.info("All services initialized successfully")
         
