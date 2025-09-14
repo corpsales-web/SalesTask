@@ -964,6 +964,30 @@ const App = () => {
     }
   };
 
+  // Lead sync function
+  const syncLeadsDateWise = async () => {
+    try {
+      const response = await axios.get(`${API}/leads/sync`, {
+        params: { date: leadSyncDate }
+      });
+      
+      // Update leads with synced data
+      setLeads(response.data.leads || []);
+      
+      toast({
+        title: "Sync Complete",
+        description: `Synced ${response.data.leads?.length || 0} leads for ${leadSyncDate}`,
+      });
+    } catch (error) {
+      console.error("Error syncing leads:", error);
+      toast({
+        title: "Sync Failed",
+        description: "Failed to sync leads. Using existing data.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Voice-to-Task functions
   const startVoiceRecording = async () => {
     try {
