@@ -4693,6 +4693,123 @@ const App = () => {
                 </CardContent>
               </Card>
 
+              {/* HRMS Leave Types Management */}
+              <Card className="bg-white border-blue-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-blue-800 flex items-center">
+                    <Calendar className="h-5 w-5 mr-2" />
+                    Leave Types Management
+                  </CardTitle>
+                  <CardDescription>
+                    Manage available leave types for HRMS system
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Add New Leave Type */}
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter new leave type"
+                      value={newLeaveType}
+                      onChange={(e) => setNewLeaveType(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={addLeaveType}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  </div>
+
+                  {/* Leave Types List */}
+                  <div>
+                    <Label className="text-sm font-medium text-blue-700 mb-2 block">Available Leave Types:</Label>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {leaveTypes.map((leaveType) => (
+                        <div key={leaveType} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <span className="font-medium text-blue-800">{leaveType}</span>
+                          <div className="flex gap-2">
+                            {!['Annual Leave', 'Sick Leave', 'Maternity Leave', 'Paternity Leave'].includes(leaveType) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => deleteLeaveType(leaveType)}
+                                className="border-red-300 hover:bg-red-100 text-red-600"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Project Types Management */}
+              <Card className="bg-white border-purple-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-purple-800 flex items-center">
+                    <Building className="h-5 w-5 mr-2" />
+                    Project Types Management
+                  </CardTitle>
+                  <CardDescription>
+                    Manage available project types for better categorization
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Add New Project Type */}
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter new project type"
+                      value={newProjectType}
+                      onChange={(e) => setNewProjectType(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={addProjectType}
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  </div>
+
+                  {/* Project Types List */}
+                  <div>
+                    <Label className="text-sm font-medium text-purple-700 mb-2 block">Available Project Types:</Label>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {projectTypes.map((projectType) => (
+                        <div key={projectType} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
+                          <span className="font-medium text-purple-800">{projectType}</span>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-purple-300 hover:bg-purple-100"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => deleteProjectType(projectType)}
+                              className="border-red-300 hover:bg-red-100 text-red-600"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* System Statistics */}
               <Card className="bg-white border-emerald-200 shadow-lg">
                 <CardHeader>
