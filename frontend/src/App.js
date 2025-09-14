@@ -3052,6 +3052,16 @@ const App = () => {
                     </Button>
                   )}
                 </div>
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white" 
+                  onClick={() => {
+                    setSelectedProject(null);
+                    setShowFileUploadModal(true);
+                  }}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Files
+                </Button>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
