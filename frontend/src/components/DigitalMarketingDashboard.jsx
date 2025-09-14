@@ -638,7 +638,7 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
                       <div>
                         <p className="text-2xl font-bold text-gray-900">{formatNumber(metrics.reach)}</p>
                         <p className="text-sm text-gray-600">Monthly Reach</p>
-                        <p className="text-sm text-blue-600 mt-1">{metrics.engagement_rate}% engagement</p>
+                        <p className="text-sm text-blue-600 mt-1">{metrics?.engagement_rate || 0}% engagement</p>
                       </div>
                     </div>
                     
