@@ -321,13 +321,17 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
     }
   };
 
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
     if (cameraStream) {
       cameraStream.getTracks().forEach(track => track.stop());
       setCameraStream(null);
     }
     setIsCapturing(false);
-  };
+  }, [cameraStream]);
 
   const captureImage = () => {
     if (!videoRef.current || !canvasRef.current) return;
