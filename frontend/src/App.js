@@ -3658,21 +3658,20 @@ const App = () => {
                         </Button>
                       </form>
                     </DialogContent>
-                    </Dialog>
+                  </Dialog>
                     
-                    <Button 
-                      className="flex-1 bg-blue-600 hover:bg-blue-700" 
-                      size="sm"
-                      onClick={() => {
-                        setSelectedProject(null);
-                        setShowFileUploadModal(true);
-                      }}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Files
-                    </Button>
-                  </div>
-                {/* Duplicate dialog content removed */}
+                  <Button 
+                    className="flex-1 bg-blue-600 hover:bg-blue-700" 
+                    size="sm"
+                    onClick={() => {
+                      setSelectedProject(null);
+                      setShowFileUploadModal(true);
+                    }}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Files
+                  </Button>
+                </div>
                 </CardContent>
               </Card>
             </div>
