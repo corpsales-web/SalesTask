@@ -587,8 +587,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Lead Routing APIs Testing Complete"
-    - "Workflow Authoring APIs Testing Complete"
+    - "Role Management Panel - Comprehensive Examples and Workflows"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
