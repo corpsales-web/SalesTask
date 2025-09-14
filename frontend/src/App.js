@@ -182,8 +182,6 @@ const App = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
 
-  // Temporarily disable autosave initialization
-  /*
   // Initialize autosave for lead edit form
   useEffect(() => {
     if (showLeadEditModal && editingLead && currentUser) {
@@ -200,16 +198,19 @@ const App = () => {
   useEffect(() => {
     if (showLeadEditModal && editingLead && currentUser) {
       const loadDraft = async () => {
-        const draft = await autoSaveManager.loadDraft('lead', editingLead.id, currentUser.id);
-        if (draft && draft.data) {
-          setLeadEditForm(prev => ({ ...prev, ...draft.data }));
-          console.log('Loaded draft for lead:', editingLead.id);
+        try {
+          const draft = await autoSaveManager.loadDraft('lead', editingLead.id, currentUser.id);
+          if (draft && draft.data) {
+            setLeadEditForm(prev => ({ ...prev, ...draft.data }));
+            console.log('Loaded draft for lead:', editingLead.id);
+          }
+        } catch (error) {
+          console.log('No draft found or error loading draft:', error);
         }
       };
       loadDraft();
     }
   }, [showLeadEditModal, editingLead, currentUser]);
-  */
   
   const mediaRecorder = useRef(null);
   const { toast } = useToast();
