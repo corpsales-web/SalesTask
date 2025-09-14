@@ -580,7 +580,7 @@ const LeadRoutingPanel = ({ isVisible }) => {
         {/* Rules Tab */}
         <TabsContent value="rules" className="space-y-6">
           <div className="grid gap-6">
-            {routingRules.map((rule) => (
+            {(routingRules || []).map((rule) => (
               <Card key={rule.id} className="bg-white shadow-lg">
                 <CardHeader>
                   <div className="flex justify-between items-start">
