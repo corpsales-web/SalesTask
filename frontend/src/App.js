@@ -2806,10 +2806,189 @@ const App = () => {
               {leads.map((lead) => (
                 <Card key={lead.id} className="bg-white shadow-lg border-emerald-100 hover:shadow-xl transition-shadow">
                   <CardHeader>
-                    <CardTitle>{lead.name}</CardTitle>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg text-gray-900">{lead.name}</CardTitle>
+                        <CardDescription className="flex items-center mt-1">
+                          <Phone className="h-3 w-3 mr-1" />
+                          {lead.phone}
+                        </CardDescription>
+                      </div>
+                      <Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <p>Lead content placeholder</p>
+                    <div className="space-y-2">
+                      {lead.email && (
+                        <p className="text-sm text-gray-600 flex items-center">
+                          <Mail className="h-3 w-3 mr-1" />
+                          {lead.email}
+                        </p>
+                      )}
+                      {lead.location && (
+                        <p className="text-sm text-gray-600 flex items-center">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {lead.location}
+                        </p>
+                      )}
+                      {lead.budget && (
+                        <p className="text-sm text-gray-600 flex items-center">
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          ₹{lead.budget.toLocaleString('en-IN')}
+                        </p>
+                      )}
+                      {lead.notes && (
+                        <p className="text-sm text-gray-600 mt-2">{lead.notes}</p>
+                      )}
+                    </div>
+                    
+                    {/* Lead Action Buttons */}
+                    <div className="mt-4 space-y-3">
+                      {/* Row 1: Communication Buttons */}
+                      <div className="flex flex-wrap gap-2">
+                        {lead.phone && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedLeadForActions(lead);
+                              setActionType('call');
+                              setShowLeadActionsPanel(true);
+                            }}
+                            className="bg-blue-50 border-blue-200 hover:bg-blue-100 text-xs flex items-center"
+                          >
+                            📞 Call
+                          </Button>
+                        )}
+                        
+                        {lead.phone && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedLeadForActions(lead);
+                              setActionType('whatsapp');
+                              setShowLeadActionsPanel(true);
+                            }}
+                            className="bg-green-50 border-green-200 hover:bg-green-100 text-xs flex items-center"
+                          >
+                            💬 WhatsApp
+                          </Button>
+                        )}
+                        
+                        {lead.email && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedLeadForActions(lead);
+                              setActionType('email');
+                              setShowLeadActionsPanel(true);
+                            }}
+                            className="bg-red-50 border-red-200 hover:bg-red-100 text-xs flex items-center"
+                          >
+                            📧 Email
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {/* Row 2: Action Buttons */}
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLeadForActions(lead);
+                            setActionType('send_images');
+                            setShowLeadActionsPanel(true);
+                          }}
+                          className="bg-purple-50 border-purple-200 hover:bg-purple-100 text-xs flex items-center"
+                        >
+                          🖼️ Images
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLeadForActions(lead);
+                            setActionType('send_catalogue');
+                            setShowLeadActionsPanel(true);
+                          }}
+                          className="bg-indigo-50 border-indigo-200 hover:bg-indigo-100 text-xs flex items-center"
+                        >
+                          📋 Catalogue
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLeadForActions(lead);
+                            setActionType('follow_up');
+                            setShowLeadActionsPanel(true);
+                          }}
+                          className="bg-orange-50 border-orange-200 hover:bg-orange-100 text-xs flex items-center"
+                        >
+                          📅 Follow Up
+                        </Button>
+                      </div>
+                      
+                      {/* Row 3: Management Buttons */}
+                      <div className="flex flex-wrap gap-2">
+                        <Select onValueChange={(value) => updateLeadStatus(lead.id, value)}>
+                          <SelectTrigger className="flex-1 h-8 text-xs">
+                            <SelectValue placeholder="Update Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="New">New</SelectItem>
+                            <SelectItem value="Qualified">Qualified</SelectItem>
+                            <SelectItem value="Proposal">Proposal</SelectItem>
+                            <SelectItem value="Negotiation">Negotiation</SelectItem>
+                            <SelectItem value="Won">Won</SelectItem>
+                            <SelectItem value="Lost">Lost</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingLead(lead);
+                            setLeadEditForm({
+                              name: lead.name || "",
+                              email: lead.email || "",
+                              phone: lead.phone || "",
+                              company: lead.company || "",
+                              designation: lead.designation || "",
+                              location: lead.location || "",
+                              budget: lead.budget || "",
+                              requirements: lead.requirements || "",
+                              notes: lead.notes || "",
+                              source: lead.source || "",
+                              assigned_to: lead.assigned_to || ""
+                            });
+                            setShowLeadEditModal(true);
+                          }}
+                          className="bg-gray-50 border-gray-200 hover:bg-gray-100 text-xs"
+                        >
+                          ✏️ Edit
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLeadForActions(lead);
+                            setActionType('remark');
+                            setShowLeadActionsPanel(true);
+                          }}
+                          className="bg-yellow-50 border-yellow-200 hover:bg-yellow-100 text-xs"
+                        >
+                          💭 Remark
+                        </Button>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
