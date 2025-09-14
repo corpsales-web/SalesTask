@@ -366,8 +366,9 @@ const RoleManagementPanel = ({ currentUser }) => {
   };
 
   // Check if current user has permission to manage roles/departments
-  const canManageRoles = currentUser?.role === 'Super Admin';
-  const canManageDepartments = ['Super Admin', 'Admin'].includes(currentUser?.role);
+  // For demo purposes, also allow viewing if currentUser is not set
+  const canManageRoles = !currentUser || currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin';
+  const canManageDepartments = !currentUser || ['Super Admin', 'Admin', 'HR Manager'].includes(currentUser?.role);
 
   if (loading) return <div className="flex justify-center py-8"><div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div></div>;
 
