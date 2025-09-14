@@ -3443,7 +3443,7 @@ const App = () => {
                             "{task.remarks[task.remarks.length - 1].content.substring(0, 100)}..."
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
-                            {new Date(task.remarks[task.remarks.length - 1].timestamp).toLocaleString()}
+                            {task.remarks && task.remarks.length > 0 ? new Date(task.remarks[task.remarks.length - 1].timestamp).toLocaleString() : ''}
                           </div>
                         </div>
                       )}
