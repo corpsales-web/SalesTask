@@ -4469,6 +4469,27 @@ const App = () => {
               </div>
             </div>
 
+            {/* Digital Marketing Dashboard */}
+            {showDigitalMarketingDashboard && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <DigitalMarketingDashboard isVisible={showDigitalMarketingDashboard} />
+              </div>
+            )}
+
+            {/* Lead Routing Panel */}
+            {showLeadRoutingPanel && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <LeadRoutingPanel isVisible={showLeadRoutingPanel} />
+              </div>
+            )}
+
+            {/* Workflow Authoring Panel */}
+            {showWorkflowAuthoringPanel && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <WorkflowAuthoringPanel isVisible={showWorkflowAuthoringPanel} />
+              </div>
+            )}
+
             {/* Role Management Panel */}
             {showRoleManagementPanel && currentUser && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
