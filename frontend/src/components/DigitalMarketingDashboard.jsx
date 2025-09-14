@@ -463,8 +463,8 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-orange-600">Impressions</p>
-                    <p className="text-2xl font-bold text-orange-900">{formatNumber(analytics.total_impressions)}</p>
-                    <p className="text-xs text-orange-700">CTR: {analytics.average_ctr}%</p>
+                    <p className="text-2xl font-bold text-orange-900">{formatNumber(analytics.total_impressions || 0)}</p>
+                    <p className="text-xs text-orange-700">CTR: {analytics.average_ctr || 0}%</p>
                   </div>
                   <Eye className="h-8 w-8 text-orange-600" />
                 </div>
