@@ -787,7 +787,7 @@ const WorkflowAuthoringPanel = ({ isVisible }) => {
                     <div>
                       <h4 className="text-sm font-medium text-gray-900">System Prompt:</h4>
                       <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded mt-1">
-                        {template.system_prompt.substring(0, 120)}...
+                        {template.system_prompt ? template.system_prompt.substring(0, 120) : 'No system prompt'}...
                       </p>
                     </div>
                     <div>
