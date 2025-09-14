@@ -391,18 +391,39 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
     startCamera();
   };
 
-  const switchCamera = async () => {
-    const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
-    setFacingMode(newFacingMode);
-    
-    if (isCapturing) {
+  const switchCamera = useCallback(async () => {
+    try {
+      setError(null);
+      
+      if (availableDevices.length <= 1) {
+        setError('Only one camera available');
+        return;
+      }
+
+      // Stop current camera
       stopCamera();
+      
+      // Switch facing mode
+      const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+      setFacingMode(newFacingMode);
+      
+      // Find next available device
+      if (availableDevices.length > 1) {
+        const currentIndex = availableDevices.findIndex(device => device.deviceId === currentDeviceId);
+        const nextIndex = (currentIndex + 1) % availableDevices.length;
+        setCurrentDeviceId(availableDevices[nextIndex].deviceId);
+      }
+      
       // Small delay to ensure stream is properly stopped
       setTimeout(() => {
         startCamera();
-      }, 100);
+      }, 200);
+      
+    } catch (error) {
+      console.error('Error switching camera:', error);
+      setError('Failed to switch camera. Please try again.');
     }
-  };
+  }, [facingMode, availableDevices, currentDeviceId, stopCamera, startCamera]);
 
   const submitCheckIn = async () => {
     if (!capturedImage) {
