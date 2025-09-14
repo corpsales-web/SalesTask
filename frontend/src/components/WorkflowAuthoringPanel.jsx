@@ -750,7 +750,7 @@ const WorkflowAuthoringPanel = ({ isVisible }) => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {promptTemplates.map((template) => (
+            {(promptTemplates || []).map((template) => (
               <Card key={template.id} className="bg-white shadow-lg">
                 <CardHeader>
                   <div className="flex justify-between items-start">
