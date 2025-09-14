@@ -170,6 +170,9 @@ const App = () => {
   const [showLeadRoutingPanel, setShowLeadRoutingPanel] = useState(false);
   const [showWorkflowAuthoringPanel, setShowWorkflowAuthoringPanel] = useState(false);
   
+  // Lead Sync State
+  const [leadSyncDate, setLeadSyncDate] = useState(new Date().toISOString().split('T')[0]);
+  
   // Lead Edit State
   const [showLeadEditModal, setShowLeadEditModal] = useState(false);
   const [editingLead, setEditingLead] = useState(null);
