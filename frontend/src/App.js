@@ -5836,6 +5836,137 @@ const App = () => {
         </div>
       )}
       
+      {/* Task Remark Modal */}
+      {showTaskRemarkModal && selectedTask && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">
+                  💭 Task Remark - {selectedTask.title}
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTaskRemarkModal(false)}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label>Stage: {taskRemarkStage}</Label>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Adding remark for task at {taskRemarkStage} stage
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="task-remark">Remark *</Label>
+                  <Textarea
+                    id="task-remark"
+                    value={taskRemark}
+                    onChange={(e) => setTaskRemark(e.target.value)}
+                    placeholder="Enter your remark about this task..."
+                    rows="4"
+                    required
+                  />
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={() => setShowVoiceSTTModal(true)}
+                    variant="outline"
+                    className="bg-purple-50 border-purple-200 hover:bg-purple-100"
+                  >
+                    🎤 Voice Remark
+                  </Button>
+                </div>
+                
+                {/* Show existing task remarks */}
+                {selectedTask.remarks && selectedTask.remarks.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-3">Previous Remarks</h3>
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {selectedTask.remarks.map((remark, index) => (
+                        <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                          <div className="text-sm text-gray-800">{remark.content}</div>
+                          <div className="text-xs text-gray-500 mt-1 flex justify-between">
+                            <span>Stage: {remark.stage}</span>
+                            <span>{new Date(remark.timestamp).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowTaskRemarkModal(false)}
+                >
+                  Cancel
+                </Button>
+                
+                <Button
+                  onClick={submitTaskRemark}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                  disabled={!taskRemark.trim()}
+                >
+                  Save Remark
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Task Upload Modal */}
+      {showTaskUploadModal && selectedTask && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">
+                  📎 Upload Files for Task: {selectedTask.title}
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTaskUploadModal(false)}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <FileUploadComponent
+                projectId={`task_${selectedTask.id}`}
+                onUploadComplete={(result) => {
+                  console.log('Task file uploaded:', result);
+                  toast({
+                    title: "Files Uploaded",
+                    description: `Files uploaded successfully for task: ${selectedTask.title}`,
+                  });
+                }}
+                maxFiles={10}
+                acceptedTypes={{
+                  'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
+                  'application/pdf': ['.pdf'],
+                  'text/*': ['.txt', '.csv', '.json'],
+                  'application/vnd.ms-excel': ['.xls', '.xlsx'],
+                  'application/msword': ['.doc', '.docx']
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Toaster />
     </div>
   );
