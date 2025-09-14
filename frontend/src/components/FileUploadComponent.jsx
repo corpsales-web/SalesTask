@@ -7,8 +7,12 @@ const FileUploadComponent = ({ projectId, onUploadComplete, maxFiles = 10, accep
   const [uploadProgress, setUploadProgress] = useState({});
   const [completedUploads, setCompletedUploads] = useState([]);
   const [errors, setErrors] = useState({});
+  const [showCameraCapture, setShowCameraCapture] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
   
   const abortControllers = useRef({});
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 
   const defaultAcceptedTypes = {
