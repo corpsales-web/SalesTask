@@ -617,22 +617,30 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
             </div>
 
             {/* Camera controls overlay */}
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-4">
               <button
                 onClick={captureImage}
-                className="w-16 h-16 bg-white rounded-full border-4 border-gray-300 hover:border-gray-400 transition-colors"
+                className="w-16 h-16 bg-white rounded-full border-4 border-gray-300 hover:border-gray-400 transition-colors shadow-lg"
+                title="Capture photo"
               >
                 <div className="w-12 h-12 bg-gray-300 rounded-full mx-auto"></div>
               </button>
               
-              {isMobileDevice() && (
+              {(isMobileDevice() || availableDevices.length > 1) && (
                 <button
                   onClick={switchCamera}
-                  className="w-12 h-12 bg-white bg-opacity-80 rounded-full flex items-center justify-center text-gray-700 hover:bg-opacity-100 transition-all"
+                  className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center text-gray-700 hover:bg-opacity-100 transition-all shadow-lg"
+                  title="Switch camera"
+                  disabled={availableDevices.length <= 1}
                 >
                   🔄
                 </button>
               )}
+              
+              {/* Camera info */}
+              <div className="bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                {facingMode === 'user' ? 'Front' : 'Back'} Camera
+              </div>
             </div>
           </div>
 
