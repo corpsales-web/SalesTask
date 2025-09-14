@@ -424,7 +424,7 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-blue-600">Total Spend</p>
-                    <p className="text-2xl font-bold text-blue-900">{formatCurrency(analytics.total_spend)}</p>
+                    <p className="text-2xl font-bold text-blue-900">{formatCurrency(analytics.total_spend || 0)}</p>
                     <p className="text-xs text-blue-700">This period</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-blue-600" />
