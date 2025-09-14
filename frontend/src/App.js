@@ -3998,7 +3998,7 @@ const App = () => {
                               </div>
                               <div className="text-right">
                                 <span className="text-emerald-800 font-medium">
-                                  ₹{emp.net_salary?.toLocaleString('en-IN')}
+                                  ₹{(emp.net_salary || 0).toLocaleString('en-IN')}
                                 </span>
                                 <br />
                                 <span className="text-emerald-600 text-xs">
