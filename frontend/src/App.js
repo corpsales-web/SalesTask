@@ -6245,7 +6245,7 @@ const App = () => {
                           <div className="text-sm text-gray-800">{remark.content}</div>
                           <div className="text-xs text-gray-500 mt-1 flex justify-between">
                             <span>Stage: {remark.stage}</span>
-                            <span>{new Date(remark.timestamp).toLocaleString()}</span>
+                            <span>{remark.timestamp ? new Date(remark.timestamp).toLocaleString() : ''}</span>
                           </div>
                         </div>
                       ))}
