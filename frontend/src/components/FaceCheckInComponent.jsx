@@ -535,9 +535,33 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
     });
   };
 
-  const isMobileDevice = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  };
+  const isMobileDevice = useCallback(() => {
+    return deviceType.includes('iphone') || deviceType.includes('android') || deviceType === 'ipad';
+  }, [deviceType]);
+
+  // Handle orientation changes on mobile devices
+  useEffect(() => {
+    if (!isMobileDevice()) return;
+
+    const handleOrientationChange = () => {
+      // Small delay to ensure dimensions are updated
+      setTimeout(() => {
+        if (isCapturing && videoRef.current) {
+          // Restart camera to adjust to new orientation
+          stopCamera();
+          setTimeout(startCamera, 500);
+        }
+      }, 100);
+    };
+
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleOrientationChange);
+
+    return () => {
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener('resize', handleOrientationChange);
+    };
+  }, [isMobileDevice, isCapturing, stopCamera, startCamera]);
 
   return (
     <div className="face-checkin-component bg-white rounded-lg border border-gray-200 p-6">
