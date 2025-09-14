@@ -15,6 +15,57 @@ const FileUploadComponent = ({ projectId, onUploadComplete, maxFiles = 10, accep
   const canvasRef = useRef(null);
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 
+  // Camera functionality
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          width: { ideal: 1280 }, 
+          height: { ideal: 720 },
+          facingMode: 'environment' // Use back camera if available
+        } 
+      });
+      setCameraStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setShowCameraCapture(true);
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      setErrors(prev => ({ ...prev, camera: 'Failed to access camera. Please check permissions.' }));
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setShowCameraCapture(false);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0);
+      
+      canvas.toBlob(async (blob) => {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `camera-capture-${timestamp}.jpg`;
+        const file = new File([blob], filename, { type: 'image/jpeg' });
+        
+        // Upload the captured photo
+        await uploadFile(file);
+        stopCamera();
+      }, 'image/jpeg', 0.8);
+    }
+  };
+
   const defaultAcceptedTypes = {
     'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp'],
     'video/*': ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm'],
