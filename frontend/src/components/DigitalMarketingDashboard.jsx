@@ -615,7 +615,7 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
         {/* Social Media Tab */}
         <TabsContent value="social" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(socialMetrics).map(([platform, metrics]) => (
+            {Object.entries(socialMetrics || {}).map(([platform, metrics]) => (
               <Card key={platform} className="bg-white shadow-lg">
                 <CardHeader>
                   <CardTitle className="capitalize flex items-center">
