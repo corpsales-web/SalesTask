@@ -916,6 +916,86 @@ async def delete_lead(lead_id: str):
         raise HTTPException(status_code=404, detail="Lead not found")
     return {"message": "Lead deleted successfully"}
 
+# Lead Routing Routes
+@api_router.post("/routing/rules")
+async def create_routing_rule(rule_data: dict, user_id: str = Depends(get_current_user_id)):
+    """Create a new lead routing rule"""
+    result = await lead_routing_service.create_routing_rule(rule_data, user_id)
+    if not result['success']:
+        raise HTTPException(status_code=400, detail=result['error'])
+    return result
+
+@api_router.get("/routing/rules")
+async def get_routing_rules(source: Optional[str] = None, active_only: bool = True):
+    """Get lead routing rules"""
+    rules = await lead_routing_service.get_routing_rules(source=source, active_only=active_only)
+    return {"rules": rules}
+
+@api_router.post("/routing/route-lead")
+async def route_lead(lead_data: dict):
+    """Route a lead based on configured rules"""
+    result = await lead_routing_service.route_lead(lead_data)
+    return result
+
+# Workflow Authoring Routes
+@api_router.post("/workflows/prompt-templates")
+async def create_prompt_template(template_data: dict, user_id: str = Depends(get_current_user_id)):
+    """Create a new GPT-5 prompt template"""
+    result = await workflow_authoring_service.create_prompt_template(template_data, user_id)
+    if not result['success']:
+        raise HTTPException(status_code=400, detail=result['error'])
+    return result
+
+@api_router.get("/workflows/prompt-templates")
+async def get_prompt_templates(category: Optional[str] = None, active_only: bool = True):
+    """Get prompt templates"""
+    templates = await workflow_authoring_service.get_prompt_templates(category=category, active_only=active_only)
+    return {"templates": templates}
+
+@api_router.post("/workflows/prompt-templates/{template_id}/test")
+async def test_prompt_template(template_id: str, test_data: dict, user_id: str = Depends(get_current_user_id)):
+    """Test a prompt template with sample data"""
+    result = await workflow_authoring_service.test_prompt_template(template_id, test_data, user_id)
+    if not result['success']:
+        raise HTTPException(status_code=400, detail=result['error'])
+    return result
+
+@api_router.post("/workflows")
+async def create_workflow(workflow_data: dict, user_id: str = Depends(get_current_user_id)):
+    """Create a new workflow"""
+    result = await workflow_authoring_service.create_workflow(workflow_data, user_id)
+    if not result['success']:
+        raise HTTPException(status_code=400, detail=result['error'])
+    return result
+
+@api_router.get("/workflows")
+async def get_workflows(category: Optional[str] = None, published_only: bool = False):
+    """Get workflows"""
+    workflows = await workflow_authoring_service.get_workflows(category=category, published_only=published_only)
+    return {"workflows": workflows}
+
+@api_router.post("/workflows/{workflow_id}/test")
+async def test_workflow(workflow_id: str, test_data: dict, user_id: str = Depends(get_current_user_id)):
+    """Test a workflow with sample data"""
+    result = await workflow_authoring_service.test_workflow(workflow_id, test_data, user_id)
+    if not result['success']:
+        raise HTTPException(status_code=400, detail=result['error'])
+    return result
+
+@api_router.post("/workflows/{workflow_id}/publish")
+async def publish_workflow(workflow_id: str, user_id: str = Depends(get_current_user_id)):
+    """Publish a workflow for production use"""
+    result = await workflow_authoring_service.publish_workflow(workflow_id, user_id)
+    if not result['success']:
+        raise HTTPException(status_code=400, detail=result['error'])
+    return result
+
+@api_router.get("/workflows/{workflow_id}/analytics")
+async def get_workflow_analytics(workflow_id: str):
+    """Get workflow analytics and performance data"""
+    analytics = await workflow_authoring_service.get_workflow_analytics(workflow_id)
+    return {"analytics": analytics}
+
 # Task Management Routes
 @api_router.post("/tasks", response_model=Task)
 async def create_task(task_data: TaskCreate):
