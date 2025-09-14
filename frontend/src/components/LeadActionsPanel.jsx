@@ -633,7 +633,12 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
   };
 
   const formatDateTime = (timestamp) => {
-    return new Date(timestamp).toLocaleString();
+    if (!timestamp) return 'Unknown time';
+    try {
+      return new Date(timestamp).toLocaleString();
+    } catch (error) {
+      return 'Invalid time';
+    }
   };
 
   const getActionIcon = (actionType) => {
