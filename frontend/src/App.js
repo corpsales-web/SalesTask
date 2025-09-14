@@ -3964,6 +3964,7 @@ const App = () => {
                     <Button 
                       className="bg-indigo-600 hover:bg-indigo-700 text-white" 
                       size="sm"
+                      onClick={() => setShowCatalogManager(true)}
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       Manage Files
