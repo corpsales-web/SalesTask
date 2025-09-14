@@ -3605,7 +3605,7 @@ const App = () => {
                     {invoices.slice(0, 3).map((invoice, index) => (
                       <div key={index} className="flex justify-between items-center text-sm mb-1">
                         <span className="text-emerald-700">{invoice.invoice_number}</span>
-                        <span className="font-medium text-emerald-800">₹{invoice.total_amount?.toLocaleString('en-IN')}</span>
+                        <span className="font-medium text-emerald-800">₹{(invoice.total_amount || 0).toLocaleString('en-IN')}</span>
                       </div>
                     ))}
                   </div>
