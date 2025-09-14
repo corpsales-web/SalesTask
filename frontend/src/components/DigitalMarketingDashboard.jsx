@@ -450,7 +450,7 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-purple-600">ROAS</p>
-                    <p className="text-2xl font-bold text-purple-900">{analytics.average_roas}x</p>
+                    <p className="text-2xl font-bold text-purple-900">{analytics.average_roas || 0}x</p>
                     <p className="text-xs text-purple-700">Return on Ad Spend</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-purple-600" />
