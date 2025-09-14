@@ -173,6 +173,16 @@ const App = () => {
   // Lead Sync State
   const [leadSyncDate, setLeadSyncDate] = useState(new Date().toISOString().split('T')[0]);
   
+  // HRMS Admin State
+  const [leaveTypes, setLeaveTypes] = useState([
+    'Annual Leave', 'Sick Leave', 'Maternity Leave', 'Paternity Leave', 'Emergency Leave'
+  ]);
+  const [newLeaveType, setNewLeaveType] = useState("");
+  const [projectTypes, setProjectTypes] = useState([
+    'Residential Garden', 'Commercial Landscaping', 'Terrace Garden', 'Vertical Garden', 'Indoor Plants'
+  ]);
+  const [newProjectType, setNewProjectType] = useState("");
+  
   // Lead Edit State
   const [showLeadEditModal, setShowLeadEditModal] = useState(false);
   const [editingLead, setEditingLead] = useState(null);
