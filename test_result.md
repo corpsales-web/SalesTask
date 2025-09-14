@@ -456,6 +456,18 @@ frontend:
         agent: "testing"
         comment: "⚠️ ENHANCED FILE UPLOAD PARTIALLY WORKING: Component exists and is integrated in ERP tab. Found upload functionality in ERP Management section. Component has full drag & drop functionality, progress tracking, and thumbnails. However, not integrated into main header as expected. Upload functionality is accessible through ERP > Project Gallery section."
 
+  - task: "JavaScript Runtime Errors in New Admin Components"
+    implemented: true
+    working: false
+    file: "components/DigitalMarketingDashboard.jsx, components/LeadRoutingPanel.jsx, components/WorkflowAuthoringPanel.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL JAVASCRIPT RUNTIME ERRORS: Multiple 'Cannot read properties of undefined (reading 'toString')' errors detected in new admin components. Errors occur in DigitalMarketingDashboard, LeadRoutingPanel, and WorkflowAuthoringPanel components. These errors prevent the new dashboard panels from loading when Management buttons are clicked. Specific errors: formatNumber function issues, react-stack-bottom-frame errors, renderWithHooks errors, updateFunctionComponent errors, beginWork errors, runWithFiberInDEV errors, performUnitOfWork errors, workLoopSync errors, renderRootSync errors. All new management buttons are visible but clicking them causes JavaScript crashes preventing proper functionality."
+
   - task: "Lead Actions Panel"
     implemented: true
     working: true
