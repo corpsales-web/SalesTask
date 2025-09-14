@@ -22,9 +22,117 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 
+  // Enhanced device detection
+  const detectDevice = useCallback(() => {
+    const userAgent = navigator.userAgent;
+    let device = 'unknown';
+    let browser = 'unknown';
+
+    // Device detection
+    if (/iPad/i.test(userAgent)) device = 'ipad';
+    else if (/iPhone/i.test(userAgent)) device = 'iphone';
+    else if (/Android/i.test(userAgent) && /Mobile/i.test(userAgent)) device = 'android-mobile';
+    else if (/Android/i.test(userAgent)) device = 'android-tablet';
+    else if (/Macintosh/i.test(userAgent)) device = 'macbook';
+    else if (/Windows/i.test(userAgent)) device = 'windows';
+    else device = 'desktop';
+
+    // Browser detection
+    if (/Chrome/i.test(userAgent) && !/Edge/i.test(userAgent)) browser = 'chrome';
+    else if (/Firefox/i.test(userAgent)) browser = 'firefox';
+    else if (/Safari/i.test(userAgent) && !/Chrome/i.test(userAgent)) browser = 'safari';
+    else if (/Edge/i.test(userAgent)) browser = 'edge';
+    else browser = 'other';
+
+    setDeviceType(device);
+    setBrowserType(browser);
+    
+    return { device, browser };
+  }, []);
+
+  // Check camera permission status
+  const checkCameraPermission = useCallback(async () => {
+    try {
+      if (!navigator.permissions) {
+        setCameraPermissionStatus('unknown');
+        return 'unknown';
+      }
+
+      const permission = await navigator.permissions.query({ name: 'camera' });
+      setCameraPermissionStatus(permission.state);
+      return permission.state;
+    } catch (error) {
+      console.warn('Could not check camera permission:', error);
+      setCameraPermissionStatus('unknown');
+      return 'unknown';
+    }
+  }, []);
+
+  // Get available camera devices
+  const getAvailableDevices = useCallback(async () => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        console.warn('enumerateDevices not supported');
+        return [];
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      setAvailableDevices(videoDevices);
+      return videoDevices;
+    } catch (error) {
+      console.warn('Could not enumerate devices:', error);
+      setAvailableDevices([]);
+      return [];
+    }
+  }, []);
+
+  // Check supported constraints
+  const checkSupportedConstraints = useCallback(() => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getSupportedConstraints) {
+      setSupportedConstraints({});
+      return {};
+    }
+
+    const constraints = navigator.mediaDevices.getSupportedConstraints();
+    setSupportedConstraints(constraints);
+    return constraints;
+  }, []);
+
+  // Enhanced initialization
+  useEffect(() => {
+    const initializeComponent = async () => {
+      setIsInitializing(true);
+      
+      try {
+        // Detect device and browser
+        detectDevice();
+        
+        // Check permissions
+        await checkCameraPermission();
+        
+        // Get available devices
+        await getAvailableDevices();
+        
+        // Check supported constraints
+        checkSupportedConstraints();
+        
+      } catch (error) {
+        console.warn('Initialization error:', error);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    initializeComponent();
+  }, [detectDevice, checkCameraPermission, getAvailableDevices, checkSupportedConstraints]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      // Cleanup camera stream on unmount
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
       if (cameraStream) {
         cameraStream.getTracks().forEach(track => track.stop());
       }
