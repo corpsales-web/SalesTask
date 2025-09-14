@@ -528,7 +528,7 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
         {/* Campaigns Tab */}
         <TabsContent value="campaigns" className="space-y-6">
           <div className="grid gap-6">
-            {campaigns.map((campaign) => (
+            {(campaigns || []).map((campaign) => (
               <Card key={campaign.id} className="bg-white shadow-lg">
                 <CardHeader>
                   <div className="flex justify-between items-start">
