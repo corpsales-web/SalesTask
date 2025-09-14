@@ -301,8 +301,66 @@ const FileUploadComponent = ({ projectId, onUploadComplete, maxFiles = 10, accep
               Max file size: 500MB • Max files: {maxFiles}
             </p>
           </div>
+          
+          {/* Camera Capture Button */}
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={startCamera}
+              className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              📷 Camera Capture
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Camera Capture Modal */}
+      {showCameraCapture && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Camera Capture</h3>
+              <button
+                onClick={stopCamera}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="relative bg-black rounded-lg overflow-hidden">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-64 object-cover"
+                />
+              </div>
+              
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={capturePhoto}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  📸 Capture Photo
+                </button>
+                <button
+                  onClick={stopCamera}
+                  className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden canvas for photo capture */}
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {/* Upload Progress */}
       {Object.keys(uploads).length > 0 && (
