@@ -40,7 +40,7 @@ async function testResizeObserverErrors() {
     });
 
     try {
-      await page.goto('https://aavana-crm-1.preview.emergentagent.com');
+      await page.goto('https://aavana-workspace.preview.emergentagent.com');
       await page.waitForTimeout(2000);
 
       // Test Flow 1: Add Lead Modal

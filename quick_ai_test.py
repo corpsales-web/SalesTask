@@ -4,7 +4,7 @@ import sys
 
 def test_ai_endpoint(name, endpoint, method="POST", data=None, params=None, timeout=30):
     """Test a single AI endpoint with timeout"""
-    base_url = "https://aavana-crm-1.preview.emergentagent.com/api"
+    base_url = "https://aavana-workspace.preview.emergentagent.com/api"
     url = f"{base_url}/{endpoint}"
     headers = {'Content-Type': 'application/json'}
     
@@ -69,7 +69,7 @@ def main():
     
     try:
         response = requests.post(
-            "https://aavana-crm-1.preview.emergentagent.com/api/leads",
+            "https://aavana-workspace.preview.emergentagent.com/api/leads",
             json=test_lead,
             headers={'Content-Type': 'application/json'},
             timeout=10
@@ -156,7 +156,7 @@ def main():
     if test_lead_id != "test_lead_id":
         try:
             requests.delete(
-                f"https://aavana-crm-1.preview.emergentagent.com/api/leads/{test_lead_id}",
+                f"https://aavana-workspace.preview.emergentagent.com/api/leads/{test_lead_id}",
                 timeout=10
             )
             print(f"\n🧹 Cleaned up test lead")
