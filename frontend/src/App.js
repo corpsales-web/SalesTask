@@ -72,7 +72,8 @@ import {
   MessageCircle,
   Share2,
   Send,
-  FolderOpen
+  FolderOpen,
+  FileSpreadsheet
 } from "lucide-react";
 
 // Import location and category data
