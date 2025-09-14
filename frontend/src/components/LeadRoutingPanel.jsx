@@ -771,7 +771,7 @@ const LeadRoutingPanel = ({ isVisible }) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {routingLogs.map((log) => (
+                {(routingLogs || []).map((log) => (
                   <div key={log.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
