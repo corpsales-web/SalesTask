@@ -504,7 +504,7 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {Object.entries(socialMetrics).map(([platform, metrics]) => (
+                  {Object.entries(socialMetrics || {}).map(([platform, metrics]) => (
                     <div key={platform} className="flex items-center justify-between">
                       <div>
                         <p className="font-medium capitalize">{platform}</p>
