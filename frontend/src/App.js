@@ -39,6 +39,7 @@ import {
   Mail, 
   MapPin,
   Building,
+  BookOpen,
   Target,
   Calendar,
   Activity,
