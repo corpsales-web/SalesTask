@@ -875,7 +875,7 @@ const WorkflowAuthoringPanel = ({ isVisible }) => {
 
                   {/* Steps List */}
                   <div className="space-y-4">
-                    {newWorkflow.steps.map((step, index) => (
+                    {(newWorkflow.steps || []).map((step, index) => (
                       <Card key={step.id} className="border-l-4 border-l-purple-500">
                         <CardContent className="pt-4">
                           <div className="flex justify-between items-start">
