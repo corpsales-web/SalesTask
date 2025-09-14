@@ -6203,6 +6203,261 @@ const App = () => {
           </div>
         </div>
       )}
+
+      {/* Catalog Manager Modal */}
+      {showCatalogManager && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">📁 Catalog File Manager</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCatalogManager(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* File List */}
+                <div className="lg:col-span-2">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">📋 Your Catalog Files</h3>
+                    
+                    <div className="space-y-3">
+                      {/* Garden Plants Catalog */}
+                      <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                              <FileText className="h-6 w-6 text-red-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">Garden Plants Catalog 2024.pdf</h4>
+                              <p className="text-sm text-gray-500">PDF Document • 2.4 MB • Uploaded 2 days ago</p>
+                              <div className="flex items-center space-x-4 mt-1">
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Popular</span>
+                                <span className="text-xs text-gray-500">Downloaded 24 times</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50">
+                              <Eye className="h-4 w-4 mr-1" />
+                              Preview
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Landscaping Services Brochure */}
+                      <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                              <FileText className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">Landscaping Services Brochure.pdf</h4>
+                              <p className="text-sm text-gray-500">PDF Document • 1.8 MB • Uploaded 1 week ago</p>
+                              <div className="flex items-center space-x-4 mt-1">
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Services</span>
+                                <span className="text-xs text-gray-500">Downloaded 18 times</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50">
+                              <Eye className="h-4 w-4 mr-1" />
+                              Preview
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Price List - Indoor Plants */}
+                      <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                              <FileText className="h-6 w-6 text-green-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">Price List - Indoor Plants.pdf</h4>
+                              <p className="text-sm text-gray-500">PDF Document • 1.2 MB • Uploaded 2 weeks ago</p>
+                              <div className="flex items-center space-x-4 mt-1">
+                                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">Pricing</span>
+                                <span className="text-xs text-gray-500">Downloaded 31 times</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50">
+                              <Eye className="h-4 w-4 mr-1" />
+                              Preview
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Seasonal Plants Guide */}
+                      <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                              <FileText className="h-6 w-6 text-purple-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">Seasonal Plants Guide.pdf</h4>
+                              <p className="text-sm text-gray-500">PDF Document • 3.1 MB • Uploaded 3 weeks ago</p>
+                              <div className="flex items-center space-x-4 mt-1">
+                                <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Guide</span>
+                                <span className="text-xs text-gray-500">Downloaded 15 times</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50">
+                              <Eye className="h-4 w-4 mr-1" />
+                              Preview
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions Panel */}
+                <div className="space-y-6">
+                  {/* Send Options */}
+                  <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-4 border border-green-200">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">📤 Send Catalogs</h3>
+                    
+                    <div className="space-y-3">
+                      <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Send via WhatsApp
+                      </Button>
+                      
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                        <Mail className="h-4 w-4 mr-2" />
+                        Send via Email
+                      </Button>
+                      
+                      <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Generate Share Link
+                      </Button>
+                    </div>
+
+                    <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
+                      <Label className="text-sm font-medium text-gray-700">Quick Send to Lead:</Label>
+                      <select className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm">
+                        <option value="">Select a lead...</option>
+                        <option value="rajesh-sharma">Rajesh Sharma (9876543210)</option>
+                        <option value="rajesh-kumar">Rajesh Kumar (9876543210)</option>
+                        <option value="priya-sharma">Priya Sharma (8765432109)</option>
+                        <option value="amit-verma">Amit Verma (9123456789)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* File Statistics */}
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">📊 File Statistics</h3>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Total Catalogs:</span>
+                        <span className="font-semibold text-gray-900">12</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">PDF Documents:</span>
+                        <span className="font-semibold text-gray-900">8</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Image Catalogs:</span>
+                        <span className="font-semibold text-gray-900">4</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Total Downloads:</span>
+                        <span className="font-semibold text-green-600">88</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Storage Used:</span>
+                        <span className="font-semibold text-blue-600">23.7 MB</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">⚡ Quick Actions</h3>
+                    
+                    <div className="space-y-2">
+                      <Button variant="outline" className="w-full text-left justify-start">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload New Catalog
+                      </Button>
+                      
+                      <Button variant="outline" className="w-full text-left justify-start">
+                        <FolderOpen className="h-4 w-4 mr-2" />
+                        Create New Folder
+                      </Button>
+                      
+                      <Button variant="outline" className="w-full text-left justify-start">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Manage Categories
+                      </Button>
+                      
+                      <Button variant="outline" className="w-full text-left justify-start text-red-600 hover:text-red-700">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Selected
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="mt-6 pt-4 border-t border-gray-200 flex justify-between items-center">
+                <div className="text-sm text-gray-500">
+                  Selected: 0 files • Total: 12 files
+                </div>
+                <div className="flex space-x-3">
+                  <Button variant="outline" onClick={() => setShowCatalogManager(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="bg-green-600 hover:bg-green-700 text-white">
+                    <Send className="h-4 w-4 mr-2" />
+                    Send Selected
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Lead Edit Modal */}
       {showLeadEditModal && editingLead && (
