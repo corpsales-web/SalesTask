@@ -1939,6 +1939,7 @@ const App = () => {
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const [showCreateTargetModal, setShowCreateTargetModal] = useState(false);
   const [showCatalogManager, setShowCatalogManager] = useState(false);
+  const [showBulkExcelUpload, setShowBulkExcelUpload] = useState(false);
   const [targets, setTargets] = useState({
     daily: { sales: 10000, leads: 5, tasks: 10 },
     weekly: { sales: 70000, leads: 35, tasks: 70 },
