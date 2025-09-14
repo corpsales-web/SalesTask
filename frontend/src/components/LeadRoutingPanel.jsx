@@ -530,7 +530,7 @@ const LeadRoutingPanel = ({ isVisible }) => {
                           <SelectValue placeholder="Select team" />
                         </SelectTrigger>
                         <SelectContent>
-                          {teams.map((team) => (
+                          {(teams || []).map((team) => (
                             <SelectItem key={team.id} value={team.id}>
                               {team.name} ({team.members} members)
                             </SelectItem>
@@ -742,7 +742,7 @@ const LeadRoutingPanel = ({ isVisible }) => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {teams.map((team) => (
+                  {(teams || []).map((team) => (
                     <div key={team.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
                         <p className="font-medium">{team.name}</p>
