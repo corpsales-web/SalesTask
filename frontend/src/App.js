@@ -3092,8 +3092,6 @@ const App = () => {
                 </Card>
               ))}
             </div>
-                  {/* Duplicate content removed */}
-            </div>
           </TabsContent>
 
           {/* Pipeline Tab */}
