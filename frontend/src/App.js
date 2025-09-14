@@ -854,10 +854,23 @@ const App = () => {
       setDashboardStats(response.data);
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
+      // Provide fallback data from leads and tasks state
+      const fallbackStats = {
+        totalLeads: leads.length,
+        activeLeads: leads.filter(lead => ['New', 'Qualified', 'Proposal'].includes(lead.status)).length,
+        completedTasks: tasks.filter(task => task.status === 'Completed').length,
+        pendingTasks: tasks.filter(task => ['Pending', 'In Progress'].includes(task.status)).length,
+        totalRevenue: leads.reduce((sum, lead) => sum + (lead.budget || 0), 0),
+        conversionRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status === 'Won').length / leads.length) * 100) : 0,
+        recentLeads: leads.slice(0, 5),
+        recentTasks: tasks.slice(0, 5)
+      };
+      setDashboardStats(fallbackStats);
+      
       toast({
-        title: "Error",
-        description: "Failed to fetch dashboard statistics",
-        variant: "destructive"
+        title: "Using Offline Data",
+        description: "Dashboard showing local data. Backend connection issues detected.",
+        variant: "default"
       });
     }
   };
