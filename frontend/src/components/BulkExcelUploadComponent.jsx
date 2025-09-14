@@ -529,15 +529,15 @@ Amit Patel,9876543212,amit@example.com,Bangalore,100000,Google Ads,Indoor plants
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Instant CRM Update</span>
-                  <Badge variant="success">Enabled</Badge>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">Enabled</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Duplicate Detection</span>
-                  <Badge variant="success">Active</Badge>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">Active</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Auto-Notification</span>
-                  <Badge variant="success">On</Badge>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">On</Badge>
                 </div>
               </div>
             </CardContent>
