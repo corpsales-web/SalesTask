@@ -3850,12 +3850,132 @@ const App = () => {
                         </div>
                         <div>
                           <Label htmlFor="project-location">Location *</Label>
-                          <Input
-                            id="project-location"
-                            value={newProject.location}
-                            onChange={(e) => setNewProject({...newProject, location: e.target.value})}
-                            required
-                          />
+                          <Select 
+                            value={newProject.location} 
+                            onValueChange={(value) => setNewProject({...newProject, location: value})}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select city/location..." />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-60 overflow-y-auto">
+                              {/* Major Indian Cities */}
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50">MAJOR CITIES</div>
+                              <SelectItem value="Mumbai, Maharashtra">Mumbai, Maharashtra</SelectItem>
+                              <SelectItem value="Delhi, Delhi">Delhi, Delhi</SelectItem>
+                              <SelectItem value="Bangalore, Karnataka">Bangalore, Karnataka</SelectItem>
+                              <SelectItem value="Hyderabad, Telangana">Hyderabad, Telangana</SelectItem>
+                              <SelectItem value="Chennai, Tamil Nadu">Chennai, Tamil Nadu</SelectItem>
+                              <SelectItem value="Kolkata, West Bengal">Kolkata, West Bengal</SelectItem>
+                              <SelectItem value="Pune, Maharashtra">Pune, Maharashtra</SelectItem>
+                              <SelectItem value="Ahmedabad, Gujarat">Ahmedabad, Gujarat</SelectItem>
+                              <SelectItem value="Jaipur, Rajasthan">Jaipur, Rajasthan</SelectItem>
+                              <SelectItem value="Surat, Gujarat">Surat, Gujarat</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">MAHARASHTRA</div>
+                              <SelectItem value="Mumbai, Maharashtra">Mumbai</SelectItem>
+                              <SelectItem value="Pune, Maharashtra">Pune</SelectItem>
+                              <SelectItem value="Nagpur, Maharashtra">Nagpur</SelectItem>
+                              <SelectItem value="Thane, Maharashtra">Thane</SelectItem>
+                              <SelectItem value="Nashik, Maharashtra">Nashik</SelectItem>
+                              <SelectItem value="Aurangabad, Maharashtra">Aurangabad</SelectItem>
+                              <SelectItem value="Solapur, Maharashtra">Solapur</SelectItem>
+                              <SelectItem value="Navi Mumbai, Maharashtra">Navi Mumbai</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">KARNATAKA</div>
+                              <SelectItem value="Bangalore, Karnataka">Bangalore</SelectItem>
+                              <SelectItem value="Mysore, Karnataka">Mysore</SelectItem>
+                              <SelectItem value="Hubli, Karnataka">Hubli</SelectItem>
+                              <SelectItem value="Mangalore, Karnataka">Mangalore</SelectItem>
+                              <SelectItem value="Belgaum, Karnataka">Belgaum</SelectItem>
+                              <SelectItem value="Gulbarga, Karnataka">Gulbarga</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">GUJARAT</div>
+                              <SelectItem value="Ahmedabad, Gujarat">Ahmedabad</SelectItem>
+                              <SelectItem value="Surat, Gujarat">Surat</SelectItem>
+                              <SelectItem value="Vadodara, Gujarat">Vadodara</SelectItem>
+                              <SelectItem value="Rajkot, Gujarat">Rajkot</SelectItem>
+                              <SelectItem value="Bhavnagar, Gujarat">Bhavnagar</SelectItem>
+                              <SelectItem value="Jamnagar, Gujarat">Jamnagar</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">RAJASTHAN</div>
+                              <SelectItem value="Jaipur, Rajasthan">Jaipur</SelectItem>
+                              <SelectItem value="Jodhpur, Rajasthan">Jodhpur</SelectItem>
+                              <SelectItem value="Udaipur, Rajasthan">Udaipur</SelectItem>
+                              <SelectItem value="Kota, Rajasthan">Kota</SelectItem>
+                              <SelectItem value="Bikaner, Rajasthan">Bikaner</SelectItem>
+                              <SelectItem value="Ajmer, Rajasthan">Ajmer</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">TAMIL NADU</div>
+                              <SelectItem value="Chennai, Tamil Nadu">Chennai</SelectItem>
+                              <SelectItem value="Coimbatore, Tamil Nadu">Coimbatore</SelectItem>
+                              <SelectItem value="Madurai, Tamil Nadu">Madurai</SelectItem>
+                              <SelectItem value="Tiruchirappalli, Tamil Nadu">Tiruchirappalli</SelectItem>
+                              <SelectItem value="Salem, Tamil Nadu">Salem</SelectItem>
+                              <SelectItem value="Tirunelveli, Tamil Nadu">Tirunelveli</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">WEST BENGAL</div>
+                              <SelectItem value="Kolkata, West Bengal">Kolkata</SelectItem>
+                              <SelectItem value="Howrah, West Bengal">Howrah</SelectItem>
+                              <SelectItem value="Durgapur, West Bengal">Durgapur</SelectItem>
+                              <SelectItem value="Asansol, West Bengal">Asansol</SelectItem>
+                              <SelectItem value="Siliguri, West Bengal">Siliguri</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">UTTAR PRADESH</div>
+                              <SelectItem value="Lucknow, Uttar Pradesh">Lucknow</SelectItem>
+                              <SelectItem value="Kanpur, Uttar Pradesh">Kanpur</SelectItem>
+                              <SelectItem value="Ghaziabad, Uttar Pradesh">Ghaziabad</SelectItem>
+                              <SelectItem value="Agra, Uttar Pradesh">Agra</SelectItem>
+                              <SelectItem value="Meerut, Uttar Pradesh">Meerut</SelectItem>
+                              <SelectItem value="Varanasi, Uttar Pradesh">Varanasi</SelectItem>
+                              <SelectItem value="Allahabad, Uttar Pradesh">Allahabad</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">TELANGANA & ANDHRA PRADESH</div>
+                              <SelectItem value="Hyderabad, Telangana">Hyderabad</SelectItem>
+                              <SelectItem value="Warangal, Telangana">Warangal</SelectItem>
+                              <SelectItem value="Visakhapatnam, Andhra Pradesh">Visakhapatnam</SelectItem>
+                              <SelectItem value="Vijayawada, Andhra Pradesh">Vijayawada</SelectItem>
+                              <SelectItem value="Guntur, Andhra Pradesh">Guntur</SelectItem>
+                              <SelectItem value="Tirupati, Andhra Pradesh">Tirupati</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">PUNJAB & HARYANA</div>
+                              <SelectItem value="Ludhiana, Punjab">Ludhiana</SelectItem>
+                              <SelectItem value="Amritsar, Punjab">Amritsar</SelectItem>
+                              <SelectItem value="Jalandhar, Punjab">Jalandhar</SelectItem>
+                              <SelectItem value="Patiala, Punjab">Patiala</SelectItem>
+                              <SelectItem value="Gurgaon, Haryana">Gurgaon</SelectItem>
+                              <SelectItem value="Faridabad, Haryana">Faridabad</SelectItem>
+                              <SelectItem value="Panipat, Haryana">Panipat</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">KERALA</div>
+                              <SelectItem value="Kochi, Kerala">Kochi</SelectItem>
+                              <SelectItem value="Thiruvananthapuram, Kerala">Thiruvananthapuram</SelectItem>
+                              <SelectItem value="Kozhikode, Kerala">Kozhikode</SelectItem>
+                              <SelectItem value="Thrissur, Kerala">Thrissur</SelectItem>
+                              <SelectItem value="Kollam, Kerala">Kollam</SelectItem>
+                              
+                              <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">OTHER STATES</div>
+                              <SelectItem value="Bhubaneswar, Odisha">Bhubaneswar, Odisha</SelectItem>
+                              <SelectItem value="Cuttack, Odisha">Cuttack, Odisha</SelectItem>
+                              <SelectItem value="Raipur, Chhattisgarh">Raipur, Chhattisgarh</SelectItem>
+                              <SelectItem value="Bhopal, Madhya Pradesh">Bhopal, Madhya Pradesh</SelectItem>
+                              <SelectItem value="Indore, Madhya Pradesh">Indore, Madhya Pradesh</SelectItem>
+                              <SelectItem value="Gwalior, Madhya Pradesh">Gwalior, Madhya Pradesh</SelectItem>
+                              <SelectItem value="Patna, Bihar">Patna, Bihar</SelectItem>
+                              <SelectItem value="Ranchi, Jharkhand">Ranchi, Jharkhand</SelectItem>
+                              <SelectItem value="Dehradun, Uttarakhand">Dehradun, Uttarakhand</SelectItem>
+                              <SelectItem value="Chandigarh, Chandigarh">Chandigarh, Chandigarh</SelectItem>
+                              <SelectItem value="Guwahati, Assam">Guwahati, Assam</SelectItem>
+                              <SelectItem value="Imphal, Manipur">Imphal, Manipur</SelectItem>
+                              <SelectItem value="Shillong, Meghalaya">Shillong, Meghalaya</SelectItem>
+                              <SelectItem value="Aizawl, Mizoram">Aizawl, Mizoram</SelectItem>
+                              <SelectItem value="Kohima, Nagaland">Kohima, Nagaland</SelectItem>
+                              <SelectItem value="Agartala, Tripura">Agartala, Tripura</SelectItem>
+                              <SelectItem value="Gangtok, Sikkim">Gangtok, Sikkim</SelectItem>
+                              <SelectItem value="Shimla, Himachal Pradesh">Shimla, Himachal Pradesh</SelectItem>
+                              <SelectItem value="Srinagar, Jammu and Kashmir">Srinagar, Jammu and Kashmir</SelectItem>
+                              <SelectItem value="Jammu, Jammu and Kashmir">Jammu, Jammu and Kashmir</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div>
                           <Label htmlFor="project-type">Project Type</Label>
