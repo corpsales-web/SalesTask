@@ -2804,6 +2804,15 @@ const App = () => {
               {leads.map((lead) => (
                 <Card key={lead.id} className="bg-white shadow-lg border-emerald-100 hover:shadow-xl transition-shadow">
                   <CardHeader>
+                    <CardTitle>{lead.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p>Lead content placeholder</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+                  <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-lg text-gray-900">{lead.name}</CardTitle>
