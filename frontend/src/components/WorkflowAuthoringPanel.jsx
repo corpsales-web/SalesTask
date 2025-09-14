@@ -1081,7 +1081,7 @@ const WorkflowAuthoringPanel = ({ isVisible }) => {
                       <div>
                         <p className="font-medium">{result.workflow_name}</p>
                         <p className="text-sm text-gray-600">
-                          Variables: {JSON.stringify(result.test_variables).substring(0, 50)}...
+                          Variables: {result.test_variables ? JSON.stringify(result.test_variables).substring(0, 50) : 'No variables'}...
                         </p>
                         <div className="flex items-center space-x-4 text-xs text-gray-500 mt-1">
                           <span>Duration: {result.duration}s</span>
