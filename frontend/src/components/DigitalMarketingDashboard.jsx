@@ -69,8 +69,8 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      // Simulate API calls
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate API calls (faster for demo)
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Mock campaign data
       setCampaigns([
