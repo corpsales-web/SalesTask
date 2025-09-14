@@ -2902,7 +2902,7 @@ const App = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {leads.map((lead) => (
+              {(leads || []).map((lead) => (
                 <Card key={lead.id} className="bg-white shadow-lg border-emerald-100 hover:shadow-xl transition-shadow">
                   <CardHeader>
                     <div className="flex justify-between items-start">
