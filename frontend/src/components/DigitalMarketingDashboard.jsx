@@ -508,7 +508,7 @@ const DigitalMarketingDashboard = ({ isVisible }) => {
                     <div key={platform} className="flex items-center justify-between">
                       <div>
                         <p className="font-medium capitalize">{platform}</p>
-                        <p className="text-sm text-gray-600">{formatNumber(metrics.followers)} followers</p>
+                        <p className="text-sm text-gray-600">{formatNumber(metrics?.followers || 0)} followers</p>
                       </div>
                       <div className="text-right">
                         <div className="flex items-center">
