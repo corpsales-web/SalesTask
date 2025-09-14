@@ -139,37 +139,185 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
     };
   }, [cameraStream]);
 
+  // Enhanced camera constraints based on device and browser
+  const getOptimalConstraints = useCallback(() => {
+    const baseConstraints = {
+      video: {
+        facingMode: facingMode,
+        audio: false
+      }
+    };
+
+    // Device-specific optimizations
+    if (deviceType === 'iphone' || deviceType === 'ipad') {
+      // iOS specific constraints
+      baseConstraints.video = {
+        ...baseConstraints.video,
+        width: { min: 320, ideal: 640, max: 1280 },
+        height: { min: 240, ideal: 480, max: 720 },
+        frameRate: { ideal: 30, max: 30 },
+        ...(currentDeviceId && { deviceId: { exact: currentDeviceId } })
+      };
+    } else if (deviceType.includes('android')) {
+      // Android specific constraints
+      baseConstraints.video = {
+        ...baseConstraints.video,
+        width: { min: 320, ideal: 720, max: 1280 },
+        height: { min: 240, ideal: 540, max: 720 },
+        frameRate: { ideal: 30, max: 30 },
+        ...(currentDeviceId && { deviceId: { exact: currentDeviceId } })
+      };
+    } else if (deviceType === 'macbook') {
+      // MacBook specific constraints
+      baseConstraints.video = {
+        ...baseConstraints.video,
+        width: { min: 640, ideal: 1280, max: 1920 },
+        height: { min: 480, ideal: 720, max: 1080 },
+        frameRate: { ideal: 30, max: 60 },
+        ...(currentDeviceId && { deviceId: { exact: currentDeviceId } })
+      };
+    } else {
+      // Default desktop constraints
+      baseConstraints.video = {
+        ...baseConstraints.video,
+        width: { min: 320, ideal: 1280, max: 1920 },
+        height: { min: 240, ideal: 720, max: 1080 },
+        frameRate: { ideal: 30, max: 60 },
+        ...(currentDeviceId && { deviceId: { exact: currentDeviceId } })
+      };
+    }
+
+    return baseConstraints;
+  }, [facingMode, deviceType, currentDeviceId]);
+
+  // Enhanced camera start with multiple fallbacks
   const startCamera = async () => {
     try {
       setError(null);
+      setIsInitializing(true);
       
-      // Stop existing stream if any
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
+      // Check HTTPS requirement for some browsers
+      if (browserType === 'chrome' && location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        throw new Error('Camera access requires HTTPS in Chrome browser');
       }
 
-      // Request camera access
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: facingMode,
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
-        audio: false
-      });
+      // Stop existing stream if any
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        setCameraStream(null);
+      }
 
+      // Check if getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera access is not supported in this browser');
+      }
+
+      let stream = null;
+      let lastError = null;
+
+      // Try multiple constraint configurations
+      const constraintsList = [
+        getOptimalConstraints(),
+        // Fallback 1: Basic constraints
+        {
+          video: {
+            facingMode: facingMode,
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          },
+          audio: false
+        },
+        // Fallback 2: Minimal constraints
+        {
+          video: { facingMode: facingMode },
+          audio: false
+        },
+        // Fallback 3: Any camera
+        {
+          video: true,
+          audio: false
+        }
+      ];
+
+      for (const constraints of constraintsList) {
+        try {
+          console.log('Trying constraints:', constraints);
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          break;
+        } catch (error) {
+          console.warn('Constraint failed:', error);
+          lastError = error;
+          continue;
+        }
+      }
+
+      if (!stream) {
+        throw lastError || new Error('Could not access camera with any constraints');
+      }
+
+      // Store stream reference
+      streamRef.current = stream;
       setCameraStream(stream);
       
+      // Configure video element
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        
+        // Handle different browsers
+        if (browserType === 'safari' || deviceType.includes('iphone') || deviceType === 'ipad') {
+          // iOS Safari specific handling
+          videoRef.current.setAttribute('playsinline', true);
+          videoRef.current.setAttribute('webkit-playsinline', true);
+          videoRef.current.muted = true;
+        }
+        
+        try {
+          await videoRef.current.play();
+        } catch (playError) {
+          console.warn('Video play error:', playError);
+          // Try to play with user interaction
+          const playPromise = videoRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(e => console.warn('Play promise rejected:', e));
+          }
+        }
       }
 
       setIsCapturing(true);
 
     } catch (error) {
       console.error('Error accessing camera:', error);
-      setError('Failed to access camera. Please check permissions and try again.');
+      
+      // Provide specific error messages based on error type
+      let errorMessage = 'Failed to access camera. ';
+      
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorMessage += 'Camera permission denied. Please allow camera access and try again.';
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorMessage += 'No camera device found. Please check if a camera is connected.';
+      } else if (error.name === 'NotSupportedError' || error.name === 'ConstraintNotSatisfiedError') {
+        errorMessage += 'Camera settings not supported. Trying with different settings...';
+        // Try again with minimal constraints
+        setTimeout(() => {
+          setFacingMode('user');
+          startCamera();
+        }, 1000);
+        return;
+      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+        errorMessage += 'Camera is busy or not accessible. Please close other apps using the camera and try again.';
+      } else if (error.message.includes('HTTPS')) {
+        errorMessage += 'Camera access requires HTTPS connection for security. Please use HTTPS.';
+      } else {
+        errorMessage += error.message || 'Please check camera permissions and try again.';
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsInitializing(false);
     }
   };
 
