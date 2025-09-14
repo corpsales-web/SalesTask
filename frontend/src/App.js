@@ -3054,7 +3054,7 @@ const App = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">Status:</span>
-                        <Badge variant="outline" className="text-xs">{task.status}</Badge>
+                        <Badge variant="outline" className={getStatusColor(task.status)}>{task.status}</Badge>
                       </div>
                       {task.due_date && (
                         <div className="flex items-center justify-between">
@@ -3070,6 +3070,82 @@ const App = () => {
                           {new Date(task.created_at).toLocaleDateString('en-IN')}
                         </span>
                       </div>
+                      
+                      {/* Enhanced Task Actions */}
+                      <div className="mt-4 space-y-2">
+                        {task.status === "Pending" && (
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              className="flex-1 bg-blue-600 hover:bg-blue-700"
+                              onClick={() => updateTaskStatus(task.id, "In Progress", "Started working on task")}
+                            >
+                              ▶️ Start
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => openTaskRemarkModal(task, "start")}
+                            >
+                              💭 Remark
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {task.status === "In Progress" && (
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              className="flex-1 bg-green-600 hover:bg-green-700"
+                              onClick={() => updateTaskStatus(task.id, "Completed", "Task completed successfully")}
+                            >
+                              ✅ Complete
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => openTaskRemarkModal(task, "progress")}
+                            >
+                              💭 Update
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {task.status === "Completed" && (
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => openTaskRemarkModal(task, "completed")}
+                            >
+                              📝 View Remarks
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {/* Upload Button for Individual Tasks */}
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="w-full bg-purple-50 border-purple-200 hover:bg-purple-100"
+                          onClick={() => openTaskUploadModal(task)}
+                        >
+                          📎 Upload Files
+                        </Button>
+                      </div>
+                      
+                      {/* Task Remarks Preview */}
+                      {task.remarks && task.remarks.length > 0 && (
+                        <div className="mt-3 p-2 bg-gray-50 rounded-lg">
+                          <div className="text-xs text-gray-600 mb-1">Latest Remark:</div>
+                          <div className="text-sm text-gray-800 italic">
+                            "{task.remarks[task.remarks.length - 1].content.substring(0, 100)}..."
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {new Date(task.remarks[task.remarks.length - 1].timestamp).toLocaleString()}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
