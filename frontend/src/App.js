@@ -4434,6 +4434,33 @@ const App = () => {
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={() => setShowDigitalMarketingDashboard(!showDigitalMarketingDashboard)}
+                  className="bg-purple-50 border-purple-200 hover:bg-purple-100"
+                >
+                  📊 Marketing Manager
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowLeadRoutingPanel(!showLeadRoutingPanel)}
+                  className="bg-green-50 border-green-200 hover:bg-green-100"
+                >
+                  🔀 Lead Routing
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowWorkflowAuthoringPanel(!showWorkflowAuthoringPanel)}
+                  className="bg-indigo-50 border-indigo-200 hover:bg-indigo-100"
+                >
+                  ⚡ Workflow Authoring
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setShowRoleManagementPanel(!showRoleManagementPanel)}
                   className="bg-blue-50 border-blue-200 hover:bg-blue-100"
                 >
