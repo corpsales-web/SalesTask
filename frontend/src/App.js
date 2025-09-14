@@ -452,14 +452,6 @@ const App = () => {
     }
   };
 
-  const deleteProjectType = (projectTypeToDelete) => {
-    setProjectTypes(projectTypes.filter(type => type !== projectTypeToDelete));
-    toast({
-      title: "Project Type Deleted",
-      description: `"${projectTypeToDelete}" has been removed`
-    });
-  };
-
   // Authentication & User Management Functions
   const login = async (credentials) => {
     try {
