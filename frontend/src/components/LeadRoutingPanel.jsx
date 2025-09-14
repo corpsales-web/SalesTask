@@ -508,7 +508,7 @@ const LeadRoutingPanel = ({ isVisible }) => {
                           <SelectValue placeholder="Select agent" />
                         </SelectTrigger>
                         <SelectContent>
-                          {agents.map((agent) => (
+                          {(agents || []).map((agent) => (
                             <SelectItem key={agent.id} value={agent.id}>
                               {agent.name} ({agent.active_leads} active leads)
                             </SelectItem>
@@ -715,7 +715,7 @@ const LeadRoutingPanel = ({ isVisible }) => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {agents.map((agent) => (
+                  {(agents || []).map((agent) => (
                     <div key={agent.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
                         <p className="font-medium">{agent.name}</p>
