@@ -179,10 +179,6 @@ const App = () => {
     'Annual Leave', 'Sick Leave', 'Maternity Leave', 'Paternity Leave', 'Emergency Leave'
   ]);
   const [newLeaveType, setNewLeaveType] = useState("");
-  const [projectTypes, setProjectTypes] = useState([
-    'Residential Garden', 'Commercial Landscaping', 'Terrace Garden', 'Vertical Garden', 'Indoor Plants'
-  ]);
-  const [newProjectType, setNewProjectType] = useState("");
   
   // Lead Edit State
   const [showLeadEditModal, setShowLeadEditModal] = useState(false);
