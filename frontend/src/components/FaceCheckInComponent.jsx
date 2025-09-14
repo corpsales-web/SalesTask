@@ -762,7 +762,7 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         </div>
       )}
 
-      {/* Instructions */}
+      {/* Enhanced Instructions */}
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <h4 className="text-sm font-medium text-blue-800 mb-2">Instructions:</h4>
         <ul className="text-xs text-blue-700 space-y-1">
@@ -771,7 +771,35 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
           <li>• Look directly at the camera</li>
           <li>• Remove sunglasses or face coverings</li>
           <li>• Stay still while capturing</li>
+          {deviceType.includes('iphone') || deviceType === 'ipad' ? (
+            <li>• Make sure to allow camera permission when prompted</li>
+          ) : null}
+          {browserType === 'safari' ? (
+            <li>• If camera doesn't start, try refreshing the page</li>
+          ) : null}
+          {deviceType.includes('android') ? (
+            <li>• You may need to close other camera apps first</li>
+          ) : null}
         </ul>
+        
+        {/* Device-specific tips */}
+        {deviceType === 'macbook' && (
+          <div className="mt-2 text-xs text-blue-600">
+            💡 MacBook tip: The green LED will light up when camera is active
+          </div>
+        )}
+        
+        {deviceType.includes('android') && (
+          <div className="mt-2 text-xs text-blue-600">
+            💡 Android tip: Use the front camera for better face detection
+          </div>
+        )}
+        
+        {(deviceType === 'iphone' || deviceType === 'ipad') && (
+          <div className="mt-2 text-xs text-blue-600">
+            💡 iOS tip: Make sure Safari has camera permission in Settings > Safari > Camera
+          </div>
+        )}
       </div>
     </div>
   );
