@@ -38,6 +38,7 @@ import {
   Phone, 
   Mail, 
   MapPin,
+  Building,
   Target,
   Calendar,
   Activity,
