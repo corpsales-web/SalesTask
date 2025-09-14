@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const FaceCheckInComponent = ({ onCheckInComplete }) => {
@@ -8,9 +8,17 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
   const [error, setError] = useState(null);
   const [cameraStream, setCameraStream] = useState(null);
   const [facingMode, setFacingMode] = useState('user'); // 'user' for front camera, 'environment' for back
+  const [deviceType, setDeviceType] = useState('unknown');
+  const [browserType, setBrowserType] = useState('unknown');
+  const [cameraPermissionStatus, setCameraPermissionStatus] = useState('unknown');
+  const [availableDevices, setAvailableDevices] = useState([]);
+  const [currentDeviceId, setCurrentDeviceId] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [supportedConstraints, setSupportedConstraints] = useState({});
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const streamRef = useRef(null);
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 
