@@ -5,7 +5,7 @@ import time
 from datetime import datetime, timezone
 
 class EnhancedAdminFeaturesTester:
-    def __init__(self, base_url="https://aavana-crm.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://aavana-crm-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
