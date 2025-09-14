@@ -426,6 +426,95 @@ class PasswordResetConfirm(BaseModel):
     token: str
     new_password: str
 
+# Lead Routing Models
+class RoutingRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    source: str
+    conditions: Dict[str, Any] = {}
+    target_agent_id: Optional[str] = None
+    target_team_id: Optional[str] = None
+    workflow_template_id: Optional[str] = None
+    priority: int = 1
+    is_active: bool = True
+    created_by: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class RoutingRuleCreate(BaseModel):
+    name: str
+    source: str
+    conditions: Dict[str, Any] = {}
+    target_agent_id: Optional[str] = None
+    target_team_id: Optional[str] = None
+    workflow_template_id: Optional[str] = None
+    priority: int = 1
+    is_active: bool = True
+
+# Workflow Authoring Models
+class PromptTemplate(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    category: str = "general"
+    system_prompt: str = ""
+    user_prompt_template: str = ""
+    variables: List[str] = []
+    ai_model: str = "gpt-5"
+    temperature: float = 0.7
+    max_tokens: int = 1000
+    functions: List[Dict[str, Any]] = []
+    examples: List[Dict[str, Any]] = []
+    tags: List[str] = []
+    is_active: bool = True
+    created_by: str
+    version: int = 1
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PromptTemplateCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    category: str = "general"
+    system_prompt: str = ""
+    user_prompt_template: str = ""
+    variables: List[str] = []
+    ai_model: str = "gpt-5"
+    temperature: float = 0.7
+    max_tokens: int = 1000
+    functions: List[Dict[str, Any]] = []
+    examples: List[Dict[str, Any]] = []
+    tags: List[str] = []
+    is_active: bool = True
+
+class WorkflowTemplate(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    category: str = "lead_nurturing"
+    trigger_conditions: Dict[str, Any] = {}
+    steps: List[Dict[str, Any]] = []
+    global_variables: Dict[str, Any] = {}
+    settings: Dict[str, Any] = {}
+    tags: List[str] = []
+    is_active: bool = False
+    is_published: bool = False
+    created_by: str
+    version: int = 1
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class WorkflowTemplateCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    category: str = "lead_nurturing"
+    trigger_conditions: Dict[str, Any] = {}
+    steps: List[Dict[str, Any]] = []
+    global_variables: Dict[str, Any] = {}
+    settings: Dict[str, Any] = {}
+    tags: List[str] = []
+    is_active: bool = False
+
 # Project Types Models
 class ProjectType(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
