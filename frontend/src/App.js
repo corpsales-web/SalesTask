@@ -178,9 +178,150 @@ const App = () => {
     source: "",
     assigned_to: ""
   });
-  // Offline Sync State
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [pendingSyncCount, setPendingSyncCount] = useState(0);
+  // Task Management State
+  const [showTaskRemarkModal, setShowTaskRemarkModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [taskRemarkStage, setTaskRemarkStage] = useState(null);
+  const [taskRemark, setTaskRemark] = useState("");
+  const [showTaskUploadModal, setShowTaskUploadModal] = useState(false);
+
+  // Task Management Functions
+  const updateTaskStatus = async (taskId, newStatus, defaultRemark = "") => {
+    try {
+      const token = localStorage.getItem('token');
+      const updateData = {
+        status: newStatus,
+        remark: defaultRemark,
+        timestamp: new Date().toISOString()
+      };
+
+      await axios.put(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/tasks/${taskId}/status`,
+        updateData,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      await fetchTasks();
+      
+      toast({
+        title: "Task Updated",
+        description: `Task marked as ${newStatus}`,
+      });
+
+      // Trigger notification
+      triggerNotification("Task Update", `Task marked as ${newStatus}`, "task_update");
+
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toast({
+        title: "Update Failed",
+        description: error.response?.data?.detail || "Failed to update task status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openTaskRemarkModal = (task, stage) => {
+    setSelectedTask(task);
+    setTaskRemarkStage(stage);
+    setTaskRemark("");
+    setShowTaskRemarkModal(true);
+  };
+
+  const openTaskUploadModal = (task) => {
+    setSelectedTask(task);
+    setShowTaskUploadModal(true);
+  };
+
+  const submitTaskRemark = async () => {
+    if (!taskRemark.trim()) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const remarkData = {
+        content: taskRemark,
+        stage: taskRemarkStage,
+        timestamp: new Date().toISOString(),
+        type: 'text'
+      };
+
+      await axios.post(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/tasks/${selectedTask.id}/remarks`,
+        remarkData,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      await fetchTasks();
+      setShowTaskRemarkModal(false);
+      setTaskRemark("");
+
+      toast({
+        title: "Remark Added",
+        description: "Task remark has been saved successfully.",
+      });
+
+    } catch (error) {
+      console.error('Error adding task remark:', error);
+      toast({
+        title: "Remark Failed",
+        description: error.response?.data?.detail || "Failed to add remark.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'pending': return 'text-orange-700 bg-orange-100';
+      case 'in progress': return 'text-blue-700 bg-blue-100';
+      case 'completed': return 'text-green-700 bg-green-100';
+      default: return 'text-gray-700 bg-gray-100';
+    }
+  };
+
+  // Notification System
+  const triggerNotification = async (title, message, type) => {
+    try {
+      // On-screen notification (toast)
+      toast({
+        title: title,
+        description: message,
+      });
+
+      // Push notification (if supported)
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, {
+          body: message,
+          icon: '/favicon.ico'
+        });
+      }
+
+      // WhatsApp notification (via API)
+      const token = localStorage.getItem('token');
+      if (token) {
+        await axios.post(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/notifications/send`,
+          {
+            title,
+            message,
+            type,
+            channels: ['whatsapp', 'push']
+          },
+          { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+      }
+
+    } catch (error) {
+      console.error('Error sending notification:', error);
+    }
+  };
+
+  // Request notification permission on load
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   // Initialize autosave for lead edit form
   useEffect(() => {
