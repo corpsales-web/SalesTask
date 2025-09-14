@@ -143,7 +143,68 @@ const App = () => {
       notes: 'Vertical garden installation for startup office'
     }
   ]);
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([
+    {
+      id: '1',
+      title: 'Site Visit - Green Gardens Project',
+      description: 'Conduct initial site assessment for terrace garden installation',
+      assignee: 'Rajesh Kumar',
+      priority: 'High',
+      status: 'Pending',
+      due_date: '2024-09-16',
+      category: 'Field Work',
+      client: 'Green Gardens Pvt Ltd',
+      remarks: []
+    },
+    {
+      id: '2', 
+      title: 'Design Proposal - Eco Homes',
+      description: 'Create landscaping design proposal for commercial project',
+      assignee: 'Priya Sharma',
+      priority: 'Medium', 
+      status: 'In Progress',
+      due_date: '2024-09-18',
+      category: 'Design',
+      client: 'Eco Homes',
+      remarks: [
+        {
+          text: 'Initial sketches completed',
+          timestamp: new Date().toISOString(),
+          author: 'Priya Sharma'
+        }
+      ]
+    },
+    {
+      id: '3',
+      title: 'Plant Procurement - Tech Corp',
+      description: 'Source and procure indoor plants for office setup',  
+      assignee: 'Amit Patel',
+      priority: 'Medium',
+      status: 'Completed',
+      due_date: '2024-09-14',
+      category: 'Procurement', 
+      client: 'Tech Corp',
+      remarks: [
+        {
+          text: 'All plants procured and quality checked',
+          timestamp: new Date(Date.now() - 24*60*60*1000).toISOString(),
+          author: 'Amit Patel'
+        }
+      ]
+    },
+    {
+      id: '4',
+      title: 'Installation Planning - StartupHub',
+      description: 'Plan vertical garden installation timeline and resources',
+      assignee: 'Sneha Reddy', 
+      priority: 'High',
+      status: 'Pending',
+      due_date: '2024-09-17',
+      category: 'Planning',
+      client: 'StartupHub',
+      remarks: []
+    }
+  ]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedLead, setSelectedLead] = useState(null);
