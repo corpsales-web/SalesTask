@@ -441,12 +441,28 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         throw new Error('No authentication token found');
       }
 
+      // Get location if available (optional)
+      let locationData = null;
+      try {
+        locationData = await getCurrentLocation();
+      } catch (locationError) {
+        console.warn('Could not get location:', locationError);
+      }
+
       // Create form data
       const formData = new FormData();
       formData.append('image', capturedImage, 'checkin.jpg');
       formData.append('timestamp', new Date().toISOString());
+      formData.append('device_type', deviceType);
+      formData.append('browser_type', browserType);
+      
+      if (locationData) {
+        formData.append('latitude', locationData.latitude.toString());
+        formData.append('longitude', locationData.longitude.toString());
+        formData.append('accuracy', locationData.accuracy.toString());
+      }
 
-      // Submit check-in
+      // Submit check-in with timeout
       const response = await axios.post(
         `${API_BASE_URL}/api/hrms/face-checkin`,
         formData,
@@ -454,7 +470,8 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
-          }
+          },
+          timeout: 30000 // 30 second timeout
         }
       );
 
@@ -463,12 +480,29 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         onCheckInComplete(response.data);
       }
 
-      alert('Check-in successful!');
+      // Show success message
+      const successMessage = response.data?.message || 'Check-in successful!';
+      alert(successMessage);
       setCapturedImage(null);
 
     } catch (error) {
       console.error('Error submitting check-in:', error);
-      setError(error.response?.data?.detail || error.message || 'Check-in failed');
+      
+      let errorMessage = 'Check-in failed. ';
+      
+      if (error.code === 'ECONNABORTED') {
+        errorMessage += 'Request timed out. Please check your internet connection and try again.';
+      } else if (error.response?.status === 401) {
+        errorMessage += 'Authentication failed. Please log in again.';
+      } else if (error.response?.status === 413) {
+        errorMessage += 'Image file too large. Please try again.';
+      } else if (error.response?.status >= 500) {
+        errorMessage += 'Server error. Please try again later.';
+      } else {
+        errorMessage += error.response?.data?.detail || error.message || 'Please try again.';
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
