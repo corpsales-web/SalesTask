@@ -386,10 +386,11 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
     }
   }, [deviceType, stopCamera]);
 
-  const retakePhoto = () => {
+  const retakePhoto = useCallback(() => {
     setCapturedImage(null);
+    setError(null);
     startCamera();
-  };
+  }, [startCamera]);
 
   const switchCamera = useCallback(async () => {
     try {
