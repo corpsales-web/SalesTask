@@ -3805,6 +3805,88 @@ const App = () => {
               </Card>
             </div>
 
+            {/* Catalog Upload Section */}
+            <Card className="bg-white border-purple-200 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-purple-800 flex items-center">
+                  <BookOpen className="h-5 w-5 mr-2" />
+                  Product Catalog Upload
+                </CardTitle>
+                <CardDescription>Upload and manage product catalogs, brochures, and marketing materials</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-purple-50 p-3 rounded-lg">
+                    <p className="text-sm text-purple-600">Total Catalogs</p>
+                    <p className="text-2xl font-bold text-purple-800">12</p>
+                  </div>
+                  <div className="bg-indigo-50 p-3 rounded-lg">
+                    <p className="text-sm text-indigo-600">PDF Documents</p>
+                    <p className="text-2xl font-bold text-indigo-800">8</p>
+                  </div>
+                  <div className="bg-pink-50 p-3 rounded-lg">
+                    <p className="text-sm text-pink-600">Image Catalogs</p>
+                    <p className="text-2xl font-bold text-pink-800">4</p>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-purple-800 mb-2">Upload Catalog Files</h4>
+                  <p className="text-sm text-purple-600 mb-3">
+                    Support for PDF brochures, image catalogs, price lists, and product specifications. 
+                    Max file size: 500MB per file.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button 
+                      className="bg-purple-600 hover:bg-purple-700 text-white" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedProject({ type: 'catalog' });
+                        setShowFileUploadModal(true);
+                      }}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Catalog
+                    </Button>
+                    <Button 
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white" 
+                      size="sm"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Manage Files
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <h4 className="font-medium text-gray-800 mb-2">Recent Catalog Uploads</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4 text-red-600" />
+                        <span>Garden Plants Catalog 2024.pdf</span>
+                      </div>
+                      <span className="text-gray-500">2 days ago</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                        <span>Landscaping Services Brochure.pdf</span>
+                      </div>
+                      <span className="text-gray-500">1 week ago</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4 text-green-600" />
+                        <span>Price List - Indoor Plants.pdf</span>
+                      </div>
+                      <span className="text-gray-500">2 weeks ago</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Executive Dashboard Summary */}
             {executiveDashboard && (
               <Card className="bg-gradient-to-r from-emerald-50 to-green-100 border-emerald-200 shadow-lg">
