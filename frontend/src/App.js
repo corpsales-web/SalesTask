@@ -413,6 +413,56 @@ const App = () => {
     });
   };
 
+  // HRMS Management Functions
+  const addLeaveType = () => {
+    if (newLeaveType.trim() && !leaveTypes.includes(newLeaveType.trim())) {
+      setLeaveTypes([...leaveTypes, newLeaveType.trim()]);
+      setNewLeaveType("");
+      toast({
+        title: "Leave Type Added",
+        description: `"${newLeaveType.trim()}" has been added to leave types`
+      });
+    }
+  };
+
+  const deleteLeaveType = (leaveTypeToDelete) => {
+    // Don't allow deletion of core leave types
+    const coreTypes = ['Annual Leave', 'Sick Leave', 'Maternity Leave', 'Paternity Leave'];
+    if (coreTypes.includes(leaveTypeToDelete)) {
+      toast({
+        title: "Cannot Delete",
+        description: "Core leave types cannot be deleted",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setLeaveTypes(leaveTypes.filter(type => type !== leaveTypeToDelete));
+    toast({
+      title: "Leave Type Deleted",
+      description: `"${leaveTypeToDelete}" has been removed`
+    });
+  };
+
+  const addProjectType = () => {
+    if (newProjectType.trim() && !projectTypes.includes(newProjectType.trim())) {
+      setProjectTypes([...projectTypes, newProjectType.trim()]);
+      setNewProjectType("");
+      toast({
+        title: "Project Type Added",
+        description: `"${newProjectType.trim()}" has been added to project types`
+      });
+    }
+  };
+
+  const deleteProjectType = (projectTypeToDelete) => {
+    setProjectTypes(projectTypes.filter(type => type !== projectTypeToDelete));
+    toast({
+      title: "Project Type Deleted",
+      description: `"${projectTypeToDelete}" has been removed`
+    });
+  };
+
   // Authentication & User Management Functions
   const login = async (credentials) => {
     try {
