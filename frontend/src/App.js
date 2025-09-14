@@ -66,7 +66,12 @@ import {
   Clock2,
   AlertTriangle,
   Award,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  MessageCircle,
+  Share2,
+  Send,
+  FolderOpen
 } from "lucide-react";
 
 // Import location and category data
