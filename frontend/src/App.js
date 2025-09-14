@@ -3540,14 +3540,15 @@ const App = () => {
                     ))}
                   </div>
 
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Project
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-md">
+                  <div className="flex gap-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" size="sm">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Project
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
                       <DialogHeader>
                         <DialogTitle>Add Project to Gallery</DialogTitle>
                         <DialogDescription>Showcase your completed project</DialogDescription>
