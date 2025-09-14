@@ -384,10 +384,152 @@ const RoleManagementPanel = ({ currentUser }) => {
 
   return (
     <div className="role-management-panel space-y-8">
+      {/* Role Assignment Examples & Workflows */}
+      <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">🏢 Role Assignment & Delegation Workflows</h2>
+        <p className="text-gray-600 mb-6">Comprehensive examples of how to assign roles and delegate responsibilities in your organization</p>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Workflow Examples */}
+          <div className="bg-white rounded-lg p-5 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">📋 Common Assignment Workflows</h3>
+            
+            <div className="space-y-4">
+              {/* New Employee Onboarding */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="font-medium text-green-800 mb-2">🆕 New Employee Onboarding</h4>
+                <div className="text-sm text-green-700 space-y-2">
+                  <p><strong>Step 1:</strong> HR Manager creates new user account</p>
+                  <p><strong>Step 2:</strong> Assign initial role (e.g., "Sales Agent" or "Field Executive")</p>
+                  <p><strong>Step 3:</strong> Department Head reviews and approves permissions</p>
+                  <p><strong>Step 4:</strong> System sends welcome email with login credentials</p>
+                  <p><strong>Example:</strong> Rajesh Kumar joins as Sales Agent → Gets leads (view, create, edit) + tasks (view, create, edit) permissions</p>
+                </div>
+              </div>
+
+              {/* Role Promotion */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-medium text-blue-800 mb-2">⬆️ Role Promotion Workflow</h4>
+                <div className="text-sm text-blue-700 space-y-2">
+                  <p><strong>Scenario:</strong> Sales Agent → Sales Manager promotion</p>
+                  <p><strong>Step 1:</strong> Current manager initiates promotion request</p>
+                  <p><strong>Step 2:</strong> HR Manager updates role from "Sales Agent" to "Sales Manager"</p>
+                  <p><strong>Step 3:</strong> New permissions: leads (assign), users (view), analytics (view, export)</p>
+                  <p><strong>Step 4:</strong> Department budget allocation increases</p>
+                  <p><strong>Result:</strong> User can now assign leads to team members and view analytics</p>
+                </div>
+              </div>
+
+              {/* Temporary Delegation */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-medium text-yellow-800 mb-2">🔄 Temporary Delegation</h4>
+                <div className="text-sm text-yellow-700 space-y-2">
+                  <p><strong>Use Case:</strong> Manager going on leave</p>
+                  <p><strong>Step 1:</strong> Create temporary role "Acting Sales Manager"</p>
+                  <p><strong>Step 2:</strong> Assign to senior team member for 2 weeks</p>
+                  <p><strong>Step 3:</strong> Grant elevated permissions: task assignment, team oversight</p>
+                  <p><strong>Step 4:</strong> Auto-revert role after specified date</p>
+                  <p><strong>Note:</strong> All actions logged for audit trail</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Permission Matrix Examples */}
+          <div className="bg-white rounded-lg p-5 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">🔐 Permission Matrix Examples</h3>
+            
+            <div className="space-y-4">
+              {/* Sales Team Structure */}
+              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                <h4 className="font-medium text-indigo-800 mb-3">🏢 Sales Team Structure</h4>
+                <div className="space-y-3">
+                  <div className="text-sm">
+                    <div className="font-medium text-indigo-900">Sales Director (Level 1)</div>
+                    <div className="text-indigo-700 ml-4">• All permissions • Team oversight • Budget approval</div>
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium text-indigo-900">Sales Manager (Level 2)</div>
+                    <div className="text-indigo-700 ml-4">• Assign leads • View analytics • Team performance</div>
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium text-indigo-900">Senior Sales Agent (Level 3)</div>
+                    <div className="text-indigo-700 ml-4">• Handle premium leads • Create tasks • AI access</div>
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium text-indigo-900">Sales Agent (Level 4)</div>
+                    <div className="text-indigo-700 ml-4">• Basic lead management • Task creation</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cross-Department Collaboration */}
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <h4 className="font-medium text-purple-800 mb-3">🤝 Cross-Department Collaboration</h4>
+                <div className="text-sm text-purple-700 space-y-2">
+                  <p><strong>Project Manager + Sales Team:</strong></p>
+                  <p className="ml-4">• Project Manager gets "leads (view)" to understand customer requirements</p>
+                  <p className="ml-4">• Sales Manager gets "projects (view)" to track delivery status</p>
+                  <p><strong>HR + All Departments:</strong></p>
+                  <p className="ml-4">• HR Manager has "users (view, edit)" across all departments</p>
+                  <p className="ml-4">• Department Heads have "hrms (view_reports)" for their teams</p>
+                </div>
+              </div>
+
+              {/* Security Best Practices */}
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h4 className="font-medium text-red-800 mb-3">🛡️ Security Best Practices</h4>
+                <div className="text-sm text-red-700 space-y-2">
+                  <p><strong>Principle of Least Privilege:</strong> Users only get minimum permissions needed</p>
+                  <p><strong>Regular Audits:</strong> Review permissions quarterly</p>
+                  <p><strong>Role Rotation:</strong> Temporary role assignments for learning</p>
+                  <p><strong>Emergency Access:</strong> Super Admin can override any permission</p>
+                  <p><strong>Audit Trail:</strong> All role changes logged with timestamps</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Assignment Templates */}
+        <div className="mt-6 bg-white rounded-lg p-5 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">⚡ Quick Assignment Templates</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gradient-to-br from-green-100 to-green-200 p-4 rounded-lg">
+              <h4 className="font-medium text-green-800 mb-2">📞 Customer Service Team</h4>
+              <div className="text-sm text-green-700">
+                <p>• Lead Management: View, Edit</p>
+                <p>• Customer Support: Full Access</p>
+                <p>• Analytics: Basic Reports</p>
+                <p>• HRMS: Attendance Only</p>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-800 mb-2">🔧 Technical Team</h4>
+              <div className="text-sm text-blue-700">
+                <p>• Project Management: Full Access</p>
+                <p>• System Configuration: Yes</p>
+                <p>• User Management: View Only</p>
+                <p>• ERP: Inventory Management</p>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-4 rounded-lg">
+              <h4 className="font-medium text-purple-800 mb-2">📊 Management Team</h4>
+              <div className="text-sm text-purple-700">
+                <p>• All Analytics: Full Access</p>
+                <p>• Team Management: Yes</p>
+                <p>• Budget Control: Department Level</p>
+                <p>• Reporting: Advanced</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Roles Section */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Role Management</h2>
+          <h2 className="text-2xl font-bold text-gray-900">👥 Current Roles</h2>
           {canManageRoles && (
             <button
               onClick={handleCreateRole}
