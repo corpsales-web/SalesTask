@@ -4609,29 +4609,26 @@ const App = () => {
               </div>
             </div>
 
-            {/* Digital Marketing Dashboard */}
-            {showDigitalMarketingDashboard && (
+            {/* Admin Panel Content - Only show active panel */}
+            {activeAdminPanel === 'marketing' && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <DigitalMarketingDashboard isVisible={showDigitalMarketingDashboard} />
+                <DigitalMarketingDashboard isVisible={true} />
               </div>
             )}
 
-            {/* Lead Routing Panel */}
-            {showLeadRoutingPanel && (
+            {activeAdminPanel === 'routing' && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <LeadRoutingPanel isVisible={showLeadRoutingPanel} />
+                <LeadRoutingPanel isVisible={true} />
               </div>
             )}
 
-            {/* Workflow Authoring Panel */}
-            {showWorkflowAuthoringPanel && (
+            {activeAdminPanel === 'workflow' && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <WorkflowAuthoringPanel isVisible={showWorkflowAuthoringPanel} />
+                <WorkflowAuthoringPanel isVisible={true} />
               </div>
             )}
 
-            {/* Role Management Panel */}
-            {showRoleManagementPanel && currentUser && (
+            {activeAdminPanel === 'roles' && currentUser && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <RoleManagementPanel currentUser={currentUser} />
               </div>
