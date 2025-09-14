@@ -557,8 +557,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Tab Navigation Critical Issue Resolution"
-    - "Enhanced Lead Action Buttons Verification"
+    - "Lead Routing APIs Testing Complete"
+    - "Workflow Authoring APIs Testing Complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
