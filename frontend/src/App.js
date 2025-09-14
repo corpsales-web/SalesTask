@@ -5365,7 +5365,7 @@ const App = () => {
                                 {type === 'sales' ? `₹${(progress || 0).toLocaleString()}` : (progress || 0)}
                               </span>
                               <span className="text-xs text-gray-600">
-                                {type === 'sales' ? `₹${target.toLocaleString()}` : target}
+                                {type === 'sales' ? `₹${(target || 0).toLocaleString()}` : (target || 0)}
                               </span>
                             </div>
                           </div>
