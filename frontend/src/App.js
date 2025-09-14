@@ -3589,6 +3589,101 @@ const App = () => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="Balcony Garden">Balcony Garden</SelectItem>
+                              <SelectItem value="Terrace Garden">Terrace Garden</SelectItem>
+                              <SelectItem value="Indoor Plants">Indoor Plants</SelectItem>
+                              <SelectItem value="Vertical Garden">Vertical Garden</SelectItem>
+                              <SelectItem value="Landscape Design">Landscape Design</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="project-budget">Budget Range</Label>
+                          <Input
+                            id="project-budget"
+                            value={newProject.budget_range}
+                            onChange={(e) => setNewProject({...newProject, budget_range: e.target.value})}
+                            placeholder="e.g., ₹25,000 - ₹50,000"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="project-description">Description</Label>
+                          <Textarea
+                            id="project-description"
+                            value={newProject.description}
+                            onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                            rows={3}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="project-testimonial">Client Testimonial</Label>
+                          <Textarea
+                            id="project-testimonial"
+                            value={newProject.testimonial}
+                            onChange={(e) => setNewProject({...newProject, testimonial: e.target.value})}
+                            rows={2}
+                            placeholder="What did the client say about this project?"
+                          />
+                        </div>
+                        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
+                          Add to Gallery
+                        </Button>
+                      </form>
+                    </DialogContent>
+                    </Dialog>
+                    
+                    <Button 
+                      className="flex-1 bg-blue-600 hover:bg-blue-700" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedProject(null);
+                        setShowFileUploadModal(true);
+                      }}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Files
+                    </Button>
+                  </div>
+                      <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add Project to Gallery</DialogTitle>
+                        <DialogDescription>Showcase your completed project</DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={createProject} className="space-y-4">
+                        <div>
+                          <Label htmlFor="project-name">Project Name *</Label>
+                          <Input
+                            id="project-name"
+                            value={newProject.project_name}
+                            onChange={(e) => setNewProject({...newProject, project_name: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="project-client">Client Name *</Label>
+                          <Input
+                            id="project-client"
+                            value={newProject.client_name}
+                            onChange={(e) => setNewProject({...newProject, client_name: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="project-location">Location *</Label>
+                          <Input
+                            id="project-location"
+                            value={newProject.location}
+                            onChange={(e) => setNewProject({...newProject, location: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="project-type">Project Type</Label>
+                          <Select value={newProject.project_type} onValueChange={(value) => setNewProject({...newProject, project_type: value})}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Balcony Garden">Balcony Garden</SelectItem>
                               <SelectItem value="Rooftop Garden">Rooftop Garden</SelectItem>
                               <SelectItem value="Landscape Design">Landscape Design</SelectItem>
                               <SelectItem value="Interior Plants">Interior Plants</SelectItem>
