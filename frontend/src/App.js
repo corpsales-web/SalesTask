@@ -3549,10 +3549,10 @@ const App = () => {
                         <div className="mt-3 p-2 bg-gray-50 rounded-lg">
                           <div className="text-xs text-gray-600 mb-1">Latest Remark:</div>
                           <div className="text-sm text-gray-800 italic">
-                            "{task.remarks[task.remarks.length - 1].content.substring(0, 100)}..."
+                            "{(task.remarks && task.remarks[task.remarks.length - 1] && task.remarks[task.remarks.length - 1].content) ? task.remarks[task.remarks.length - 1].content.substring(0, 100) : 'No remark available'}..."
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
-                            {task.remarks && task.remarks.length > 0 ? new Date(task.remarks[task.remarks.length - 1].timestamp).toLocaleString() : ''}
+                            {task.remarks && task.remarks.length > 0 && task.remarks[task.remarks.length - 1].timestamp ? new Date(task.remarks[task.remarks.length - 1].timestamp).toLocaleString() : ''}
                           </div>
                         </div>
                       )}
