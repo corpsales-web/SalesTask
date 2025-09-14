@@ -14,6 +14,7 @@ import FaceCheckInComponent from './components/FaceCheckInComponent';
 import DigitalMarketingDashboard from './components/DigitalMarketingDashboard';
 import LeadRoutingPanel from './components/LeadRoutingPanel';
 import WorkflowAuthoringPanel from './components/WorkflowAuthoringPanel';
+import BulkExcelUploadComponent from './components/BulkExcelUploadComponent';
 
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
