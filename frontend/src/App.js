@@ -270,7 +270,7 @@ const App = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getTaskStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'pending': return 'text-orange-700 bg-orange-100';
       case 'in progress': return 'text-blue-700 bg-blue-100';
