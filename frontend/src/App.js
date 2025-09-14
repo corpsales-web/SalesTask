@@ -4560,37 +4560,49 @@ const App = () => {
                 </Badge>
                 
                 <Button
-                  variant="outline"
+                  variant={activeAdminPanel === 'marketing' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setShowDigitalMarketingDashboard(!showDigitalMarketingDashboard)}
-                  className="bg-purple-50 border-purple-200 hover:bg-purple-100"
+                  onClick={() => setActiveAdminPanel(activeAdminPanel === 'marketing' ? null : 'marketing')}
+                  className={activeAdminPanel === 'marketing' ? 
+                    "bg-purple-600 text-white hover:bg-purple-700" :
+                    "bg-purple-50 border-purple-200 hover:bg-purple-100"
+                  }
                 >
                   📊 Marketing Manager
                 </Button>
                 
                 <Button
-                  variant="outline"
+                  variant={activeAdminPanel === 'routing' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setShowLeadRoutingPanel(!showLeadRoutingPanel)}
-                  className="bg-green-50 border-green-200 hover:bg-green-100"
+                  onClick={() => setActiveAdminPanel(activeAdminPanel === 'routing' ? null : 'routing')}
+                  className={activeAdminPanel === 'routing' ? 
+                    "bg-green-600 text-white hover:bg-green-700" :
+                    "bg-green-50 border-green-200 hover:bg-green-100"
+                  }
                 >
                   🔀 Lead Routing
                 </Button>
                 
                 <Button
-                  variant="outline"
+                  variant={activeAdminPanel === 'workflow' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setShowWorkflowAuthoringPanel(!showWorkflowAuthoringPanel)}
-                  className="bg-indigo-50 border-indigo-200 hover:bg-indigo-100"
+                  onClick={() => setActiveAdminPanel(activeAdminPanel === 'workflow' ? null : 'workflow')}
+                  className={activeAdminPanel === 'workflow' ? 
+                    "bg-indigo-600 text-white hover:bg-indigo-700" :
+                    "bg-indigo-50 border-indigo-200 hover:bg-indigo-100"
+                  }
                 >
                   ⚡ Workflow Authoring
                 </Button>
                 
                 <Button
-                  variant="outline"
+                  variant={activeAdminPanel === 'roles' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setShowRoleManagementPanel(!showRoleManagementPanel)}
-                  className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                  onClick={() => setActiveAdminPanel(activeAdminPanel === 'roles' ? null : 'roles')}
+                  className={activeAdminPanel === 'roles' ? 
+                    "bg-blue-600 text-white hover:bg-blue-700" :
+                    "bg-blue-50 border-blue-200 hover:bg-blue-100"
+                  }
                 >
                   👥 Role Management
                 </Button>
