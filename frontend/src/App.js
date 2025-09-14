@@ -3195,7 +3195,7 @@ const App = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">Status:</span>
-                        <Badge variant="outline" className={getStatusColor(task.status)}>{task.status}</Badge>
+                        <Badge variant="outline" className={getTaskStatusColor(task.status)}>{task.status}</Badge>
                       </div>
                       {task.due_date && (
                         <div className="flex items-center justify-between">
