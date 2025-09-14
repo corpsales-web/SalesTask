@@ -705,17 +705,62 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         className="hidden"
       />
 
-      {/* Browser Compatibility Check */}
+      {/* Enhanced Browser Compatibility Check */}
       {!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia ? (
         <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <div className="flex items-center">
             <span className="text-yellow-500 mr-2">⚠️</span>
-            <span className="text-yellow-700">
-              Camera access is not supported in this browser. Please use Chrome, Firefox, or Edge.
-            </span>
+            <div className="text-yellow-700">
+              <p className="font-medium mb-2">Camera access is not supported</p>
+              <p className="text-sm">
+                For the best experience, please use:
+              </p>
+              <ul className="text-sm mt-1 ml-4 list-disc">
+                <li>Chrome 53+ or Firefox 36+</li>
+                <li>Safari 11+ (iOS 11+)</li>
+                <li>Edge 12+</li>
+              </ul>
+              {location.protocol !== 'https:' && location.hostname !== 'localhost' && (
+                <p className="text-sm mt-2 font-medium">
+                  ⚠️ HTTPS connection required for camera access
+                </p>
+              )}
+            </div>
           </div>
         </div>
       ) : null}
+
+      {/* Camera Permission Status */}
+      {cameraPermissionStatus === 'denied' && (
+        <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center">
+            <span className="text-red-500 mr-2">🚫</span>
+            <div className="text-red-700">
+              <p className="font-medium mb-2">Camera permission denied</p>
+              <p className="text-sm">
+                To enable face check-in:
+              </p>
+              <ul className="text-sm mt-1 ml-4 list-disc">
+                <li>Click the camera icon in your browser's address bar</li>
+                <li>Select "Allow" for camera permission</li>
+                <li>Refresh this page and try again</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Available Cameras Info */}
+      {availableDevices.length > 1 && (
+        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center">
+            <span className="text-green-500 mr-2">📹</span>
+            <span className="text-green-700 text-sm">
+              {availableDevices.length} cameras detected. You can switch between them using the camera switch button.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Instructions */}
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
