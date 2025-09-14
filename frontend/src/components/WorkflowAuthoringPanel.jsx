@@ -494,7 +494,7 @@ const WorkflowAuthoringPanel = ({ isVisible }) => {
           </div>
 
           <div className="grid gap-6">
-            {workflows.map((workflow) => (
+            {(workflows || []).map((workflow) => (
               <Card key={workflow.id} className="bg-white shadow-lg">
                 <CardHeader>
                   <div className="flex justify-between items-start">
