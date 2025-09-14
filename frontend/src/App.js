@@ -2505,26 +2505,49 @@ const App = () => {
 
           {/* Leads Tab */}
           <TabsContent value="leads" className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <h2 className="text-2xl font-bold text-gray-900">Lead Management</h2>
-              <div className="flex gap-2">
-                <Button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white" 
-                  onClick={() => {
-                    setSelectedProject(null);
-                    setShowFileUploadModal(true);
-                  }}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Files
-                </Button>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Lead
-                    </Button>
-                  </DialogTrigger>
+              
+              {/* Lead Management Controls */}
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                {/* Date-wise Sync Filter */}
+                <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border">
+                  <Label className="text-sm font-medium whitespace-nowrap">Sync Leads:</Label>
+                  <Input
+                    type="date"
+                    value={leadSyncDate}
+                    onChange={(e) => setLeadSyncDate(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={syncLeadsDateWise}
+                    className="bg-cyan-50 border-cyan-200 hover:bg-cyan-100 text-xs whitespace-nowrap"
+                  >
+                    🔄 Sync
+                  </Button>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white" 
+                    onClick={() => {
+                      setSelectedProject(null);
+                      setShowFileUploadModal(true);
+                    }}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Files
+                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Lead
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent className="max-w-2xl sm:max-w-lg md:max-w-2xl w-[95vw] max-h-[95vh] overflow-y-auto pointer-events-auto">
                     <DialogHeader>
                       <DialogTitle>Add New Lead</DialogTitle>
