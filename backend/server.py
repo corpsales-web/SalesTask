@@ -644,6 +644,10 @@ async def get_current_admin(current_user: UserResponse = Depends(get_current_use
         )
     return current_user
 
+async def get_current_user_id(current_user: UserResponse = Depends(get_current_user)):
+    """Get the current authenticated user's ID"""
+    return current_user.id
+
 def generate_reset_token() -> str:
     """Generate a secure reset token"""
     return secrets.token_urlsafe(32)
