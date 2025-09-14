@@ -93,7 +93,56 @@ const App = () => {
     recentLeads: [],
     recentTasks: []
   });
-  const [leads, setLeads] = useState([]);
+  const [leads, setLeads] = useState([
+    {
+      id: '1',
+      name: 'Rajesh Kumar',
+      email: 'rajesh@example.com',
+      phone: '+91 9876543210',
+      company: 'Green Gardens Pvt Ltd',
+      location: 'Mumbai',
+      budget: 150000,
+      status: 'New',
+      source: 'Website',
+      notes: 'Interested in terrace garden setup for residential complex'
+    },
+    {
+      id: '2', 
+      name: 'Priya Sharma',
+      email: 'priya.sharma@gmail.com',
+      phone: '+91 8765432109',
+      company: 'Eco Homes',
+      location: 'Bangalore',
+      budget: 250000,
+      status: 'Qualified',
+      source: 'Google Ads',
+      notes: 'Looking for commercial landscaping solutions'
+    },
+    {
+      id: '3',
+      name: 'Amit Patel',
+      email: 'amit.patel@techcorp.com', 
+      phone: '+91 7654321098',
+      company: 'Tech Corp',
+      location: 'Pune',
+      budget: 80000,
+      status: 'Proposal',
+      source: 'Referral',
+      notes: 'Office indoor plant setup and maintenance'
+    },
+    {
+      id: '4',
+      name: 'Sneha Reddy',
+      email: 'sneha.reddy@startup.com',
+      phone: '+91 6543210987',
+      company: 'StartupHub',
+      location: 'Hyderabad', 
+      budget: 120000,
+      status: 'Negotiation',
+      source: 'Facebook',
+      notes: 'Vertical garden installation for startup office'
+    }
+  ]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
