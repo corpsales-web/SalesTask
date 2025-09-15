@@ -614,13 +614,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Lead-specific camera functionality testing"
     - "Workflow Authoring Create New Workflow fix"
     - "Role Management Panel - Comprehensive Examples and Workflows"
     - "NotificationSystem Component Integration"
   stuck_tasks:
     - "NotificationSystem Component Integration"
-    - "Lead-specific camera functionality - implementation needs verification"
   test_all: false
   test_priority: "high_first"
 
