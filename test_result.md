@@ -318,6 +318,21 @@ frontend:
         agent: "main"
         comment: "✅ LEAD-SPECIFIC CAMERA FUNCTIONALITY FULLY WORKING: Comprehensive testing confirms all components working correctly: (1) Lead Actions Panel opens when clicking Images button on individual lead cards ✅ (2) Camera action (📸 Camera) is visible and clickable in modal ✅ (3) Lead-specific camera interface opens with proper lead tagging ('Camera Capture for [Lead Name]') ✅ (4) Delivery method selection shows lead's specific phone/email ✅ (5) 'Open Camera' button triggers camera access with proper error handling ✅ (6) Interface includes personal message pre-populated for specific lead ✅ (7) Camera permissions handled correctly with user-friendly error messages ✅. All lead-specific features implemented including photo tagging, delivery options, follow-up tracking, and budget-appropriate content recommendations. Camera functionality successfully integrated into lead management workflow."
 
+  - task: "Workflow Authoring Create New Workflow fix"
+    implemented: true
+    working: true
+    file: "components/WorkflowAuthoringPanel.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "needs_testing"
+        agent: "main"
+        comment: "Fixed Workflow Authoring 'Create New Workflow' functionality by adding tab state management and updating both 'New Workflow' and 'Create First Workflow' buttons to automatically switch to the 'builder' tab when clicked. Added activeTab state and onValueChange handler to Tabs component."
+      - working: true
+        agent: "main"
+        comment: "✅ WORKFLOW AUTHORING CREATE NEW WORKFLOW FULLY WORKING: Comprehensive testing confirms the fix is successful: (1) 'New Workflow' button correctly switches to 'Workflow Builder' tab ✅ (2) Workflow creation form displays properly with all fields (name, category, description, workflow steps) ✅ (3) Step type buttons are all functional (AI Response, Send Message, Wait for Response, Conditional Logic, Assign Agent, Schedule Follow-up, Update Lead, Send Notification) ✅ (4) 'Save Workflow' button is available and enabled ✅ (5) Tab switching functionality working seamlessly ✅. Users can now create workflows intuitively by clicking 'New Workflow' which takes them directly to the builder interface. Complete workflow authoring functionality operational."
+
   - task: "Admin Panel Frontend - User Management Integration"
     implemented: true
     working: true
