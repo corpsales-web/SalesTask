@@ -4401,6 +4401,19 @@ const App = () => {
                     <Camera className="h-4 w-4 mr-2" />
                     📷 Camera
                   </Button>
+                  <Button 
+                    className="flex-1 bg-purple-600 hover:bg-purple-700" 
+                    size="sm"
+                    onClick={() => openShareModal('project', { 
+                      name: 'Project Gallery', 
+                      location: 'Multiple Locations', 
+                      budget: 'Various Budgets',
+                      id: 'gallery' 
+                    })}
+                  >
+                    <Share className="h-4 w-4 mr-2" />
+                    Share Gallery
+                  </Button>
                 </div>
                 </CardContent>
               </Card>
