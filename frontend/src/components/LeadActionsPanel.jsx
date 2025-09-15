@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
-import { Camera, Info } from 'lucide-react';
+import { Camera, Info, X } from 'lucide-react';
 
 const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionType }) => {
   const [actions, setActions] = useState([]);
