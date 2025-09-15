@@ -2044,6 +2044,11 @@ const App = () => {
   const [showCreateTargetModal, setShowCreateTargetModal] = useState(false);
   const [showCatalogManager, setShowCatalogManager] = useState(false);
   const [showBulkExcelUpload, setShowBulkExcelUpload] = useState(false);
+  const [showTaskCompleteModal, setShowTaskCompleteModal] = useState(false);
+  const [showTaskReminderModal, setShowTaskReminderModal] = useState(false);
+  const [taskCompletionNote, setTaskCompletionNote] = useState('');
+  const [taskReminderNote, setTaskReminderNote] = useState('');
+  const [selectedReminderInterval, setSelectedReminderInterval] = useState('1hour');
   const [targets, setTargets] = useState({
     daily: { sales: 10000, leads: 5, tasks: 10 },
     weekly: { sales: 70000, leads: 35, tasks: 70 },
