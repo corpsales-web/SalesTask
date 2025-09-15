@@ -6490,6 +6490,150 @@ const App = () => {
         </div>
       )}
 
+      {/* Task Complete Modal */}
+      {showTaskCompleteModal && selectedTask && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-md mx-4">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">✅ Complete Task</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTaskCompleteModal(false)}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h3 className="font-medium text-green-800 mb-1">{selectedTask.title}</h3>
+                  <p className="text-sm text-green-600">Priority: {selectedTask.priority} | Due: {new Date(selectedTask.due_date).toLocaleDateString()}</p>
+                </div>
+                
+                <div>
+                  <Label htmlFor="completion-note">Completion Note (Optional)</Label>
+                  <Textarea
+                    id="completion-note"
+                    placeholder="Add any notes about how this task was completed..."
+                    value={taskCompletionNote}
+                    onChange={(e) => setTaskCompletionNote(e.target.value)}
+                    rows={3}
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowTaskCompleteModal(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      completeTaskWithValidation(selectedTask.id, taskCompletionNote);
+                      setShowTaskCompleteModal(false);
+                      setTaskCompletionNote('');
+                    }}
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                  >
+                    ✅ Mark Complete
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Task Reminder Modal */}
+      {showTaskReminderModal && selectedTask && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-md mx-4">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">⏰ Set Task Reminder</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTaskReminderModal(false)}
+                  className="text-gray-500"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <h3 className="font-medium text-yellow-800 mb-1">{selectedTask.title}</h3>
+                  <p className="text-sm text-yellow-600">Priority: {selectedTask.priority} | Due: {new Date(selectedTask.due_date).toLocaleDateString()}</p>
+                </div>
+                
+                <div>
+                  <Label htmlFor="reminder-interval">Reminder Frequency</Label>
+                  <Select 
+                    value={selectedReminderInterval} 
+                    onValueChange={setSelectedReminderInterval}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15min">15 minutes</SelectItem>
+                      <SelectItem value="30min">30 minutes</SelectItem>
+                      <SelectItem value="1hour">1 hour</SelectItem>
+                      <SelectItem value="2hours">2 hours</SelectItem>
+                      <SelectItem value="1day">1 day</SelectItem>
+                      <SelectItem value="1week">1 week</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Reminder will be set for {selectedReminderInterval} from now
+                  </p>
+                </div>
+                
+                <div>
+                  <Label htmlFor="reminder-note">Reminder Note (Optional)</Label>
+                  <Textarea
+                    id="reminder-note"
+                    placeholder="Add a note for the reminder..."
+                    value={taskReminderNote}
+                    onChange={(e) => setTaskReminderNote(e.target.value)}
+                    rows={3}
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowTaskReminderModal(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setTaskReminder(selectedTask.id, selectedReminderInterval, taskReminderNote);
+                      setShowTaskReminderModal(false);
+                      setTaskReminderNote('');
+                      setSelectedReminderInterval('1hour');
+                    }}
+                    className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                  >
+                    ⏰ Set Reminder
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Catalog Manager Modal */}
       {showCatalogManager && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
