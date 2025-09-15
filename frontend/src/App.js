@@ -4938,6 +4938,18 @@ const App = () => {
                 >
                   👥 Role Management
                 </Button>
+                
+                <Button
+                  variant={activeAdminPanel === 'notifications' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActiveAdminPanel(activeAdminPanel === 'notifications' ? null : 'notifications')}
+                  className={activeAdminPanel === 'notifications' ? 
+                    "bg-yellow-600 text-white hover:bg-yellow-700" :
+                    "bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
+                  }
+                >
+                  🔔 Notifications
+                </Button>
               </div>
             </div>
 
