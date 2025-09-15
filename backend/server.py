@@ -2671,7 +2671,7 @@ async def face_recognition_checkin(checkin_data: dict):
         attendance = Attendance(
             employee_id=employee_id,
             date=check_in_time.date(),
-            check_in=check_in_time.time(),
+            check_in=check_in_time,  # Use full datetime, not just time
             location=location.get("address", "Office") if isinstance(location, dict) else str(location),
             status="Present"
         )
