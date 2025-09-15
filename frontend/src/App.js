@@ -2948,7 +2948,8 @@ const App = () => {
             </button>
           </div>
 
-        {/* Custom Tab Content - Direct Implementation */}
+        {/* Dashboard Tab */}
+        <TabsContent value="dashboard" className="space-y-6">
             {dashboardStats && (
               <>
                 {/* Stats Cards */}
