@@ -4978,6 +4978,12 @@ const App = () => {
               </div>
             )}
 
+            {activeAdminPanel === 'notifications' && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <NotificationSystem />
+              </div>
+            )}
+
             {/* Default Admin Content - Only show when no specific panel is active */}
             {!activeAdminPanel && (
               <>
