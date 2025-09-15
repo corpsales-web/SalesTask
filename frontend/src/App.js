@@ -340,7 +340,7 @@ const App = () => {
       };
 
       await axios.put(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/tasks/${taskId}/status`,
+        `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'}/api/tasks/${taskId}/status`,
         updateData,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
