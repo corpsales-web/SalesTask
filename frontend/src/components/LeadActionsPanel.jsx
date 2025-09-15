@@ -10,6 +10,16 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
   const [selectedAction, setSelectedAction] = useState(null);
   const [actionData, setActionData] = useState({});
   
+  // Camera functionality states
+  const [showCameraCapture, setShowCameraCapture] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
+  const [capturedImages, setCapturedImages] = useState([]);
+  const [isInitializingCamera, setIsInitializingCamera] = useState(false);
+  const [cameraError, setCameraError] = useState(null);
+  
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 
   useEffect(() => {
