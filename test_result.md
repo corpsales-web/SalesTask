@@ -629,7 +629,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Workflow Authoring Create New Workflow fix"
     - "Role Management Panel - Comprehensive Examples and Workflows"
     - "NotificationSystem Component Integration"
   stuck_tasks:
