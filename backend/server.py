@@ -92,6 +92,7 @@ from voice_stt_service import initialize_voice_stt_service, voice_stt_service
 from offline_sync_service import initialize_offline_sync_service, offline_sync_service
 from lead_routing_service import initialize_lead_routing_service
 from workflow_authoring_service import initialize_workflow_authoring_service
+from background_services import background_service, run_background_services
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
