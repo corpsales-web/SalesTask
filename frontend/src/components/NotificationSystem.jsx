@@ -343,92 +343,99 @@ const NotificationSystem = () => {
 
         {/* Notification Panel */}
         {isNotificationPanelOpen && (
-          <div className="absolute right-0 top-12 w-96 max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]">
-            <div className="p-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-                <div className="flex space-x-2">
-                  {notifications.length > 0 && (
-                    <Button variant="outline" size="sm" onClick={clearAllNotifications}>
-                      Clear All
+          <>
+            {/* Backdrop overlay to close panel */}
+            <div 
+              className="fixed inset-0 z-[9998]" 
+              onClick={() => setIsNotificationPanelOpen(false)}
+            />
+            <div className="absolute right-0 top-12 w-96 max-h-96 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]">
+              <div className="p-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                  <div className="flex space-x-2">
+                    {notifications.length > 0 && (
+                      <Button variant="outline" size="sm" onClick={clearAllNotifications}>
+                        Clear All
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsNotificationPanelOpen(false)}
+                    >
+                      <X className="h-4 w-4" />
                     </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsNotificationPanelOpen(false)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="max-h-80 overflow-y-auto">
-              {notifications.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
-                  <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p>No notifications yet</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 hover:bg-gray-50 cursor-pointer ${
-                        notification.status === 'unread' ? 'bg-blue-50' : ''
-                      }`}
-                      onClick={() => markAsRead(notification.id)}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div className="text-2xl">{getNotificationIcon(notification.type)}</div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {notification.title}
-                            </p>
-                            <div className="flex items-center space-x-2">
-                              <Badge className={`text-xs ${getPriorityColor(notification.priority)}`}>
-                                {notification.priority}
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-4 w-4 p-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteNotification(notification.id);
-                                }}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
+              <div className="max-h-80 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="p-6 text-center text-gray-500">
+                    <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p>No notifications yet</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`p-4 hover:bg-gray-50 cursor-pointer ${
+                          notification.status === 'unread' ? 'bg-blue-50' : ''
+                        }`}
+                        onClick={() => markAsRead(notification.id)}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className="text-2xl">{getNotificationIcon(notification.type)}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {notification.title}
+                              </p>
+                              <div className="flex items-center space-x-2">
+                                <Badge className={`text-xs ${getPriorityColor(notification.priority)}`}>
+                                  {notification.priority}
+                                </Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-4 w-4 p-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteNotification(notification.id);
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {notification.message}
-                          </p>
-                          <div className="flex items-center justify-between mt-2">
-                            <p className="text-xs text-gray-400">
-                              {notification.timestamp.toLocaleString()}
+                            <p className="text-sm text-gray-600 mt-1">
+                              {notification.message}
                             </p>
-                            <div className="flex space-x-1">
-                              {notification.channel.map((channel) => (
-                                <span key={channel} className="text-xs text-gray-400">
-                                  {channel === 'push' && '📱'}
-                                  {channel === 'whatsapp' && '💬'}
-                                  {channel === 'email' && '📧'}
-                                </span>
-                              ))}
+                            <div className="flex items-center justify-between mt-2">
+                              <p className="text-xs text-gray-400">
+                                {notification.timestamp.toLocaleString()}
+                              </p>
+                              <div className="flex space-x-1">
+                                {notification.channel.map((channel) => (
+                                  <span key={channel} className="text-xs text-gray-400">
+                                    {channel === 'push' && '📱'}
+                                    {channel === 'whatsapp' && '💬'}
+                                    {channel === 'email' && '📧'}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
 
