@@ -11,57 +11,6 @@ const FileUploadComponent = ({ projectId, onUploadComplete, maxFiles = 10, accep
   const abortControllers = useRef({});
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 
-  // Camera functionality
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: { ideal: 1280 }, 
-          height: { ideal: 720 },
-          facingMode: 'environment' // Use back camera if available
-        } 
-      });
-      setCameraStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setShowCameraCapture(true);
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      setErrors(prev => ({ ...prev, camera: 'Failed to access camera. Please check permissions.' }));
-    }
-  };
-
-  const stopCamera = () => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach(track => track.stop());
-      setCameraStream(null);
-    }
-    setShowCameraCapture(false);
-  };
-
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0);
-      
-      canvas.toBlob(async (blob) => {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `camera-capture-${timestamp}.jpg`;
-        const file = new File([blob], filename, { type: 'image/jpeg' });
-        
-        // Upload the captured photo
-        await uploadFile(file);
-        stopCamera();
-      }, 'image/jpeg', 0.8);
-    }
-  };
-
   const defaultAcceptedTypes = {
     'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp'],
     'video/*': ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm'],
@@ -86,129 +35,72 @@ const FileUploadComponent = ({ projectId, onUploadComplete, maxFiles = 10, accep
     for (const file of acceptedFiles) {
       await uploadFile(file);
     }
-  }, [projectId]);
-
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    isDragReject
-  } = useDropzone({
-    onDrop,
-    accept: Object.keys(acceptedTypes).length > 0 ? acceptedTypes : defaultAcceptedTypes,
-    maxSize: 500 * 1024 * 1024, // 500MB
-    maxFiles: maxFiles,
-    multiple: true
-  });
+  }, []);
 
   const uploadFile = async (file) => {
-    const fileId = `${Date.now()}-${file.name}`;
+    const fileId = `${file.name}-${Date.now()}`;
     
     try {
-      // Create abort controller for this upload
-      abortControllers.current[fileId] = new AbortController();
-
-      // Initialize upload state
-      setUploads(prev => ({
-        ...prev,
-        [fileId]: {
-          file,
-          status: 'uploading',
-          startTime: Date.now()
-        }
-      }));
-
-      setUploadProgress(prev => ({
-        ...prev,
-        [fileId]: {
-          loaded: 0,
-          total: file.size,
-          percentage: 0
-        }
-      }));
-
-      // Create form data
+      // Create FormData
       const formData = new FormData();
       formData.append('file', file);
-      if (projectId) {
-        formData.append('project_id', projectId);
-      }
+      formData.append('project_id', projectId || 'general');
+      
+      // Create AbortController for this upload
+      const controller = new AbortController();
+      abortControllers.current[fileId] = controller;
+      
+      // Initialize upload state
+      setUploads(prev => ({ ...prev, [fileId]: { file, status: 'uploading' } }));
+      setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[file.name];
+        return newErrors;
+      });
 
-      // Get auth token
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      // Upload file
+      // Upload file with progress tracking
       const response = await axios.post(
-        `${API_BASE_URL}/api/upload/file`,
+        `${API_BASE_URL}/api/upload`, 
         formData,
         {
+          signal: controller.signal,
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
           },
-          signal: abortControllers.current[fileId].signal,
           onUploadProgress: (progressEvent) => {
-            const progress = {
-              loaded: progressEvent.loaded,
-              total: progressEvent.total,
-              percentage: Math.round((progressEvent.loaded / progressEvent.total) * 100)
-            };
-            
-            setUploadProgress(prev => ({
-              ...prev,
-              [fileId]: progress
-            }));
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(prev => ({ ...prev, [fileId]: progress }));
           }
         }
       );
 
       // Upload successful
-      setUploads(prev => ({
-        ...prev,
-        [fileId]: {
-          ...prev[fileId],
-          status: 'completed',
-          result: response.data
-        }
-      }));
-
-      setCompletedUploads(prev => [...prev, response.data]);
-
+      setUploads(prev => ({ ...prev, [fileId]: { file, status: 'completed', response: response.data } }));
+      setCompletedUploads(prev => [...prev, { file, response: response.data }]);
+      
+      // Clean up
+      delete abortControllers.current[fileId];
+      
+      // Notify parent component
       if (onUploadComplete) {
-        onUploadComplete(response.data);
+        onUploadComplete({ file, response: response.data });
       }
 
     } catch (error) {
-      if (error.name === 'AbortError' || error.message === 'canceled') {
+      if (error.name === 'CanceledError') {
         // Upload was cancelled
-        setUploads(prev => ({
-          ...prev,
-          [fileId]: {
-            ...prev[fileId],
-            status: 'cancelled'
-          }
-        }));
+        setUploads(prev => ({ ...prev, [fileId]: { file, status: 'cancelled' } }));
       } else {
         // Upload failed
-        setUploads(prev => ({
-          ...prev,
-          [fileId]: {
-            ...prev[fileId],
-            status: 'failed',
-            error: error.response?.data?.detail || error.message
-          }
-        }));
-
-        setErrors(prev => ({
-          ...prev,
-          [file.name]: error.response?.data?.detail || error.message
+        setUploads(prev => ({ ...prev, [fileId]: { file, status: 'error' } }));
+        setErrors(prev => ({ 
+          ...prev, 
+          [file.name]: error.response?.data?.detail || error.message || 'Upload failed' 
         }));
       }
-    } finally {
-      // Cleanup
+      
+      // Clean up
       delete abortControllers.current[fileId];
     }
   };
@@ -216,6 +108,7 @@ const FileUploadComponent = ({ projectId, onUploadComplete, maxFiles = 10, accep
   const cancelUpload = (fileId) => {
     if (abortControllers.current[fileId]) {
       abortControllers.current[fileId].abort();
+      delete abortControllers.current[fileId];
     }
   };
 
@@ -233,247 +126,122 @@ const FileUploadComponent = ({ projectId, onUploadComplete, maxFiles = 10, accep
     });
   };
 
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { ...defaultAcceptedTypes, ...acceptedTypes },
+    maxFiles,
+    maxSize: 50 * 1024 * 1024, // 50MB limit
+  });
+
+  const getFileIcon = (file) => {
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension)) return '🖼️';
+    if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'].includes(extension)) return '🎥';
+    if (extension === 'pdf') return '📄';
+    if (['txt', 'csv', 'json'].includes(extension)) return '📝';
+    if (extension === 'zip') return '📦';
+    return '📁';
   };
 
-  const getUploadSpeed = (fileId) => {
-    const upload = uploads[fileId];
-    const progress = uploadProgress[fileId];
-    
-    if (!upload || !progress || progress.loaded === 0) return '0 B/s';
-    
-    const timeElapsed = (Date.now() - upload.startTime) / 1000;
-    const speed = progress.loaded / timeElapsed;
-    return formatFileSize(speed) + '/s';
-  };
-
-  const getTimeRemaining = (fileId) => {
-    const progress = uploadProgress[fileId];
-    const upload = uploads[fileId];
-    
-    if (!progress || !upload || progress.percentage === 0) return 'Calculating...';
-    
-    const remainingBytes = progress.total - progress.loaded;
-    const timeElapsed = (Date.now() - upload.startTime) / 1000;
-    const speed = progress.loaded / timeElapsed;
-    
-    if (speed === 0) return 'Unknown';
-    
-    const remainingTime = remainingBytes / speed;
-    
-    if (remainingTime < 60) return `${Math.round(remainingTime)}s`;
-    if (remainingTime < 3600) return `${Math.round(remainingTime / 60)}m`;
-    return `${Math.round(remainingTime / 3600)}h`;
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'uploading': return 'bg-blue-500';
+      case 'completed': return 'bg-green-500';
+      case 'error': return 'bg-red-500';
+      case 'cancelled': return 'bg-gray-500';
+      default: return 'bg-gray-300';
+    }
   };
 
   return (
-    <div className="file-upload-component">
-      {/* Drop Zone */}
+    <div className="file-upload-component space-y-4">
+      {/* File Drop Zone */}
       <div
         {...getRootProps()}
-        className={`
-          drop-zone border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-          ${isDragReject ? 'border-red-500 bg-red-50' : ''}
-        `}
+        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+          isDragActive
+            ? 'border-blue-500 bg-blue-50'
+            : 'border-gray-300 hover:border-gray-400'
+        }`}
       >
         <input {...getInputProps()} />
-        
-        <div className="space-y-4">
-          <div className="text-6xl">
-            {isDragActive ? '📁' : '📎'}
-          </div>
-          
+        <div className="space-y-2">
+          <div className="text-4xl">📤</div>
           <div>
-            <p className="text-lg font-medium text-gray-700">
-              {isDragActive ? 'Drop files here...' : 'Drag & drop files here, or click to select'}
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Max file size: 500MB • Max files: {maxFiles}
-            </p>
-          </div>
-          
-          {/* Camera Capture Button */}
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={startCamera}
-              className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              📷 Camera Capture
-            </button>
+            {isDragActive ? (
+              <p className="text-blue-600 font-medium">Drop files here...</p>
+            ) : (
+              <div>
+                <p className="text-gray-600 font-medium">
+                  Drag & drop files here, or click to select
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Max {maxFiles} files, up to 50MB each
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Camera Capture Modal */}
-      {showCameraCapture && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Camera Capture</h3>
-              <button
-                onClick={stopCamera}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="relative bg-black rounded-lg overflow-hidden">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-64 object-cover"
-                />
+      {/* File Upload Progress */}
+      {Object.keys(uploads).length > 0 && (
+        <div className="space-y-3">
+          <h4 className="font-medium text-gray-900">File Uploads</h4>
+          {Object.entries(uploads).map(([fileId, { file, status }]) => (
+            <div key={fileId} className="border rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">{getFileIcon(file)}</span>
+                  <span className="text-sm font-medium text-gray-900 truncate">
+                    {file.name}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                  </span>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <span className={`px-2 py-1 rounded-full text-xs text-white ${getStatusColor(status)}`}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </span>
+                  
+                  {status === 'uploading' && (
+                    <button
+                      onClick={() => cancelUpload(fileId)}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  
+                  {(status === 'completed' || status === 'error' || status === 'cancelled') && (
+                    <button
+                      onClick={() => removeUpload(fileId)}
+                      className="text-gray-500 hover:text-gray-700 text-sm"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
               
-              <div className="flex justify-center space-x-4">
-                <button
-                  onClick={capturePhoto}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  📸 Capture Photo
-                </button>
-                <button
-                  onClick={stopCamera}
-                  className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hidden canvas for photo capture */}
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-      {/* Upload Progress */}
-      {Object.keys(uploads).length > 0 && (
-        <div className="mt-6 space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Upload Progress</h3>
-          
-          {Object.entries(uploads).map(([fileId, upload]) => {
-            const progress = uploadProgress[fileId] || { percentage: 0 };
-            
-            return (
-              <div key={fileId} className="border rounded-lg p-4 bg-white shadow-sm">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-2xl">
-                      {upload.file.type.startsWith('image/') ? '🖼️' :
-                       upload.file.type.startsWith('video/') ? '🎥' :
-                       upload.file.type === 'application/pdf' ? '📄' :
-                       upload.file.type.includes('zip') ? '🗜️' : '📁'}
-                    </div>
-                    
-                    <div>
-                      <p className="font-medium text-gray-900">{upload.file.name}</p>
-                      <p className="text-sm text-gray-500">{formatFileSize(upload.file.size)}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    {upload.status === 'uploading' && (
-                      <button
-                        onClick={() => cancelUpload(fileId)}
-                        className="text-red-600 hover:text-red-800 text-sm"
-                      >
-                        Cancel
-                      </button>
-                    )}
-                    
-                    {upload.status !== 'uploading' && (
-                      <button
-                        onClick={() => removeUpload(fileId)}
-                        className="text-gray-400 hover:text-gray-600 text-sm"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
+              {/* Progress Bar */}
+              {status === 'uploading' && (
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress[fileId] || 0}%` }}
+                  />
                 </div>
-
-                {/* Progress Bar */}
-                {upload.status === 'uploading' && (
-                  <div className="space-y-2">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${progress.percentage}%` }}
-                      />
-                    </div>
-                    
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>{progress.percentage}%</span>
-                      <span>{getUploadSpeed(fileId)}</span>
-                      <span>ETA: {getTimeRemaining(fileId)}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Status Messages */}
-                {upload.status === 'completed' && (
-                  <div className="flex items-center text-green-600 text-sm">
-                    <span className="mr-2">✅</span>
-                    Upload completed successfully
-                  </div>
-                )}
-
-                {upload.status === 'failed' && (
-                  <div className="flex items-center text-red-600 text-sm">
-                    <span className="mr-2">❌</span>
-                    {upload.error || 'Upload failed'}
-                  </div>
-                )}
-
-                {upload.status === 'cancelled' && (
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <span className="mr-2">⏹️</span>
-                    Upload cancelled
-                  </div>
-                )}
-
-                {/* Thumbnails for images */}
-                {upload.status === 'completed' && upload.result?.thumbnails && (
-                  <div className="mt-3">
-                    <p className="text-xs text-gray-500 mb-2">Thumbnails:</p>
-                    <div className="flex space-x-2">
-                      {Object.entries(upload.result.thumbnails).map(([size, url]) => (
-                        <img
-                          key={size}
-                          src={url}
-                          alt={`${size} thumbnail`}
-                          className="w-16 h-16 object-cover rounded border"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Error Messages */}
-      {Object.keys(errors).length > 0 && (
-        <div className="mt-4 space-y-2">
-          {Object.entries(errors).map(([filename, error]) => (
-            <div key={filename} className="flex items-center text-red-600 text-sm bg-red-50 p-2 rounded">
-              <span className="mr-2">⚠️</span>
-              <span className="font-medium">{filename}:</span>
-              <span className="ml-1">{error}</span>
+              )}
+              
+              {/* Error Message */}
+              {errors[file.name] && (
+                <div className="mt-2 text-sm text-red-600">
+                  {errors[file.name]}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -481,14 +249,15 @@ const FileUploadComponent = ({ projectId, onUploadComplete, maxFiles = 10, accep
 
       {/* Completed Uploads Summary */}
       {completedUploads.length > 0 && (
-        <div className="mt-6 p-4 bg-green-50 rounded-lg">
-          <h3 className="text-lg font-medium text-green-800 mb-2">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <h4 className="text-green-800 font-medium mb-2">
             ✅ {completedUploads.length} file{completedUploads.length !== 1 ? 's' : ''} uploaded successfully
-          </h3>
-          <div className="space-y-1">
+          </h4>
+          <div className="text-sm text-green-700 space-y-1">
             {completedUploads.map((upload, index) => (
-              <div key={index} className="text-sm text-green-700">
-                📎 {upload.original_filename} ({formatFileSize(upload.file_size)})
+              <div key={index} className="flex items-center space-x-2">
+                <span>{getFileIcon(upload.file)}</span>
+                <span>{upload.file.name}</span>
               </div>
             ))}
           </div>
