@@ -674,13 +674,62 @@ const App = () => {
     });
   };
 
-  const addProjectType = () => {
-    if (newProjectType.trim() && !projectTypes.includes(newProjectType.trim())) {
-      setProjectTypes([...projectTypes, newProjectType.trim()]);
+  const addProjectType = async () => {
+    if (!newProjectType.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a project type name",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check for duplicates (handle both string and object formats)
+    const exists = projectTypes.some(pt => {
+      const name = typeof pt === 'string' ? pt : (pt.name || pt.title);
+      return name?.toLowerCase() === newProjectType.trim().toLowerCase();
+    });
+
+    if (exists) {
+      toast({
+        title: "Error", 
+        description: "This project type already exists",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Try to create via API if possible
+      if (authToken) {
+        const response = await axios.post(`${API}/project-types`, {
+          name: newProjectType.trim(),
+          description: `Project type: ${newProjectType.trim()}`,
+          active: true
+        }, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        
+        // Reload project types from API
+        await loadProjectTypes();
+      } else {
+        // Fallback to local state if no auth
+        setProjectTypes([...projectTypes, newProjectType.trim()]);
+      }
+      
       setNewProjectType("");
       toast({
         title: "Project Type Added",
         description: `"${newProjectType.trim()}" has been added to project types`
+      });
+    } catch (error) {
+      console.error('Failed to add project type:', error);
+      // Fallback to local state on API error
+      setProjectTypes([...projectTypes, newProjectType.trim()]);
+      setNewProjectType("");
+      toast({
+        title: "Project Type Added",
+        description: `"${newProjectType.trim()}" has been added locally (API unavailable)`
       });
     }
   };
