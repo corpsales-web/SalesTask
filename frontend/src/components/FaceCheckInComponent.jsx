@@ -169,12 +169,25 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         ...(currentDeviceId && { deviceId: { exact: currentDeviceId } })
       };
     } else if (deviceType === 'macbook') {
-      // MacBook specific constraints
+      // MacBook specific constraints - enhanced for better compatibility
       baseConstraints.video = {
         ...baseConstraints.video,
-        width: { min: 640, ideal: 1280, max: 1920 },
-        height: { min: 480, ideal: 720, max: 1080 },
-        frameRate: { ideal: 30, max: 60 },
+        width: { min: 480, ideal: 1280, max: 1920 },
+        height: { min: 360, ideal: 720, max: 1080 },
+        frameRate: { min: 15, ideal: 30, max: 60 },
+        // Add MacBook-specific optimizations
+        aspectRatio: { ideal: 16/9 },
+        resizeMode: 'crop-and-scale',
+        ...(currentDeviceId && { deviceId: { exact: currentDeviceId } })
+      };
+    } else if (deviceType === 'windows') {
+      // Windows desktop constraints
+      baseConstraints.video = {
+        ...baseConstraints.video,
+        width: { min: 480, ideal: 1280, max: 1920 },
+        height: { min: 360, ideal: 720, max: 1080 },
+        frameRate: { min: 15, ideal: 30, max: 60 },
+        aspectRatio: { ideal: 16/9 },
         ...(currentDeviceId && { deviceId: { exact: currentDeviceId } })
       };
     } else {
