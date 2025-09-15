@@ -1177,13 +1177,17 @@ const App = () => {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       setTasks(response.data);
+      console.log('Tasks fetched successfully:', response.data.length, 'tasks');
     } catch (error) {
       console.error("Error fetching tasks:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch tasks",
-        variant: "destructive"
-      });
+      // Don't show error toast if tasks are already loaded (avoid false errors)
+      if (tasks.length === 0) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch tasks",
+          variant: "destructive"
+        });
+      }
     }
   };
 
