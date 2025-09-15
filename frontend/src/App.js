@@ -5358,28 +5358,34 @@ const App = () => {
                   <div>
                     <Label className="text-sm font-medium text-purple-700 mb-2 block">Available Project Types:</Label>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {projectTypes.map((projectType) => (
-                        <div key={projectType} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
-                          <span className="font-medium text-purple-800">{projectType}</span>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-purple-300 hover:bg-purple-100"
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => deleteProjectType(projectType)}
-                              className="border-red-300 hover:bg-red-100 text-red-600"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
+                      {projectTypes.map((projectType) => {
+                        // Handle both string and object format
+                        const displayName = typeof projectType === 'string' ? projectType : (projectType.name || projectType.title || 'Unnamed Project Type');
+                        const projectId = typeof projectType === 'object' ? (projectType.id || projectType._id) : projectType;
+                        
+                        return (
+                          <div key={projectId} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
+                            <span className="font-medium text-purple-800">{displayName}</span>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-purple-300 hover:bg-purple-100"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => deleteProjectType(projectId)}
+                                className="border-red-300 hover:bg-red-100 text-red-600"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </CardContent>
