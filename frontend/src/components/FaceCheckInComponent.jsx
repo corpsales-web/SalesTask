@@ -250,9 +250,20 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
           video: { facingMode: facingMode },
           audio: false
         },
-        // Fallback 3: Any camera
+        // Fallback 4: Desktop/laptop camera without facingMode
         {
-          video: true,
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          },
+          audio: false
+        },
+        // Fallback 5: Ultra-basic constraints for older devices
+        {
+          video: {
+            width: 320,
+            height: 240
+          },
           audio: false
         }
       ];
