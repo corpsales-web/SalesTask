@@ -2869,6 +2869,11 @@ const App = () => {
                 >
                   📷 Check-In
                 </Button>
+
+                {/* Notification Bell - Always visible in header */}
+                <div className="relative">
+                  <NotificationSystem />
+                </div>
               </div>
               
               <div className="text-right">
