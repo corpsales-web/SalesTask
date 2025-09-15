@@ -718,6 +718,7 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
       whatsapp: '💬',
       email: '📧',
       send_images: '🖼️',
+      capture_and_send_images: '📸',
       send_catalogue: '📋',
       meeting: '🤝',
       follow_up: '🔄',
