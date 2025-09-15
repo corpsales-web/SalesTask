@@ -467,7 +467,7 @@ const App = () => {
       };
 
       await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'}/api/tasks/${taskId}/reminder`,
+        `${API}/tasks/${taskId}/reminder`,
         reminderData,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
