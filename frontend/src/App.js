@@ -7473,6 +7473,80 @@ const App = () => {
         </div>
       )}
       
+      {/* Share Modal */}
+      {showShareModal && shareData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg border border-gray-200 p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Share {shareContext}</h3>
+              <button
+                onClick={closeShareModal}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Share Content Preview */}
+              <div className="bg-gray-50 p-3 rounded-lg border">
+                <h4 className="font-medium text-gray-900">
+                  {shareContext === 'lead' && shareData.name}
+                  {shareContext === 'project' && shareData.name}
+                  {shareContext === 'task' && shareData.title}
+                </h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  {shareContext === 'lead' && `${shareData.phone} • ${shareData.requirements}`}
+                  {shareContext === 'project' && `${shareData.location} • ${shareData.budget}`}
+                  {shareContext === 'task' && `Assigned to: ${shareData.assignee}`}
+                </p>
+              </div>
+              
+              {/* Share Options */}
+              <div className="grid grid-cols-1 gap-3">
+                <button
+                  onClick={() => {
+                    const content = generateShareContent(shareContext, shareData);
+                    const phone = shareContext === 'lead' ? shareData.phone?.replace(/[^0-9]/g, '') : '';
+                    shareViaWhatsApp(content.message, phone);
+                    closeShareModal();
+                  }}
+                  className="flex items-center justify-center w-full p-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Share via WhatsApp
+                </button>
+                
+                <button
+                  onClick={() => {
+                    const content = generateShareContent(shareContext, shareData);
+                    const email = shareContext === 'lead' ? shareData.email : '';
+                    shareViaEmail(content.subject, content.message, email);
+                    closeShareModal();
+                  }}
+                  className="flex items-center justify-center w-full p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Share via Email
+                </button>
+                
+                <button
+                  onClick={() => {
+                    const content = generateShareContent(shareContext, shareData);
+                    copyShareLink(JSON.stringify(shareData));
+                    closeShareModal();
+                  }}
+                  className="flex items-center justify-center w-full p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                >
+                  <Link className="h-4 w-4 mr-2" />
+                  Copy Share Link
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Toaster />
     </div>
   );
