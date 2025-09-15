@@ -77,7 +77,8 @@ import {
   Share2,
   Send,
   FolderOpen,
-  FileSpreadsheet
+  FileSpreadsheet,
+  X
 } from "lucide-react";
 
 // Import location and category data
