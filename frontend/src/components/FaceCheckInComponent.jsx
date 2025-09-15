@@ -939,7 +939,7 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         
         {(deviceType === 'iphone' || deviceType === 'ipad') && (
           <div className="mt-2 text-xs text-blue-600">
-            💡 iOS tip: Make sure Safari has camera permission in Settings > Safari > Camera
+            💡 iOS tip: Make sure Safari has camera permission in Settings Safari Camera
           </div>
         )}
       </div>
