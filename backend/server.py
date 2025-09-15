@@ -3812,6 +3812,11 @@ async def startup_event():
 async def shutdown_event():
     """Cleanup on application shutdown"""
     try:
+        # Stop background services
+        if background_service:
+            await background_service.stop_background_services()
+            logger.info("✅ Background agent services stopped")
+        
         if offline_sync_service:
             await offline_sync_service.stop_background_sync()
         client.close()
