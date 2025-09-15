@@ -1172,7 +1172,10 @@ const App = () => {
 
   const fetchTasks = async () => {
     try {
-      const response = await axios.get(`${API}/tasks`);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/tasks`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
       setTasks(response.data);
     } catch (error) {
       console.error("Error fetching tasks:", error);
