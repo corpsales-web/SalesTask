@@ -272,12 +272,7 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
     </div>
   );
 };
-    
-    return { device, browser };
-  }, []);
-
-  // Check camera permission status
-  const checkCameraPermission = useCallback(async () => {
+export default FaceCheckInComponent;
     try {
       if (!navigator.permissions) {
         setCameraPermissionStatus('unknown');
