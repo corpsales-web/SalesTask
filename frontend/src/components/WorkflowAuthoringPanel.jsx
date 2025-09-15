@@ -463,7 +463,7 @@ const WorkflowAuthoringPanel = ({ isVisible }) => {
         </div>
       </div>
 
-      <Tabs defaultValue="workflows" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="workflows">Workflows</TabsTrigger>
           <TabsTrigger value="prompts">Prompt Templates</TabsTrigger>
