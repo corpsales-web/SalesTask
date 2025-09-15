@@ -2679,6 +2679,13 @@ const App = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'admin') {
+      fetchDashboardStats();
+      loadProjectTypes(); // Load project types when admin tab is accessed
+    }
+  }, [activeTab, authToken]);
+
   const getStatusColor = (status) => {
     const colors = {
       "New": "bg-blue-100 text-blue-800 border-blue-200",
