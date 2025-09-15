@@ -559,7 +559,7 @@ const App = () => {
       const token = localStorage.getItem('token');
       if (token) {
         await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/notifications/send`,
+          `${API}/notifications/send`,
           {
             title,
             message,
