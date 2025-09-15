@@ -2487,8 +2487,8 @@ const App = () => {
   const handleFileUploadComplete = (uploadData) => {
     console.log('File uploaded successfully:', uploadData);
     // Add to project gallery or process as needed
-    setShowFileUpload(false);
-    setShowTaskFileUpload(false);
+    setShowFileUploadModal(false);
+    setShowTaskUploadModal(false);
   };
 
   // Camera handling functions
