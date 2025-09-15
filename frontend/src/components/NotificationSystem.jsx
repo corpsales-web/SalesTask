@@ -20,7 +20,19 @@ const NotificationSystem = () => {
     
     // Check for service worker
     checkServiceWorker();
-  }, []);
+
+    // Add click outside listener for notification panel
+    const handleClickOutside = (event) => {
+      if (isNotificationPanelOpen && !event.target.closest('.notification-system')) {
+        setIsNotificationPanelOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isNotificationPanelOpen]);
 
   const initializeNotificationSystem = async () => {
     // Check notification permission
