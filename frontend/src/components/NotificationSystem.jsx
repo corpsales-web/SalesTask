@@ -439,8 +439,9 @@ const NotificationSystem = ({ showTestingPanel = false }) => {
         )}
       </div>
 
-      {/* Notification Testing Panel */}
-      <Card className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+      {/* Notification Testing Panel - Only show when requested */}
+      {showTestingPanel && (
+        <Card className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             🔔 Notification System Testing
