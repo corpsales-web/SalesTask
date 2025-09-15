@@ -402,7 +402,7 @@ const App = () => {
       };
 
       await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}/api/tasks/${taskId}/complete`,
+        `${API}/tasks/${taskId}/complete`,
         updateData,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
