@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 
-const NotificationSystem = () => {
+const NotificationSystem = ({ showTestingPanel = false }) => {
   const [notifications, setNotifications] = useState([]);
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false); // Keep closed by default
   const [notificationPermission, setNotificationPermission] = useState('default');
