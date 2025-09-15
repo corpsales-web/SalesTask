@@ -7307,6 +7307,19 @@ const App = () => {
         </div>
       )}
       
+      {/* Camera Modal */}
+      {showCamera && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg border border-gray-200 p-6 max-w-lg w-full mx-4">
+            <CameraComponent 
+              onPhotoCapture={handlePhotoCapture}
+              onClose={closeCamera}
+              title={`📷 ${cameraContext ? cameraContext.charAt(0).toUpperCase() + cameraContext.slice(1) : 'Camera'} Capture`}
+            />
+          </div>
+        </div>
+      )}
+      
       <Toaster />
     </div>
   );
