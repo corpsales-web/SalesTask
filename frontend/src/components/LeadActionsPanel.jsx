@@ -296,9 +296,14 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
           </div>
         );
 
-      case 'send_images':
+      case 'capture_and_send_images':
         return (
           <div className="space-y-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <h4 className="font-medium text-green-800 mb-2">📸 Camera Capture for {leadData.name}</h4>
+              <p className="text-sm text-green-600">Capture photos directly and send them to this specific lead</p>
+            </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Delivery Method
@@ -308,32 +313,96 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
                 onChange={(e) => setActionData({ ...actionData, method: e.target.value })}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
-                <option value="whatsapp">WhatsApp</option>
-                <option value="email">Email</option>
-                <option value="both">Both</option>
+                <option value="whatsapp">📱 WhatsApp ({leadData.phone})</option>
+                <option value="email">📧 Email ({leadData.email})</option>
               </select>
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Message
+                Camera Capture
               </label>
-              <textarea
-                value={actionData.message || 'Please find the attached images'}
-                onChange={(e) => setActionData({ ...actionData, message: e.target.value })}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                rows="3"
-                placeholder="Message to accompany images..."
-              />
+              <div className="border-2 border-dashed border-green-300 rounded-lg p-6 text-center bg-green-50">
+                <div className="mb-4">
+                  <Camera className="h-12 w-12 text-green-600 mx-auto mb-2" />
+                  <p className="text-green-700 font-medium">Lead-Specific Camera Capture</p>
+                  <p className="text-sm text-green-600">Photos will be automatically tagged for {leadData.name}</p>
+                </div>
+                
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center justify-center mx-auto"
+                    onClick={() => {
+                      // Trigger camera capture specifically for this lead
+                      setActionData({ 
+                        ...actionData, 
+                        capture_mode: 'camera',
+                        lead_specific: true,
+                        lead_id: leadId,
+                        lead_name: leadData.name
+                      });
+                    }}
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    📸 Open Camera
+                  </button>
+                  
+                  <div className="text-xs text-gray-500">
+                    Or choose existing images:
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <button
+                      type="button"
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                      onClick={() => setActionData({ ...actionData, images: ['garden-sample-1.jpg'], source: 'gallery' })}
+                    >
+                      🌿 Garden Designs
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+                      onClick={() => setActionData({ ...actionData, images: ['plant-care-guide.jpg'], source: 'gallery' })}
+                    >
+                      📖 Care Guides
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-purple-500 text-white px-3 py-1 rounded text-sm"
+                      onClick={() => setActionData({ ...actionData, images: ['testimonial-photos.jpg'], source: 'gallery' })}
+                    >
+                      ⭐ Testimonials
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Select Images (Placeholder)
+                Personal Message for {leadData.name}
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                <p className="text-gray-500">Image selection will be integrated with file upload service</p>
+              <textarea
+                value={actionData.message || `Hi ${leadData.name}, here are some images related to your ${leadData.requirements || 'garden project'}. Let me know if you have any questions!`}
+                onChange={(e) => setActionData({ ...actionData, message: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                rows="3"
+                placeholder={`Personal message for ${leadData.name}...`}
+              />
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center text-blue-800">
+                <Info className="h-4 w-4 mr-2" />
+                <span className="text-sm font-medium">Lead-Specific Features:</span>
               </div>
+              <ul className="text-sm text-blue-700 mt-1 ml-6 list-disc">
+                <li>Photos tagged with {leadData.name}</li>
+                <li>Delivery to {leadData.phone} or {leadData.email}</li>
+                <li>Automatic follow-up tracking</li>
+                <li>Budget-appropriate content ({leadData.budget ? `₹${Number(leadData.budget).toLocaleString()}` : 'Custom budget'})</li>
+              </ul>
             </div>
           </div>
         );
