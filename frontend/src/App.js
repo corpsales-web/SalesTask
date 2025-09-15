@@ -279,6 +279,10 @@ const App = () => {
   const [showFileUploadModal, setShowFileUploadModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   
+  // Camera State
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraContext, setCameraContext] = useState(null); // 'gallery', 'leads', 'tasks'
+  
   // Lead Actions State
   const [showLeadActionsPanel, setShowLeadActionsPanel] = useState(false);
   const [selectedLeadForActions, setSelectedLeadForActions] = useState(null);
