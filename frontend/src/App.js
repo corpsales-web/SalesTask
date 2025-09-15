@@ -2912,6 +2912,13 @@ const App = () => {
                     Upload Files
                   </Button>
                   <Button 
+                    className="bg-green-600 hover:bg-green-700 text-white" 
+                    onClick={() => openCamera('leads')}
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    📷 Camera
+                  </Button>
+                  <Button 
                     className="bg-purple-600 hover:bg-purple-700 text-white" 
                     onClick={() => setShowBulkExcelUpload(true)}
                   >
