@@ -586,6 +586,7 @@ const NotificationSystem = ({ showTestingPanel = false }) => {
           </div>
         </CardContent>
       </Card>
+      )}
     </div>
   );
 };
