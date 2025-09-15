@@ -2483,6 +2483,46 @@ const App = () => {
     }
   };
 
+  // File Upload Handler
+  const handleFileUploadComplete = (uploadData) => {
+    console.log('File uploaded successfully:', uploadData);
+    // Add to project gallery or process as needed
+    setShowFileUpload(false);
+    setShowTaskFileUpload(false);
+  };
+
+  // Camera handling functions
+  const openCamera = (context) => {
+    setCameraContext(context);
+    setShowCamera(true);
+  };
+
+  const handlePhotoCapture = (photoData) => {
+    console.log('Photo captured:', photoData);
+    // Handle photo based on context
+    switch (cameraContext) {
+      case 'gallery':
+        // Add to project gallery
+        console.log('Adding photo to gallery');
+        break;
+      case 'leads':
+        // Process lead photo
+        console.log('Processing lead photo');
+        break;
+      case 'tasks':
+        // Add photo to task
+        console.log('Adding photo to task');
+        break;
+      default:
+        console.log('Photo captured without context');
+    }
+  };
+
+  const closeCamera = () => {
+    setShowCamera(false);
+    setCameraContext(null);
+  };
+
   // Enhanced error handling and data fetching
   useEffect(() => {
     // Note: ResizeObserver error handling is now managed by unified handler in index.js
