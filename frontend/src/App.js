@@ -2887,11 +2887,6 @@ const App = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Debug: Show current activeTab value */}
-        <div className="mb-4 p-2 bg-yellow-100 rounded text-sm">
-          <strong>Debug - Current Tab:</strong> {activeTab}
-        </div>
-        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-8 bg-white shadow-sm border border-emerald-100 text-xs">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
