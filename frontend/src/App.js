@@ -7311,7 +7311,7 @@ const App = () => {
                     try {
                       const token = localStorage.getItem('token');
                       await axios.put(
-                        `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/leads/${editingLead.id}`,
+                        `${API}/leads/${editingLead.id}`,
                         leadEditForm,
                         { headers: { 'Authorization': `Bearer ${token}` } }
                       );
