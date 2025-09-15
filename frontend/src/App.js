@@ -60,6 +60,8 @@ import {
   Package,
   FileText,
   BarChart3,
+  Share,
+  Link,
   UserCheck,
   MessageSquare,
   Camera,
