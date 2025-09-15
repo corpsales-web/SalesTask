@@ -15,7 +15,7 @@ import tempfile
 import os
 
 class EnhancedBackendTester:
-    def __init__(self, base_url="https://aavana-workspace.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://aavana-green-crm.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

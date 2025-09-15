@@ -74,7 +74,7 @@
       "allConsoleMessages": [
         {
           "type": "error",
-          "text": "[JavaScript Error: \"Cookie “dmn_chk_01993db8-9c09-7064-9d7d-8f2e92a1742b” has been rejected for invalid domain.\" {file: \"https://aavana-workspace.preview.emergentagent.com/\" line: 0}]",
+          "text": "[JavaScript Error: \"Cookie “dmn_chk_01993db8-9c09-7064-9d7d-8f2e92a1742b” has been rejected for invalid domain.\" {file: \"https://aavana-green-crm.preview.emergentagent.com/\" line: 0}]",
           "timestamp": "2025-09-12T11:38:52.889Z",
           "isResizeObserver": false
         },
