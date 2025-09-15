@@ -6,6 +6,7 @@ import { autoSaveManager } from './utils/autosave';
 
 // Import new components
 import FileUploadComponent from './components/FileUploadComponent';
+import CameraComponent from './components/CameraComponent';
 import LeadActionsPanel from './components/LeadActionsPanel';
 import VoiceSTTComponent from './components/VoiceSTTComponent';
 import RoleManagementPanel from './components/RoleManagementPanel';
