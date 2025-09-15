@@ -435,23 +435,81 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
                 </div>
                 
                 <div className="space-y-3">
-                  <button
-                    type="button"
-                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center justify-center mx-auto"
-                    onClick={() => {
-                      // Trigger camera capture specifically for this lead
-                      setActionData({ 
-                        ...actionData, 
-                        capture_mode: 'camera',
-                        lead_specific: true,
-                        lead_id: leadId,
-                        lead_name: leadData.name
-                      });
-                    }}
-                  >
-                    <Camera className="h-4 w-4 mr-2" />
-                    📸 Open Camera
-                  </button>
+                  {!showCameraCapture ? (
+                    <button
+                      type="button"
+                      className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center justify-center mx-auto disabled:bg-gray-400"
+                      onClick={startCamera}
+                      disabled={isInitializingCamera}
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      {isInitializingCamera ? 'Starting Camera...' : '📸 Open Camera'}
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="relative bg-black rounded-lg overflow-hidden">
+                        <video
+                          ref={videoRef}
+                          autoPlay
+                          playsInline
+                          className="w-full max-w-sm mx-auto"
+                          style={{ transform: 'scaleX(-1)' }}
+                        />
+                        <canvas ref={canvasRef} className="hidden" />
+                      </div>
+                      
+                      <div className="flex justify-center space-x-2">
+                        <button
+                          type="button"
+                          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                          onClick={capturePhoto}
+                        >
+                          📸 Capture Photo
+                        </button>
+                        <button
+                          type="button"
+                          className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+                          onClick={stopCamera}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Close Camera
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {cameraError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-red-700 text-sm">{cameraError}</p>
+                    </div>
+                  )}
+                  
+                  {/* Display captured images */}
+                  {capturedImages.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm font-medium text-gray-700 mb-2">
+                        Captured Images ({capturedImages.length})
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {capturedImages.map((image) => (
+                          <div key={image.id} className="relative">
+                            <img
+                              src={image.url}
+                              alt="Captured"
+                              className="w-full h-20 object-cover rounded border"
+                            />
+                            <button
+                              type="button"
+                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                              onClick={() => removeImage(image.id)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="text-xs text-gray-500">
                     Or choose existing images:
