@@ -593,10 +593,43 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       {/* Error Display */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div className="flex items-center">
+          <div className="flex items-center mb-3">
             <span className="text-red-500 mr-2">⚠️</span>
             <span className="text-red-700">{error}</span>
           </div>
+          
+          {/* Alternative Options when camera fails */}
+          {(error.includes('No camera device found') || error.includes('Failed to access camera')) && (
+            <div className="mt-3 pt-3 border-t border-red-200">
+              <p className="text-sm text-red-600 mb-3">Alternative check-in methods:</p>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => {
+                    // Close the face check-in modal and let user use GPS check-in
+                    if (onCheckInComplete) {
+                      onCheckInComplete({
+                        success: false,
+                        method: 'switch_to_gps',
+                        message: 'Switched to GPS check-in due to camera unavailability'
+                      });
+                    }
+                  }}
+                  className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                >
+                  📍 Use GPS Check-In
+                </button>
+                <button
+                  onClick={() => {
+                    setError(null);
+                    startCamera();
+                  }}
+                  className="px-3 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50 text-sm"
+                >
+                  🔄 Try Again
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
