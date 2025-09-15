@@ -2577,6 +2577,92 @@ const App = () => {
     setCameraContext(null);
   };
 
+  // Share functionality functions
+  const openShareModal = (context, data) => {
+    setShareContext(context);
+    setShareData(data);
+    setShowShareModal(true);
+  };
+
+  const closeShareModal = () => {
+    setShowShareModal(false);
+    setShareContext(null);
+    setShareData(null);
+  };
+
+  const shareViaWhatsApp = (message, phone = '') => {
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = phone 
+      ? `https://wa.me/${phone}?text=${encodedMessage}`
+      : `https://wa.me/?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+    
+    toast({
+      title: "Shared via WhatsApp",
+      description: "Opening WhatsApp to share content"
+    });
+  };
+
+  const shareViaEmail = (subject, body, email = '') => {
+    const encodedSubject = encodeURIComponent(subject);
+    const encodedBody = encodeURIComponent(body);
+    const emailUrl = email
+      ? `mailto:${email}?subject=${encodedSubject}&body=${encodedBody}`
+      : `mailto:?subject=${encodedSubject}&body=${encodedBody}`;
+    window.open(emailUrl, '_blank');
+    
+    toast({
+      title: "Shared via Email",
+      description: "Opening email client to share content"
+    });
+  };
+
+  const copyShareLink = (content) => {
+    // Create a shareable link (in real app, this would be a proper URL)
+    const shareLink = `${window.location.origin}/shared/${btoa(content)}`;
+    navigator.clipboard.writeText(shareLink);
+    
+    toast({
+      title: "Link Copied!",
+      description: "Share link has been copied to clipboard"
+    });
+  };
+
+  const generateShareContent = (context, data) => {
+    switch (context) {
+      case 'project':
+        return {
+          subject: `Check out this project: ${data.name}`,
+          message: `🌱 Project: ${data.name}\n📍 Location: ${data.location}\n💰 Budget: ${data.budget}\n🔗 View details: ${window.location.origin}/project/${data.id}`,
+          link: `${window.location.origin}/project/${data.id}`
+        };
+      case 'lead':
+        return {
+          subject: `Lead: ${data.name}`,
+          message: `👤 Lead: ${data.name}\n📞 Phone: ${data.phone}\n📧 Email: ${data.email}\n🌱 Interest: ${data.requirements}\n🔗 View details: ${window.location.origin}/lead/${data.id}`,
+          link: `${window.location.origin}/lead/${data.id}`
+        };
+      case 'task':
+        return {
+          subject: `Task: ${data.title}`,
+          message: `📋 Task: ${data.title}\n👤 Assignee: ${data.assignee}\n📅 Due: ${data.due_date}\n🔗 View details: ${window.location.origin}/task/${data.id}`,
+          link: `${window.location.origin}/task/${data.id}`
+        };
+      case 'image':
+        return {
+          subject: `Shared from Aavana Greens`,
+          message: `🖼️ Check out this image from Aavana Greens!\n🔗 View: ${window.location.origin}/image/${data.id}`,
+          link: `${window.location.origin}/image/${data.id}`
+        };
+      default:
+        return {
+          subject: 'Shared from Aavana Greens CRM',
+          message: `Check out this content from Aavana Greens!\n🔗 ${window.location.origin}`,
+          link: window.location.origin
+        };
+    }
+  };
+
   // Enhanced error handling and data fetching
   useEffect(() => {
     // Note: ResizeObserver error handling is now managed by unified handler in index.js
