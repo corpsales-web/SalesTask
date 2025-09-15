@@ -2905,21 +2905,21 @@ const App = () => {
               <CheckCircle className="h-3 w-3 mr-1" />
               Tasks
             </TabsTrigger>
-            <TabsTrigger value="erp" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+            <TabsTrigger value="erp" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("erp")}>
               <Package className="h-3 w-3 mr-1" />
               ERP
             </TabsTrigger>
-            <TabsTrigger value="hrms" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+            <TabsTrigger value="hrms" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("hrms")}>
               <UserCheck className="h-3 w-3 mr-1" />
               HRMS
             </TabsTrigger>
             {/* AI Tab - Show to all users, with enhanced features for authenticated users */}
-            <TabsTrigger value="ai" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+            <TabsTrigger value="ai" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("ai")}>
               <Brain className="h-3 w-3 mr-1" />
               AI
             </TabsTrigger>
             {/* Admin Tab - Show to all users, but functionality requires authentication */}
-            <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+            <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("admin")}>
               <Settings className="h-3 w-3 mr-1" />
               Admin
             </TabsTrigger>
