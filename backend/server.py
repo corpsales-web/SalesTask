@@ -4316,6 +4316,38 @@ async def resolve_sync_conflict(
 
 # ============== HEALTH CHECK ENDPOINTS ==============
 
+@app.get("/api/health/background-services")
+async def get_background_services_status():
+    """Get status of background agent services"""
+    try:
+        status = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "background_services": {
+                "is_running": background_service.is_running if background_service else False,
+                "services": {}
+            }
+        }
+        
+        if background_service and hasattr(background_service, 'last_run'):
+            for service_name, interval in background_service.sync_intervals.items():
+                last_run = background_service.last_run.get(service_name)
+                status["background_services"]["services"][service_name] = {
+                    "interval_seconds": interval,
+                    "last_run": last_run.isoformat() if last_run else None,
+                    "status": "active" if last_run else "not_started"
+                }
+        
+        return status
+    except Exception as e:
+        logger.error(f"Error getting background services status: {e}")
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "background_services": {
+                "is_running": False,
+                "error": str(e)
+            }
+        }
+
 @app.get("/api/health/services")
 async def get_services_health():
     """Get health status of all services"""
