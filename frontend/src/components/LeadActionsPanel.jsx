@@ -127,6 +127,101 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
     setActions(availableActions);
   };
 
+  // Camera functionality methods
+  const startCamera = useCallback(async () => {
+    setIsInitializingCamera(true);
+    setCameraError(null);
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          width: { ideal: 1280 }, 
+          height: { ideal: 720 },
+          facingMode: 'environment' // Use back camera if available
+        } 
+      });
+      
+      setCameraStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setShowCameraCapture(true);
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      setCameraError('Failed to access camera. Please check permissions and try again.');
+    } finally {
+      setIsInitializingCamera(false);
+    }
+  }, []);
+
+  const stopCamera = useCallback(() => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setShowCameraCapture(false);
+    setCameraError(null);
+  }, [cameraStream]);
+
+  const capturePhoto = useCallback(() => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw the current video frame to canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Convert to blob and add to captured images
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const imageUrl = URL.createObjectURL(blob);
+          const newImage = {
+            id: Date.now(),
+            blob,
+            url: imageUrl,
+            timestamp: new Date(),
+            leadId: leadId,
+            leadName: leadData.name
+          };
+          
+          setCapturedImages(prev => [...prev, newImage]);
+          
+          // Update action data with captured image
+          setActionData(prev => ({
+            ...prev,
+            images: [...(prev.images || []), newImage],
+            capture_mode: 'camera',
+            lead_specific: true,
+            lead_id: leadId,
+            lead_name: leadData.name
+          }));
+        }
+      }, 'image/jpeg', 0.8);
+    }
+  }, [leadId, leadData.name]);
+
+  const removeImage = useCallback((imageId) => {
+    setCapturedImages(prev => {
+      const updated = prev.filter(img => img.id !== imageId);
+      // Clean up URL
+      const imageToRemove = prev.find(img => img.id === imageId);
+      if (imageToRemove) {
+        URL.revokeObjectURL(imageToRemove.url);
+      }
+      return updated;
+    });
+    
+    setActionData(prev => ({
+      ...prev,
+      images: (prev.images || []).filter(img => img.id !== imageId)
+    }));
+  }, []);
+
   const fetchActionHistory = async () => {
     try {
       const token = localStorage.getItem('token');
