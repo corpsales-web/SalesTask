@@ -350,8 +350,7 @@ const RoleManagementPanel = ({ currentUser }) => {
   const canManageRoles = !currentUser || currentUser?.role === 'Super Admin' || currentUser?.role === 'Admin';
   const canManageDepartments = !currentUser || ['Super Admin', 'Admin', 'HR Manager'].includes(currentUser?.role);
 
-  // Debug: Always show the panel content for now
-  // if (loading) return <div className="flex justify-center py-8"><div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div></div>;
+  if (loading) return <div className="flex justify-center py-8"><div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div></div>;
 
   if (error) {
     return (
