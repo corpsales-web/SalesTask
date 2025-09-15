@@ -2887,46 +2887,68 @@ const App = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 bg-white shadow-sm border border-emerald-100 text-xs">
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("dashboard")}>
+        {/* Custom Tab Navigation - Direct Implementation */}
+        <div className="space-y-6">
+          <div className="grid w-full grid-cols-8 bg-white shadow-sm border border-emerald-100 text-xs rounded-lg overflow-hidden">
+            <button 
+              onClick={() => setActiveTab("dashboard")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "dashboard" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+            >
               <Activity className="h-3 w-3 mr-1" />
               Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="leads" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("leads")}>
+            </button>
+            <button 
+              onClick={() => setActiveTab("leads")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "leads" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+            >
               <Users className="h-3 w-3 mr-1" />
               Leads
-            </TabsTrigger>
-            <TabsTrigger value="pipeline" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("pipeline")}>
+            </button>
+            <button 
+              onClick={() => setActiveTab("pipeline")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "pipeline" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+            >
               <Target className="h-3 w-3 mr-1" />
               Pipeline
-            </TabsTrigger>
-            <TabsTrigger value="tasks" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("tasks")}>
+            </button>
+            <button 
+              onClick={() => setActiveTab("tasks")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "tasks" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+            >
               <CheckCircle className="h-3 w-3 mr-1" />
               Tasks
-            </TabsTrigger>
-            <TabsTrigger value="erp" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("erp")}>
+            </button>
+            <button 
+              onClick={() => setActiveTab("erp")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "erp" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+            >
               <Package className="h-3 w-3 mr-1" />
               ERP
-            </TabsTrigger>
-            <TabsTrigger value="hrms" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("hrms")}>
+            </button>
+            <button 
+              onClick={() => setActiveTab("hrms")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "hrms" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+            >
               <UserCheck className="h-3 w-3 mr-1" />
               HRMS
-            </TabsTrigger>
-            {/* AI Tab - Show to all users, with enhanced features for authenticated users */}
-            <TabsTrigger value="ai" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("ai")}>
+            </button>
+            <button 
+              onClick={() => setActiveTab("ai")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "ai" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+            >
               <Brain className="h-3 w-3 mr-1" />
               AI
-            </TabsTrigger>
-            {/* Admin Tab - Show to all users, but functionality requires authentication */}
-            <TabsTrigger value="admin" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("admin")}>
+            </button>
+            <button 
+              onClick={() => setActiveTab("admin")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "admin" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+            >
               <Settings className="h-3 w-3 mr-1" />
               Admin
-            </TabsTrigger>
-          </TabsList>
+            </button>
+          </div>
 
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-6">
+        {/* Custom Tab Content - Direct Implementation */}
             {dashboardStats && (
               <>
                 {/* Stats Cards */}
