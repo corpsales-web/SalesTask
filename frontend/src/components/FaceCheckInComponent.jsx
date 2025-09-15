@@ -694,10 +694,80 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         </div>
       )}
 
-      {/* Start Camera Button */}
+      {/* Start Camera Button or Demo Mode */}
       {!isCapturing && !capturedImage && !isInitializing && (
         <div className="text-center">
-          <button
+          {isDemoMode ? (
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-center mb-2">
+                  <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                    📷
+                  </div>
+                  <h3 className="font-medium text-blue-800">Demo Mode Active</h3>
+                </div>
+                <p className="text-sm text-blue-700">
+                  Camera not available. You can proceed with GPS-based check-in or simulate face check-in for testing.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    // Simulate successful face check-in
+                    setIsProcessing(true);
+                    setTimeout(() => {
+                      setIsProcessing(false);
+                      if (onCheckInComplete) {
+                        onCheckInComplete({
+                          success: true,
+                          method: 'demo_face_checkin',
+                          timestamp: new Date().toISOString(),
+                          message: 'Demo face check-in completed successfully'
+                        });
+                      }
+                    }, 2000);
+                  }}
+                  disabled={isProcessing}
+                  className={`px-4 py-2 rounded-md font-medium ${
+                    isProcessing
+                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                >
+                  {isProcessing ? 'Processing...' : '✅ Simulate Face Check-In'}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    // Switch to GPS check-in mode
+                    if (onCheckInComplete) {
+                      onCheckInComplete({
+                        success: true,
+                        method: 'gps_checkin',
+                        timestamp: new Date().toISOString(),
+                        message: 'Switched to GPS-based check-in'
+                      });
+                    }
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  📍 Use GPS Check-In Instead
+                </button>
+              </div>
+              
+              <button
+                onClick={() => {
+                  setIsDemoMode(false);
+                  setError(null);
+                }}
+                className="text-sm text-gray-600 hover:text-gray-800 underline"
+              >
+                Try Camera Access Again
+              </button>
+            </div>
+          ) : (
+            <button
             onClick={startCamera}
             disabled={cameraPermissionStatus === 'denied' || (!navigator.mediaDevices)}
             className={`inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
