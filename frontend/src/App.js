@@ -140,6 +140,7 @@ const App = () => {
           </div>
 
           {/* Direct Conditional Content Rendering */}
+          <div key={renderKey}>
           
           {/* Dashboard Content */}
           {activeTab === "dashboard" && (
