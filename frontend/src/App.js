@@ -2889,19 +2889,19 @@ const App = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-8 bg-white shadow-sm border border-emerald-100 text-xs">
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("dashboard")}>
               <Activity className="h-3 w-3 mr-1" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="leads" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+            <TabsTrigger value="leads" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("leads")}>
               <Users className="h-3 w-3 mr-1" />
               Leads
             </TabsTrigger>
-            <TabsTrigger value="pipeline" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+            <TabsTrigger value="pipeline" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("pipeline")}>
               <Target className="h-3 w-3 mr-1" />
               Pipeline
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+            <TabsTrigger value="tasks" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700" onClick={() => setActiveTab("tasks")}>
               <CheckCircle className="h-3 w-3 mr-1" />
               Tasks
             </TabsTrigger>
