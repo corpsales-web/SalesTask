@@ -299,7 +299,10 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         errorMessage += 'Camera permission denied. Please allow camera access and try again.';
       } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        errorMessage += 'No camera device found. Please check if a camera is connected.';
+        errorMessage += 'No camera device found. ';
+        // Automatically switch to demo mode when no camera is found
+        setIsDemoMode(true);
+        errorMessage += 'Switching to Demo Mode for testing purposes.';
       } else if (error.name === 'NotSupportedError' || error.name === 'ConstraintNotSatisfiedError') {
         errorMessage += 'Camera settings not supported. Trying with different settings...';
         // Try again with minimal constraints
