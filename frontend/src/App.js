@@ -5116,9 +5116,9 @@ const App = () => {
               </div>
             )}
 
-            {activeAdminPanel === 'roles' && currentUser && (
+            {activeAdminPanel === 'roles' && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <RoleManagementPanel currentUser={currentUser} />
+                <RoleManagementPanel currentUser={currentUser || {}} />
               </div>
             )}
 
