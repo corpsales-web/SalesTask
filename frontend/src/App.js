@@ -3490,6 +3490,16 @@ const App = () => {
                         >
                           📅 Follow Up
                         </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openShareModal('lead', lead)}
+                          className="bg-purple-50 border-purple-200 hover:bg-purple-100 text-xs flex items-center"
+                        >
+                          <Share className="h-3 w-3 mr-1" />
+                          Share
+                        </Button>
                       </div>
                       
                       {/* Row 3: Management Buttons */}
