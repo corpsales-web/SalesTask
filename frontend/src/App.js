@@ -5357,7 +5357,7 @@ const App = () => {
 
             {activeAdminPanel === 'notifications' && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <NotificationSystem />
+                <NotificationSystem showTestingPanel={true} />
               </div>
             )}
 
