@@ -57,6 +57,7 @@ const WorkflowAuthoringPanel = ({ isVisible }) => {
   const [testResults, setTestResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
+  const [activeTab, setActiveTab] = useState('workflows');
   const [newWorkflow, setNewWorkflow] = useState({
     name: '',
     description: '',
