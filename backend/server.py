@@ -3752,6 +3752,14 @@ async def startup_event():
         lead_routing_service = initialize_lead_routing_service(db)
         workflow_authoring_service = initialize_workflow_authoring_service(db)
         
+        # Initialize background services for continuous agent activity
+        await background_service.initialize()
+        
+        # Start background services in a separate task
+        import asyncio
+        asyncio.create_task(background_service.start_background_services())
+        logger.info("✅ Background agent services started")
+        
         logger.info("All services initialized successfully")
         
         # Create master user if doesn't exist
