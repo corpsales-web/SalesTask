@@ -54,12 +54,16 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
 
   // Stop camera when modal is closed
   useEffect(() => {
-    if (!showActionModal) {
-      stopCamera();
+    if (!showActionModal && cameraStream) {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        setCameraStream(null);
+      }
+      setShowCameraCapture(false);
       setCapturedImages([]);
       setCameraError(null);
     }
-  }, [showActionModal, stopCamera]);
+  }, [showActionModal, cameraStream]);
 
   const fetchAvailableActions = () => {
     // Get available actions based on lead data
