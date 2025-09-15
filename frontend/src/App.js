@@ -4233,6 +4233,14 @@ const App = () => {
                     <Upload className="h-4 w-4 mr-2" />
                     Upload Files
                   </Button>
+                  <Button 
+                    className="flex-1 bg-green-600 hover:bg-green-700" 
+                    size="sm"
+                    onClick={() => openCamera('gallery')}
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    📷 Camera
+                  </Button>
                   
                   <Button 
                     className="bg-green-600 hover:bg-green-700" 
