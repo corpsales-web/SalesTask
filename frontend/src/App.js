@@ -237,6 +237,7 @@ const App = () => {
                 </CardContent>
               </Card>
             </div>
+            </div>
           )}
 
           {/* HRMS Content */}
