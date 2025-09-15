@@ -283,6 +283,11 @@ const App = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [cameraContext, setCameraContext] = useState(null); // 'gallery', 'leads', 'tasks'
   
+  // Share functionality state
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareContext, setShareContext] = useState(null); // 'project', 'lead', 'task', 'image'
+  const [shareData, setShareData] = useState(null);
+  
   // Lead Actions State
   const [showLeadActionsPanel, setShowLeadActionsPanel] = useState(false);
   const [selectedLeadForActions, setSelectedLeadForActions] = useState(null);
