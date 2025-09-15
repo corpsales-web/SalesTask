@@ -3632,9 +3632,23 @@ const App = () => {
                             <Button 
                               size="sm" 
                               className="flex-1 bg-green-600 hover:bg-green-700"
-                              onClick={() => updateTaskStatus(task.id, "Completed", "Task completed successfully")}
+                              onClick={() => {
+                                setSelectedTask(task);
+                                setShowTaskCompleteModal(true);
+                              }}
                             >
                               ✅ Complete
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
+                              onClick={() => {
+                                setSelectedTask(task);
+                                setShowTaskReminderModal(true);
+                              }}
+                            >
+                              ⏰ Reminder
                             </Button>
                             <Button 
                               size="sm" 
