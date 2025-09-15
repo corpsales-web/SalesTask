@@ -28,6 +28,7 @@ const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 const App = () => {
   // Basic State Management
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [renderKey, setRenderKey] = useState(0);
   const [dashboardStats, setDashboardStats] = useState({
     totalLeads: 26,
     activeLeads: 18,
