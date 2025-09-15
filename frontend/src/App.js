@@ -237,102 +237,104 @@ const App = () => {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+          )}
 
-          {/* HRMS Tab */}
-          <TabsContent value="hrms" className="space-y-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
-                  <p className="text-gray-600">Manage employee attendance and records</p>
+          {/* HRMS Content */}
+          {activeTab === "hrms" && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
+                    <p className="text-gray-600">Manage employee attendance and records</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-blue-700">
+                        <UserCheck className="h-5 w-5" />
+                        Face Check-in
+                      </CardTitle>
+                      <CardDescription>Face recognition + GPS tracking</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <FaceCheckInComponent />
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-green-700">
+                        <Calendar className="h-5 w-5" />
+                        Leave Management
+                      </CardTitle>
+                      <CardDescription>Apply and track leave requests</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                        Apply Leave
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-purple-700">
+                        <Clock className="h-5 w-5" />
+                        Attendance
+                      </CardTitle>
+                      <CardDescription>View attendance history</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
+                        View History
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-blue-700">
-                      <UserCheck className="h-5 w-5" />
-                      Face Check-in
-                    </CardTitle>
-                    <CardDescription>Face recognition + GPS tracking</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <FaceCheckInComponent />
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-green-700">
-                      <Calendar className="h-5 w-5" />
-                      Leave Management
-                    </CardTitle>
-                    <CardDescription>Apply and track leave requests</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
-                      Apply Leave
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-purple-700">
-                      <Clock className="h-5 w-5" />
-                      Attendance
-                    </CardTitle>
-                    <CardDescription>View attendance history</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
-                      View History
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
-          </TabsContent>
+          )}
 
-          {/* Other Tabs - Minimal Implementation */}
-          <TabsContent value="leads" className="space-y-6">
+          {/* Other Tabs */}
+          {activeTab === "leads" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Lead Management</h2>
               <p className="text-gray-600">Manage your leads and prospects</p>
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="tasks" className="space-y-6">
+          {activeTab === "tasks" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Task Management</h2>
               <p className="text-gray-600">Track and manage your tasks</p>
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="erp" className="space-y-6">
+          {activeTab === "erp" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Business Management & Operations</h2>
               <p className="text-gray-600">Manage projects and operations</p>
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="pipeline" className="space-y-6">
+          {activeTab === "pipeline" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Sales Pipeline</h2>
               <p className="text-gray-600">Track your sales pipeline</p>
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="ai" className="space-y-6">
+          {activeTab === "ai" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">AI Assistant</h2>
               <p className="text-gray-600">AI-powered insights and automation</p>
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="admin" className="space-y-6">
+          {activeTab === "admin" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Super Admin Panel</h2>
               <p className="text-gray-600">System administration and settings</p>
@@ -340,8 +342,9 @@ const App = () => {
                 <NotificationSystem showTestingPanel={true} />
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+          )}
+
+        </div>
       </main>
     </div>
   );
