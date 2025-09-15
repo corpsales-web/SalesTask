@@ -377,6 +377,108 @@ const App = () => {
     setShowTaskUploadModal(true);
   };
 
+  // Enhanced task completion with validation
+  const completeTaskWithValidation = async (taskId, completionNote = "") => {
+    try {
+      const token = localStorage.getItem('token');
+      const updateData = {
+        status: "Completed",
+        completion_note: completionNote,
+        completed_at: new Date().toISOString(),
+        timestamp: new Date().toISOString()
+      };
+
+      await axios.put(
+        `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'}/api/tasks/${taskId}/complete`,
+        updateData,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      await fetchTasks();
+      
+      toast({
+        title: "Task Completed",
+        description: "Task has been marked as completed successfully",
+      });
+
+      // Trigger notification
+      triggerNotification("Task Completed", "Task has been completed successfully", "task_completed");
+
+    } catch (error) {
+      console.error('Error completing task:', error);
+      toast({
+        title: "Completion Failed",
+        description: error.response?.data?.detail || "Failed to complete task.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Set task reminder with configurable intervals
+  const setTaskReminder = async (taskId, reminderInterval, reminderNote = "") => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Calculate reminder time based on interval
+      const now = new Date();
+      let reminderTime = new Date(now);
+      
+      switch (reminderInterval) {
+        case '15min':
+          reminderTime.setMinutes(now.getMinutes() + 15);
+          break;
+        case '30min':
+          reminderTime.setMinutes(now.getMinutes() + 30);
+          break;
+        case '1hour':
+          reminderTime.setHours(now.getHours() + 1);
+          break;
+        case '2hours':
+          reminderTime.setHours(now.getHours() + 2);
+          break;
+        case '1day':
+          reminderTime.setDate(now.getDate() + 1);
+          break;
+        case '1week':
+          reminderTime.setDate(now.getDate() + 7);
+          break;
+        default:
+          reminderTime.setHours(now.getHours() + 1);
+      }
+
+      const reminderData = {
+        reminder_time: reminderTime.toISOString(),
+        reminder_interval: reminderInterval,
+        reminder_note: reminderNote,
+        reminder_active: true
+      };
+
+      await axios.put(
+        `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001'}/api/tasks/${taskId}/reminder`,
+        reminderData,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      await fetchTasks();
+      
+      toast({
+        title: "Reminder Set",
+        description: `Reminder set for ${reminderInterval} from now`,
+      });
+
+      // Trigger notification
+      triggerNotification("Reminder Set", `Task reminder set for ${reminderInterval}`, "reminder_set");
+
+    } catch (error) {
+      console.error('Error setting reminder:', error);
+      toast({
+        title: "Reminder Failed",
+        description: error.response?.data?.detail || "Failed to set reminder.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const submitTaskRemark = async () => {
     if (!taskRemark.trim()) return;
 
