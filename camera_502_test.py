@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class Camera502DiagnosticTest:
     def __init__(self):
         # Get backend URL from environment
-        self.backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://aavana-green-crm.preview.emergentagent.com')
+        self.backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://aavana-greens-crm.preview.emergentagent.com')
         self.api_base = f"{self.backend_url}/api"
         
         # Test results storage
@@ -233,7 +233,7 @@ class Camera502DiagnosticTest:
             'OPTIONS', 
             '/hrms/face-checkin',
             headers={
-                'Origin': 'https://aavana-green-crm.preview.emergentagent.com',
+                'Origin': 'https://aavana-greens-crm.preview.emergentagent.com',
                 'Access-Control-Request-Method': 'POST',
                 'Access-Control-Request-Headers': 'Content-Type'
             }

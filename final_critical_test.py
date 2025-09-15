@@ -9,7 +9,7 @@ import time
 
 def test_specific_endpoints():
     """Test the exact endpoints mentioned in the review request"""
-    base_url = "https://aavana-green-crm.preview.emergentagent.com/api"
+    base_url = "https://aavana-greens-crm.preview.emergentagent.com/api"
     
     print("🎯 FINAL CRITICAL TEST - SPECIFIC REVIEW REQUEST ISSUES")
     print("=" * 70)
