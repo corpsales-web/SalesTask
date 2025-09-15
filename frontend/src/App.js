@@ -2872,7 +2872,7 @@ const App = () => {
 
                 {/* Notification Bell - Always visible in header */}
                 <div className="relative">
-                  <NotificationSystem />
+                  <NotificationSystem showTestingPanel={false} />
                 </div>
               </div>
               
