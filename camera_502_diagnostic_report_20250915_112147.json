@@ -1,0 +1,192 @@
+{
+  "timestamp": "2025-09-15T11:21:47.786582",
+  "backend_url": "https://aavana-green-crm.preview.emergentagent.com",
+  "summary": {
+    "total_tests": 5,
+    "working_tests": 0,
+    "failed_tests": 5,
+    "error_502_count": 0,
+    "overall_status": "CRITICAL - MULTIPLE FAILURES"
+  },
+  "detailed_results": {
+    "camera_endpoints": [
+      {
+        "endpoint": "/hrms/face-checkin",
+        "method": "POST",
+        "url": "https://aavana-green-crm.preview.emergentagent.com/api/hrms/face-checkin",
+        "status_code": 500,
+        "response_time_ms": 49.43,
+        "error": null,
+        "response_data": {
+          "detail": "Face check-in failed: 1 validation error for Attendance\ncheck_in\n  Input should be a valid datetime [type=datetime_type, input_value=datetime.time(11, 21, 47, 648203), input_type=time]\n    For further information visit https://errors.pydantic.dev/2.11/v/datetime_type"
+        },
+        "headers_received": {
+          "Content-Length": "283",
+          "Content-Type": "application/json",
+          "Date": "Mon, 15 Sep 2025 11:21:47 GMT",
+          "Server": "uvicorn",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "is_502_error": false,
+        "working": false
+      }
+    ],
+    "file_upload_endpoints": [
+      {
+        "endpoint": "/upload/file",
+        "method": "POST",
+        "url": "https://aavana-green-crm.preview.emergentagent.com/api/upload/file",
+        "status_code": 403,
+        "response_time_ms": 11.89,
+        "error": null,
+        "response_data": {
+          "detail": "Not authenticated"
+        },
+        "headers_received": {
+          "Content-Length": "30",
+          "Content-Type": "application/json",
+          "Date": "Mon, 15 Sep 2025 11:21:47 GMT",
+          "Server": "uvicorn",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "is_502_error": false,
+        "working": false
+      },
+      {
+        "endpoint": "/upload/multiple",
+        "method": "POST",
+        "url": "https://aavana-green-crm.preview.emergentagent.com/api/upload/multiple",
+        "status_code": 403,
+        "response_time_ms": 11.87,
+        "error": null,
+        "response_data": {
+          "detail": "Not authenticated"
+        },
+        "headers_received": {
+          "Content-Length": "30",
+          "Content-Type": "application/json",
+          "Date": "Mon, 15 Sep 2025 11:21:47 GMT",
+          "Server": "uvicorn",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "is_502_error": false,
+        "working": false
+      },
+      {
+        "endpoint": "/upload/presigned-url",
+        "method": "POST",
+        "url": "https://aavana-green-crm.preview.emergentagent.com/api/upload/presigned-url",
+        "status_code": 403,
+        "response_time_ms": 6.89,
+        "error": null,
+        "response_data": {
+          "detail": "Not authenticated"
+        },
+        "headers_received": {
+          "Content-Length": "30",
+          "Content-Type": "application/json",
+          "Date": "Mon, 15 Sep 2025 11:21:47 GMT",
+          "Server": "uvicorn",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "is_502_error": false,
+        "working": false
+      }
+    ],
+    "image_processing_endpoints": [
+      {
+        "endpoint": "/ai/generate-content",
+        "method": "POST",
+        "url": "https://aavana-green-crm.preview.emergentagent.com/api/ai/generate-content",
+        "status_code": 422,
+        "response_time_ms": 50.11,
+        "error": null,
+        "response_data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "topic"
+              ],
+              "msg": "Field required",
+              "input": {
+                "type": "image_analysis",
+                "content": "Analyze this camera capture for face recognition",
+                "context": {
+                  "image_data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU77zgAAAABJRU5ErkJggg=="
+                }
+              },
+              "url": "https://errors.pydantic.dev/2.11/v/missing"
+            }
+          ]
+        },
+        "headers_received": {
+          "Content-Length": "347",
+          "Content-Type": "application/json",
+          "Date": "Mon, 15 Sep 2025 11:21:47 GMT",
+          "Server": "uvicorn",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "is_502_error": false,
+        "working": false
+      }
+    ],
+    "cors_tests": [
+      {
+        "endpoint": "/hrms/face-checkin",
+        "method": "OPTIONS",
+        "url": "https://aavana-green-crm.preview.emergentagent.com/api/hrms/face-checkin",
+        "status_code": 200,
+        "response_time_ms": 6.69,
+        "error": null,
+        "response_data": "OK",
+        "headers_received": {
+          "Access-Control-Allow-Credentials": "true",
+          "Access-Control-Allow-Headers": "Content-Type",
+          "Access-Control-Allow-Methods": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT",
+          "Access-Control-Allow-Origin": "https://aavana-green-crm.preview.emergentagent.com",
+          "Access-Control-Max-Age": "600",
+          "Content-Length": "2",
+          "Content-Type": "text/plain; charset=utf-8",
+          "Date": "Mon, 15 Sep 2025 11:21:47 GMT",
+          "Server": "uvicorn",
+          "Vary": "Origin",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "is_502_error": false,
+        "working": true
+      }
+    ],
+    "authentication_tests": [
+      {
+        "endpoint": "/hrms/face-checkin",
+        "method": "POST",
+        "url": "https://aavana-green-crm.preview.emergentagent.com/api/hrms/face-checkin",
+        "status_code": 500,
+        "response_time_ms": 5.77,
+        "error": null,
+        "response_data": {
+          "detail": "Face check-in failed: 1 validation error for Attendance\ncheck_in\n  Input should be a valid datetime [type=datetime_type, input_value=datetime.time(11, 21, 47, 783835), input_type=time]\n    For further information visit https://errors.pydantic.dev/2.11/v/datetime_type"
+        },
+        "headers_received": {
+          "Content-Length": "283",
+          "Content-Type": "application/json",
+          "Date": "Mon, 15 Sep 2025 11:21:47 GMT",
+          "Server": "uvicorn",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "is_502_error": false,
+        "working": false
+      }
+    ],
+    "overall_status": "CRITICAL - MULTIPLE FAILURES"
+  }
+}
