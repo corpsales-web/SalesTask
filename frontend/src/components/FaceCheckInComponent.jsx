@@ -265,6 +265,11 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
             height: 240
           },
           audio: false
+        },
+        // Fallback 6: Any available camera
+        {
+          video: true,
+          audio: false
         }
       ];
 
