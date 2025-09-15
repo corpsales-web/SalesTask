@@ -353,7 +353,7 @@ const App = () => {
       };
 
       await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}/api/tasks/${taskId}/status`,
+        `${API}/tasks/${taskId}/status`,
         updateData,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
