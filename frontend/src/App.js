@@ -5249,6 +5249,11 @@ const App = () => {
                     </div>
                   ) : (
                     <>
+                      {/* Notification System */}
+                      <div className="mb-4">
+                        <NotificationSystem />
+                      </div>
+
                       {/* Current User Info */}
                       <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
                         <div className="flex items-center justify-between">
