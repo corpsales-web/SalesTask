@@ -39,6 +39,28 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
     }
   }, [initialActionType, actions]);
 
+  // Cleanup camera stream when component unmounts or modal closes
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+      // Cleanup any created URLs
+      capturedImages.forEach(image => {
+        URL.revokeObjectURL(image.url);
+      });
+    };
+  }, [cameraStream, capturedImages]);
+
+  // Stop camera when modal is closed
+  useEffect(() => {
+    if (!showActionModal) {
+      stopCamera();
+      setCapturedImages([]);
+      setCameraError(null);
+    }
+  }, [showActionModal, stopCamera]);
+
   const fetchAvailableActions = () => {
     // Get available actions based on lead data
     const availableActions = [];
