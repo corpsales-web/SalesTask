@@ -600,7 +600,9 @@ metadata:
 test_plan:
   current_focus:
     - "Role Management Panel - Comprehensive Examples and Workflows"
-  stuck_tasks: []
+    - "NotificationSystem Component Integration"
+  stuck_tasks:
+    - "NotificationSystem Component Integration"
   test_all: false
   test_priority: "high_first"
 
