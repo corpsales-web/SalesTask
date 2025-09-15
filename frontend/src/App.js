@@ -505,7 +505,7 @@ const App = () => {
       };
 
       await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/tasks/${selectedTask.id}/remarks`,
+        `${API}/tasks/${selectedTask.id}/remarks`,
         remarkData,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
