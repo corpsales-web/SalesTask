@@ -768,17 +768,18 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
             </div>
           ) : (
             <button
-            onClick={startCamera}
-            disabled={cameraPermissionStatus === 'denied' || (!navigator.mediaDevices)}
-            className={`inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-              cameraPermissionStatus === 'denied' || (!navigator.mediaDevices)
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700'
-            }`}
-          >
-            <span className="text-2xl mr-2">📷</span>
-            {cameraPermissionStatus === 'denied' ? 'Camera Blocked' : 'Start Camera'}
-          </button>
+              onClick={startCamera}
+              disabled={cameraPermissionStatus === 'denied' || (!navigator.mediaDevices)}
+              className={`inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                cameraPermissionStatus === 'denied' || (!navigator.mediaDevices)
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              <span className="text-2xl mr-2">📷</span>
+              {cameraPermissionStatus === 'denied' ? 'Camera Blocked' : 'Start Camera'}
+            </button>
+          )}
           
           <div className="mt-3 text-xs text-gray-500 space-y-1">
             <p>Make sure you're in a well-lit area for best results</p>
