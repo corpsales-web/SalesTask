@@ -15,6 +15,7 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
   const [currentDeviceId, setCurrentDeviceId] = useState(null);
   const [isInitializing, setIsInitializing] = useState(false);
   const [supportedConstraints, setSupportedConstraints] = useState({});
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
