@@ -6,7 +6,7 @@ import { Badge } from './ui/badge';
 
 const NotificationSystem = () => {
   const [notifications, setNotifications] = useState([]);
-  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
+  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false); // Keep closed by default
   const [notificationPermission, setNotificationPermission] = useState('default');
   const [serviceWorkerReady, setServiceWorkerReady] = useState(false);
   const audioRef = useRef(null);
