@@ -195,6 +195,7 @@ const RoleManagementPanel = ({ currentUser }) => {
 
         setRoles(mockRoles);
         setDepartments(mockDepartments);
+        setLoading(false); // Explicitly set loading to false after setting mock data
     } catch (error) {
       console.error('Error in role management data loading:', error);
       setError('Failed to load role management data. Please try again.');
