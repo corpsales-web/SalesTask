@@ -294,9 +294,9 @@ const App = () => {
 
   // Content Rendering Function
   const renderContent = () => {
-    console.log(`🎯 RENDERING CONTENT FOR: ${currentView}`);
+    console.log(`🎯 RENDERING CONTENT FOR: dashboard`);
     
-    switch(currentView) {
+    switch('dashboard') {
       case 'dashboard':
         console.log(`📊 RENDERING DASHBOARD`);
         return (
