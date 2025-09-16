@@ -1296,9 +1296,9 @@ const App = () => {
               <span className="ml-2 text-gray-600">Loading...</span>
             </div>
           ) : (
-            <div key={`content-${currentView}-${forceUpdate}`} className="content-wrapper">
+            <div className="content-wrapper">
               {(() => {
-                console.log(`🎯 RENDERING CONTENT - currentView: ${currentView}, forceUpdate: ${forceUpdate}`);
+                console.log(`🎯 RENDERING CONTENT - dashboard`);
                 return renderContent();
               })()}
             </div>
