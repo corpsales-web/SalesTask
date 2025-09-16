@@ -85,32 +85,41 @@ const WorkflowAuthoringPanel = () => {
   const fetchTemplates = async () => {
     try {
       const response = await axios.get(`${API}/api/workflow-templates`);
-      setTemplates(response.data);
+      // Ensure response.data is an array
+      if (Array.isArray(response.data)) {
+        setTemplates(response.data);
+      } else if (response.data && Array.isArray(response.data.templates)) {
+        setTemplates(response.data.templates);
+      } else {
+        console.warn('Invalid templates data format, using demo data');
+        setTemplates(getDemoTemplates());
+      }
     } catch (error) {
       console.error('Fetch templates error:', error);
-      // Demo data
-      setTemplates([
-        {
-          id: '1',
-          name: 'Welcome Email',
-          description: 'Initial welcome message for new leads',
-          category: 'lead_nurturing',
-          template: 'Hello {{name}}, welcome to Aavana Greens! We are excited to help you find your dream property.',
-          variables: ['name'],
-          created_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: 'Follow-up Reminder',
-          description: 'Reminder for sales team follow-ups',
-          category: 'internal_communication',
-          template: 'Reminder: Follow up with {{lead_name}} ({{phone}}) regarding {{property_type}} inquiry.',
-          variables: ['lead_name', 'phone', 'property_type'],
-          created_at: new Date().toISOString()
-        }
-      ]);
+      setTemplates(getDemoTemplates());
     }
   };
+
+  const getDemoTemplates = () => [
+    {
+      id: '1',
+      name: 'Welcome Email',
+      description: 'Initial welcome message for new leads',
+      category: 'lead_nurturing',
+      template: 'Hello {{name}}, welcome to Aavana Greens! We are excited to help you find your dream property.',
+      variables: ['name'],
+      created_at: new Date().toISOString()
+    },
+    {
+      id: '2',
+      name: 'Follow-up Reminder',
+      description: 'Reminder for sales team follow-ups',
+      category: 'internal_communication',
+      template: 'Reminder: Follow up with {{lead_name}} ({{phone}}) regarding {{property_type}} inquiry.',
+      variables: ['lead_name', 'phone', 'property_type'],
+      created_at: new Date().toISOString()
+    }
+  ];
 
   const createWorkflow = async () => {
     setLoading(true);
