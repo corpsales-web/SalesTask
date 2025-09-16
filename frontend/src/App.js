@@ -63,7 +63,6 @@ const App = () => {
   // Admin States
   const [activeAdminPanel, setActiveAdminPanel] = useState('overview');
   const [currentUser, setCurrentUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // AI States
   const [aiInsights, setAiInsights] = useState([]);
