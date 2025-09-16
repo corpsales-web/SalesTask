@@ -415,8 +415,12 @@ const App = () => {
         );
 
       case 'leads':
+        console.log(`🎯 RENDERING LEADS`);
         return (
           <div className="space-y-6">
+            <div className="bg-blue-50 p-2 rounded mb-4">
+              <small>Current View: Leads Management</small>
+            </div>
             {/* Header */}
             <div className="flex justify-between items-center">
               <div>
