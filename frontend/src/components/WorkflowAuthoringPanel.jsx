@@ -326,8 +326,8 @@ const WorkflowAuthoringPanel = () => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg">{workflow.name}</CardTitle>
-                    <CardDescription>{workflow.description}</CardDescription>
+                    <CardTitle className="text-lg">{workflow.name || 'Untitled Workflow'}</CardTitle>
+                    <CardDescription>{workflow.description || 'No description available'}</CardDescription>
                   </div>
                   <Badge className={workflow.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
                     {workflow.is_active ? 'Active' : 'Inactive'}
