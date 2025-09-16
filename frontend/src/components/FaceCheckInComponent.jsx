@@ -10,8 +10,28 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
+  const checkCameraAvailability = useCallback(async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      return videoDevices.length > 0;
+    } catch (err) {
+      console.log('Cannot enumerate devices:', err);
+      return false;
+    }
+  }, []);
+
   const startCamera = useCallback(async () => {
     setError(null);
+    
+    // First check if camera devices are available
+    const cameraAvailable = await checkCameraAvailability();
+    if (!cameraAvailable) {
+      setError('⚠️ No camera devices found on this system. This is common in containerized or server environments. GPS Check-in is the recommended method for attendance.');
+      setCameraActive(false);
+      return;
+    }
+
     try {
       // Stop any existing stream
       if (cameraStream) {
@@ -44,18 +64,20 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
     } catch (err) {
       console.error('Camera access error:', err);
       
-      // Check if it's a containerized environment or no camera available
+      // Provide specific error messages based on error type
       if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        setError('No camera detected on this system. In containerized environments, camera access may not be available. Please use GPS check-in below.');
+        setError('⚠️ Camera hardware not accessible. This is expected in containerized environments. GPS Check-in is your primary attendance option.');
       } else if (err.name === 'NotAllowedError') {
-        setError('Camera access denied. Please allow camera permissions in your browser or use GPS check-in as an alternative.');
+        setError('📷 Camera access denied by browser. Please allow camera permissions or use GPS Check-in as an alternative.');
+      } else if (err.name === 'NotReadableError') {
+        setError('📷 Camera is already in use by another application. Please close other apps using the camera or use GPS Check-in.');
       } else {
-        setError('Camera initialization failed. This may be due to system restrictions. GPS check-in is available as a reliable alternative.');
+        setError('📷 Camera initialization failed. GPS Check-in is available as a reliable alternative.');
       }
       
       setCameraActive(false);
     }
-  }, [cameraStream, onCheckInComplete]);
+  }, [cameraStream, onCheckInComplete, checkCameraAvailability]);
 
   const stopCamera = useCallback(() => {
     if (cameraStream) {
