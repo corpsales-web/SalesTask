@@ -154,19 +154,20 @@ const getErrorMessage = (errorType) => {
 const getFallbackOptions = (errorType) => {
   const fallbacks = {
     'NO_CAMERA_DEVICES': [
-      { type: 'GPS', label: 'Use GPS Location Instead', description: 'Use your location for check-in' },
-      { type: 'MANUAL', label: 'Manual Entry', description: 'Enter details manually' }
+      { type: 'RETRY', label: 'Try Again', description: 'Retry camera access' },
+      { type: 'GPS', label: 'Use GPS Location', description: 'Use your location for check-in' }
     ],
     'NotAllowedError': [
-      { type: 'PERMISSIONS', label: 'Enable Camera Permissions', description: 'Check browser settings' },
-      { type: 'GPS', label: 'Use GPS Instead', description: 'Alternative check-in method' }
+      { type: 'PERMISSIONS', label: 'Enable Camera', description: 'Allow camera access and try again' },
+      { type: 'GPS', label: 'Use GPS Location', description: 'Alternative check-in method' }
     ],
     'NotFoundError': [
-      { type: 'GPS', label: 'Use GPS Location Instead', description: 'Use your location for check-in' }
+      { type: 'RETRY', label: 'Try Again', description: 'Check camera connection and retry' },
+      { type: 'GPS', label: 'Use GPS Location', description: 'Use your location for check-in' }
     ],
     'NotReadableError': [
       { type: 'RETRY', label: 'Try Again', description: 'Close other camera apps and retry' },
-      { type: 'GPS', label: 'Use GPS Instead', description: 'Alternative method' }
+      { type: 'GPS', label: 'Use GPS Location', description: 'Alternative method' }
     ]
   };
 
