@@ -218,6 +218,29 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         <p className="text-sm text-gray-600">Capture your photo to record attendance</p>
       </div>
 
+      {/* Success State */}
+      {checkInComplete && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+          <div className="text-green-600 text-2xl mb-2">✅</div>
+          <h3 className="text-lg font-semibold text-green-800 mb-1">Check-In Successful!</h3>
+          <p className="text-green-700 text-sm mb-2">Attendance recorded successfully</p>
+          {attendanceId && (
+            <p className="text-green-600 text-xs">ID: {attendanceId}</p>
+          )}
+          <button
+            onClick={() => {
+              setCheckInComplete(false);
+              setAttendanceId(null);
+              setCapturedImage(null);
+              setError(null);
+            }}
+            className="mt-3 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+          >
+            New Check-In
+          </button>
+        </div>
+      )}
+
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-red-700 text-sm">{error}</p>
