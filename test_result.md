@@ -647,9 +647,9 @@ frontend:
 
   - task: "Enhanced Lead Action Buttons Integration"
     implemented: true
-    working: true
+    working: false
     file: "App.js, components/LeadActionsPanel.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -659,6 +659,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ ENHANCED LEAD ACTION BUTTONS FULLY WORKING: Comprehensive testing confirms all individual action buttons are present and functional on lead cards. Found 181 total individual action buttons: 📞 Call (26), 💬 WhatsApp (26), 📧 Email (25), 🖼️ Images (26), 📋 Catalogue (26), ✏️ Edit (26), 💭 Remark (26). Lead Actions Panel opens successfully when clicking action buttons (tested Call button functionality). All enhanced lead action buttons are accessible through the Leads tab navigation. Minor 401 authentication errors in action history are expected without login but don't affect core functionality."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL INTEGRATION ISSUE: LeadActionsPanel.jsx component exists but enhanced lead action buttons are NOT VISIBLE in the main application. Leads tab shows only placeholder content 'Lead Management - Manage your leads and prospects' instead of actual lead cards with Call/WhatsApp/Email action buttons. Component is not integrated into the main App.js renderContent() function for the leads case. Previous testing was incorrect - no individual lead cards or action buttons are actually displayed to users."
 
   - task: "Enhanced Header Buttons Integration"
     implemented: true
