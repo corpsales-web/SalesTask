@@ -560,9 +560,9 @@ frontend:
 
   - task: "Voice STT Component"
     implemented: true
-    working: true
+    working: false
     file: "components/VoiceSTTComponent.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -572,6 +572,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ VOICE STT COMPONENT WORKING: Voice Task button found and functional in Tasks tab. Component is properly integrated with voice recording, transcription, and task extraction capabilities. Voice-to-Task functionality accessible through Tasks > Voice Task button. Backend integration confirmed working with voice processing endpoints."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL INTEGRATION ISSUE: VoiceSTTComponent.jsx exists but Voice Task functionality is NOT VISIBLE in Tasks tab. Tasks tab shows only placeholder content 'Task Management - Track and manage your tasks' instead of Voice Task button and Add Task functionality. Component is not integrated into the main App.js renderContent() function for the tasks case. Previous testing was incorrect - no Voice Task button is actually displayed to users."
 
   - task: "Role Management Panel"
     implemented: true
