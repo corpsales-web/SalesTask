@@ -212,16 +212,23 @@ const App = () => {
     }
   };
 
-  // Tab switching function with enhanced debugging
+  // Tab switching function with enhanced debugging and forced re-render
   const showContent = (tabName) => {
     console.log(`🔄 SWITCHING TO TAB: ${tabName}`);
     console.log(`🔄 PREVIOUS VIEW: ${currentView}`);
-    setCurrentView(tabName);
     
-    // Force a small delay to ensure state update
+    // Force component re-render by using functional state update
+    setCurrentView(prevView => {
+      console.log(`🔄 STATE UPDATE: ${prevView} → ${tabName}`);
+      return tabName;
+    });
+    
+    // Force re-render after state update
     setTimeout(() => {
       console.log(`✅ NEW VIEW SET TO: ${tabName}`);
-    }, 100);
+      // Force a re-render by updating a dummy state
+      setLoading(false);
+    }, 50);
   };
 
   // Lead Management Functions
