@@ -26,19 +26,19 @@ import indianCitiesStates from './data/indianCitiesStates';
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const App = () => {
-  // Force re-render approach with direct DOM manipulation
+  // Window-based tab management for reliable switching
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const [pageContent, setPageContent] = useState("dashboard");
   
-  // Force update function
-  const handleTabChange = (newTab) => {
-    console.log(`Changing tab from ${activeTab} to ${newTab}`);
-    setActiveTab(newTab);
-    setForceUpdate(prev => prev + 1);
-    // Also update URL hash for backup
-    window.location.hash = newTab;
-    // Force component re-render
-    setTimeout(() => setForceUpdate(prev => prev + 1), 100);
+  // Direct tab switching function
+  const switchTab = (tabName) => {
+    console.log(`Direct tab switch to: ${tabName}`);
+    setActiveTab(tabName);
+    setPageContent(tabName);
+    // Force immediate re-render
+    window.requestAnimationFrame(() => {
+      document.body.className = `tab-${tabName}`;
+    });
   };
   
   const [dashboardStats, setDashboardStats] = useState({
