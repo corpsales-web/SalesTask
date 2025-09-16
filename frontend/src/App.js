@@ -218,16 +218,16 @@ const App = () => {
     }
   };
 
-  // Tab switching function with forced re-render
+  // Direct tab switching with window reload if needed
   const showContent = (tabName) => {
     console.log(`🔄 SWITCHING TO TAB: ${tabName}`);
-    console.log(`🔄 PREVIOUS VIEW: ${currentView}`);
     
-    // Update both states to force re-render
+    // Force immediate state update
     setCurrentView(tabName);
-    setForceUpdate(prev => prev + 1);
+    setForceUpdate(Date.now()); // Use timestamp for absolute uniqueness
+    setLoading(false); // Additional trigger
     
-    console.log(`✅ NEW VIEW SET TO: ${tabName}, Force Update: ${forceUpdate + 1}`);
+    console.log(`✅ FORCED UPDATE TO: ${tabName}`);
   };
 
   // Lead Management Functions
