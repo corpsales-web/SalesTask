@@ -214,7 +214,6 @@ const App = () => {
     const token = localStorage.getItem('auth_token');
     const user = localStorage.getItem('current_user');
     if (token && user) {
-      setIsAuthenticated(true);
       setCurrentUser(JSON.parse(user));
     }
   };
