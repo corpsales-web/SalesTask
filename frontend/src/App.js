@@ -290,18 +290,15 @@ const App = () => {
     toast({ title: "Success", description: "Logged out successfully" });
   };
 
-  // Content Rendering Function
+  // Legacy content rendering - replaced by TabContent component
   const renderContent = () => {
-    console.log(`🎯 RENDERING CONTENT FOR: dashboard`);
-    
-    switch('dashboard') {
-      case 'dashboard':
-        console.log(`📊 RENDERING DASHBOARD`);
-        return (
-          <div className="space-y-6">
-            <div className="bg-blue-50 p-2 rounded mb-4">
-              <small>Current View: Dashboard</small>
-            </div>
+    console.log(`🎯 LEGACY RENDER - Now handled by TabContent component`);
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Content now handled by TabContent component</p>
+      </div>
+    );
+  };
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="bg-white shadow-lg border-emerald-100 hover:shadow-xl transition-shadow">
