@@ -12,45 +12,54 @@ const CameraComponent = ({ onPhotoCapture, onClose, title = "Camera Capture" }) 
 
   const startCamera = useCallback(async () => {
     setError(null);
+    
     try {
-      // Stop any existing stream
+      // Stop any existing stream first
       if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
+        stopCameraStream(cameraStream);
+        setCameraStream(null);
       }
 
-      // Simple, reliable camera constraints
-      const constraints = {
+      // Initialize camera with comprehensive error handling
+      const result = await initializeCamera({
         video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 1280, max: 1920 },
+          height: { ideal: 720, max: 1080 },
           facingMode: 'environment' // Back camera for better photos
-        },
-        audio: false
-      };
+        }
+      });
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
-        };
+      if (result.success) {
+        setCameraStream(result.stream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = result.stream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current.play().catch(err => {
+              console.error('Video play failed:', err);
+              setError('📷 Video preview failed but camera may still work for capture.');
+            });
+          };
+        }
+        setCameraActive(true);
+        setError(null);
+        console.log('✅ Camera component initialized successfully');
+        
+      } else {
+        setError(result.message);
+        setCameraActive(false);
+        console.error('Camera initialization failed:', result.error);
       }
-      
-      setCameraStream(stream);
-      setCameraActive(true);
-      setError(null);
       
     } catch (err) {
-      console.error('Camera access error:', err);
-      setError('Camera access failed. Please ensure camera permissions are granted.');
+      console.error('Unexpected camera error:', err);
+      setError('📷 Unexpected camera error. Please try again or use file upload instead.');
       setCameraActive(false);
     }
   }, [cameraStream]);
 
   const stopCamera = useCallback(() => {
     if (cameraStream) {
-      cameraStream.getTracks().forEach(track => track.stop());
+      stopCameraStream(cameraStream);
       setCameraStream(null);
     }
     if (videoRef.current) {
