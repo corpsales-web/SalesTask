@@ -46,32 +46,41 @@ const WorkflowAuthoringPanel = () => {
   const fetchWorkflows = async () => {
     try {
       const response = await axios.get(`${API}/api/workflows`);
-      setWorkflows(response.data);
+      // Ensure response.data is an array
+      if (Array.isArray(response.data)) {
+        setWorkflows(response.data);
+      } else if (response.data && Array.isArray(response.data.workflows)) {
+        setWorkflows(response.data.workflows);
+      } else {
+        console.warn('Invalid workflows data format, using demo data');
+        setWorkflows(getDemoWorkflows());
+      }
     } catch (error) {
       console.error('Fetch workflows error:', error);
-      // Demo data
-      setWorkflows([
-        {
-          id: '1',
-          name: 'Lead Nurturing Sequence',
-          description: 'Automated follow-up sequence for new leads',
-          trigger: 'new_lead',
-          steps: 5,
-          is_active: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: 'Task Reminder System',
-          description: 'Automated reminders for pending tasks',
-          trigger: 'task_due',
-          steps: 3,
-          is_active: true,
-          created_at: new Date().toISOString()
-        }
-      ]);
+      setWorkflows(getDemoWorkflows());
     }
   };
+
+  const getDemoWorkflows = () => [
+    {
+      id: '1',
+      name: 'Lead Nurturing Sequence',
+      description: 'Automated follow-up sequence for new leads',
+      trigger: 'new_lead',
+      steps: 5,
+      is_active: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: '2',
+      name: 'Task Reminder System',
+      description: 'Automated reminders for pending tasks',
+      trigger: 'task_due',
+      steps: 3,
+      is_active: true,
+      created_at: new Date().toISOString()
+    }
+  ];
 
   const fetchTemplates = async () => {
     try {
