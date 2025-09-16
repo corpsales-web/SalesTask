@@ -287,7 +287,6 @@ const App = () => {
       const { access_token, user } = response.data;
       localStorage.setItem('auth_token', access_token);
       localStorage.setItem('current_user', JSON.stringify(user));
-      setIsAuthenticated(true);
       setCurrentUser(user);
       toast({ title: "Success", description: "Logged in successfully" });
     } catch (error) {
