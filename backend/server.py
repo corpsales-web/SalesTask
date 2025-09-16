@@ -1046,6 +1046,12 @@ async def get_prompt_templates(category: Optional[str] = None, active_only: bool
     templates = await workflow_authoring_service.get_prompt_templates(category=category, active_only=active_only)
     return {"templates": templates}
 
+@api_router.get("/workflow-templates")
+async def get_workflow_templates(category: Optional[str] = None, active_only: bool = True):
+    """Get workflow templates (alternative endpoint for frontend compatibility)"""
+    templates = await workflow_authoring_service.get_prompt_templates(category=category, active_only=active_only)
+    return templates  # Return directly as array for frontend compatibility
+
 @api_router.post("/workflows/prompt-templates/{template_id}/test")
 async def test_prompt_template(template_id: str, test_data: dict, user_id: str = Depends(get_current_user_id)):
     """Test a prompt template with sample data"""
