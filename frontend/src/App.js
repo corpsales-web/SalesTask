@@ -1163,19 +1163,20 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
-      {/* Header */}
-      <header className="bg-white shadow-lg border-b-2 border-emerald-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">A</span>
+    <TabProvider>
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
+        {/* Header */}
+        <header className="bg-white shadow-lg border-b-2 border-emerald-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">A</span>
+                  </div>
+                  <h1 className="ml-3 text-2xl font-bold text-gray-900">Aavana Greens CRM</h1>
                 </div>
-                <h1 className="ml-3 text-2xl font-bold text-gray-900">Aavana Greens CRM</h1>
               </div>
-            </div>
 
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
