@@ -761,18 +761,17 @@ metadata:
 
 test_plan:
   current_focus:
-    - "CRITICAL: Face Check-in Camera Access Failure"
-    - "CRITICAL: JavaScript Runtime Errors in AI Components"
-    - "CRITICAL: Modal Overlay Issues Blocking User Interactions"
-    - "API Endpoint 404/401 Errors"
-    - "Authentication System Problems"
+    - "Enhanced AI Endpoints Performance Optimization"
+    - "External URL Timeout Issues Resolution"
+    - "AI Processing Response Time Improvements"
+    - "Frontend JavaScript Runtime Errors in AI Components"
+    - "Modal Overlay Issues Blocking User Interactions"
   stuck_tasks:
-    - "HRMS Face Check-in Error Fix"
     - "JavaScript Runtime Errors in New Admin Components"
     - "Enhanced File Upload System"
     - "Voice STT Component"
   test_all: false
-  test_priority: "critical_user_reported_issues"
+  test_priority: "ai_endpoints_and_performance"
 
 agent_communication:
   - agent: "main"
