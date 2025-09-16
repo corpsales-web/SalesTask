@@ -142,12 +142,19 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
 
   const completeGPSCheckIn = useCallback(async () => {
     setIsProcessing(true);
+    setError(null);
+    
     try {
-      // Get location
+      // Get location with proper error handling
       const position = await new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error('Geolocation not supported'));
+          return;
+        }
+        
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
-          timeout: 10000,
+          timeout: 15000,
           maximumAge: 60000
         });
       });
