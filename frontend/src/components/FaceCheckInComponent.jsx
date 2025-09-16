@@ -256,8 +256,8 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
   return (
     <div className="face-checkin-component bg-white rounded-lg border border-gray-200 p-6 max-w-md mx-auto">
       <div className="text-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">📷 Face Check-In</h2>
-        <p className="text-sm text-gray-600">Capture your photo to record attendance</p>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">📷 Camera Check-In</h2>
+        <p className="text-sm text-gray-600">Use your camera to capture attendance photo</p>
       </div>
 
       {/* Success State */}
