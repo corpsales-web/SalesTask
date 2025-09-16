@@ -1221,19 +1221,22 @@ const App = () => {
 
           {/* Debug Info Removed - Production Ready */}
           
-          {/* Content Area */}
+          {/* Content Area - New Tab System */}
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
               <span className="ml-2 text-gray-600">Loading...</span>
             </div>
           ) : (
-            <div className="content-wrapper">
-              {(() => {
-                console.log(`🎯 RENDERING CONTENT - dashboard`);
-                return renderContent();
-              })()}
-            </div>
+            <TabContent
+              dashboardStats={dashboardStats}
+              leads={leads}
+              tasks={tasks}
+              showLeadActionsPanel={showLeadActionsPanel}
+              selectedLead={selectedLead}
+              setShowLeadActionsPanel={setShowLeadActionsPanel}
+              onActionComplete={handleActionComplete}
+            />
           )}
         </div>
       </main>
