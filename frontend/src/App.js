@@ -329,13 +329,14 @@ const App = () => {
 
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setShowFileUploadModal(true)}
-                    className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center"
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload
-                  </button>
+                  <EnhancedFileUploadHeader 
+                    onFileUpload={(fileData) => {
+                      console.log('File uploaded:', fileData);
+                      toast({ title: "Success", description: `File ${fileData.name} uploaded successfully` });
+                    }}
+                    maxFiles={10}
+                    maxFileSize={100 * 1024 * 1024}
+                  />
                   <button
                     onClick={() => setShowVoiceModal(true)}
                     className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center"
