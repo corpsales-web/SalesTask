@@ -299,8 +299,8 @@ const App = () => {
       </div>
     );
   };
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+  return (
               <Card className="bg-white shadow-lg border-emerald-100 hover:shadow-xl transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600">Total Leads</CardTitle>
