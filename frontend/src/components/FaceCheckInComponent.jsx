@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { initializeCamera, capturePhoto, stopCameraStream, checkCameraAvailability, getDeviceInfo } from '../utils/cameraUtils';
 
 const FaceCheckInComponent = ({ onCheckInComplete }) => {
   const [cameraActive, setCameraActive] = useState(false);
