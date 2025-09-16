@@ -26,16 +26,20 @@ import indianCitiesStates from './data/indianCitiesStates';
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const App = () => {
-  // Basic State Management with hash-based navigation
-  const [activeTab, setActiveTab] = useState(() => {
-    return window.location.hash.replace('#', '') || "dashboard";
-  });
-  const [renderKey, setRenderKey] = useState(0);
+  // Force re-render approach with direct DOM manipulation
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [forceUpdate, setForceUpdate] = useState(0);
   
-  // Update URL hash when tab changes
-  useEffect(() => {
-    window.location.hash = activeTab;
-  }, [activeTab]);
+  // Force update function
+  const handleTabChange = (newTab) => {
+    console.log(`Changing tab from ${activeTab} to ${newTab}`);
+    setActiveTab(newTab);
+    setForceUpdate(prev => prev + 1);
+    // Also update URL hash for backup
+    window.location.hash = newTab;
+    // Force component re-render
+    setTimeout(() => setForceUpdate(prev => prev + 1), 100);
+  };
   
   const [dashboardStats, setDashboardStats] = useState({
     totalLeads: 26,
