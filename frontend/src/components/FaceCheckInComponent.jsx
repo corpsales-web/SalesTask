@@ -11,6 +11,7 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
   const [attendanceId, setAttendanceId] = useState(null);
   
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
 
   const startCamera = useCallback(async () => {
     setError(null);
