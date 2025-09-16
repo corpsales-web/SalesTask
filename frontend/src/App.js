@@ -300,8 +300,16 @@ const App = () => {
 
   // Content Rendering Function
   const renderContent = () => {
+    console.log(`🎯 RENDERING CONTENT FOR: ${currentView}`);
+    
     switch(currentView) {
       case 'dashboard':
+        console.log(`📊 RENDERING DASHBOARD`);
+        return (
+          <div className="space-y-6">
+            <div className="bg-blue-50 p-2 rounded mb-4">
+              <small>Current View: Dashboard</small>
+            </div>
         return (
           <div className="space-y-6">
             {/* Stats Cards */}
