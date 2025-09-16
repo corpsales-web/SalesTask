@@ -395,7 +395,7 @@ const WorkflowAuthoringPanel = () => {
                     <CardDescription>{template.description}</CardDescription>
                   </div>
                   <Badge className="bg-blue-100 text-blue-800">
-                    {template.category.replace('_', ' ')}
+                    {(template.category || '').replace('_', ' ') || 'General'}
                   </Badge>
                 </div>
               </CardHeader>
