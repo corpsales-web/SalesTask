@@ -382,12 +382,8 @@ const App = () => {
     </TabProvider>
   );
 };
-                  <p className="text-xs text-gray-500 mt-1">Active pipeline</p>
-                </CardContent>
-              </Card>
 
-              <Card className="bg-white shadow-lg border-emerald-100 hover:shadow-xl transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+export default App;
                   <CardTitle className="text-sm font-medium text-gray-600">Active Leads</CardTitle>
                   <Target className="h-4 w-4 text-blue-600" />
                 </CardHeader>
