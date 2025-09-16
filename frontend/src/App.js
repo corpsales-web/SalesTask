@@ -255,7 +255,7 @@ const App = () => {
           )}
 
           {/* HRMS Content */}
-          {activeTab === "hrms" && (
+          {pageContent === "hrms" && (
             <div className="space-y-6">
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-6">
