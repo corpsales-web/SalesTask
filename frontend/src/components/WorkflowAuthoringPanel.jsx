@@ -391,8 +391,8 @@ const WorkflowAuthoringPanel = () => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg">{template.name}</CardTitle>
-                    <CardDescription>{template.description}</CardDescription>
+                    <CardTitle className="text-lg">{template.name || 'Untitled Template'}</CardTitle>
+                    <CardDescription>{template.description || 'No description available'}</CardDescription>
                   </div>
                   <Badge className="bg-blue-100 text-blue-800">
                     {(template.category || '').replace('_', ' ') || 'General'}
