@@ -1291,6 +1291,127 @@ async def recall_client_context(client_id: str, query: str = ""):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Context recall failed: {str(e)}")
 
+# Enhanced AI API Endpoints
+@api_router.post("/ai/generate", response_model=dict)
+async def generate_ai_response(request: dict):
+    """Generate AI response using multiple models"""
+    try:
+        if not enhanced_ai_service:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        ai_request = AIRequest(
+            prompt=request.get('prompt', ''),
+            provider=request.get('provider', 'openai'),
+            model=request.get('model', 'gpt-5'),
+            temperature=request.get('temperature', 0.7),
+            system_message=request.get('system_message')
+        )
+        
+        response = await enhanced_ai_service.generate_response(ai_request)
+        return {
+            "content": response.content,
+            "provider": response.provider,
+            "model": response.model,
+            "session_id": response.session_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {str(e)}")
+
+@api_router.post("/ai/smart-selection", response_model=dict)
+async def smart_model_selection(request: dict):
+    """Automatically select best AI model for task"""
+    try:
+        if not enhanced_ai_service:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        task_type = request.get('task_type', 'business')
+        prompt = request.get('prompt', '')
+        
+        response = await enhanced_ai_service.smart_model_selection(task_type, prompt)
+        return {
+            "content": response.content,
+            "provider": response.provider,
+            "model": response.model,
+            "session_id": response.session_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Smart selection failed: {str(e)}")
+
+@api_router.post("/ai/analyze-conversation", response_model=dict)
+async def analyze_lead_conversation(conversation_data: dict):
+    """Analyze customer conversations for insights"""
+    try:
+        if not enhanced_ai_service:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        analysis = await enhanced_ai_service.analyze_lead_conversation(conversation_data)
+        return analysis
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Conversation analysis failed: {str(e)}")
+
+@api_router.post("/ai/generate-proposal", response_model=dict)
+async def generate_smart_proposal(request: dict):
+    """Generate AI-powered custom proposals"""
+    try:
+        if not enhanced_ai_service:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        lead_data = request.get('lead_data', {})
+        service_type = request.get('service_type', 'landscaping')
+        
+        proposal = await enhanced_ai_service.generate_smart_proposal(lead_data, service_type)
+        return proposal
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Proposal generation failed: {str(e)}")
+
+@api_router.post("/ai/optimize-workflow", response_model=dict)
+async def optimize_workflow(workflow_data: dict):
+    """AI-powered workflow optimization"""
+    try:
+        if not enhanced_ai_service:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        optimization = await enhanced_ai_service.optimize_workflow(workflow_data)
+        return optimization
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Workflow optimization failed: {str(e)}")
+
+@api_router.post("/ai/marketing-content", response_model=dict)
+async def generate_marketing_content(campaign_data: dict):
+    """Generate marketing content using AI"""
+    try:
+        if not enhanced_ai_service:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        content = await enhanced_ai_service.generate_marketing_content(campaign_data)
+        return content
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Marketing content generation failed: {str(e)}")
+
+@api_router.post("/ai/predict-deals", response_model=dict)
+async def predict_deal_closure(deals_data: list):
+    """Predict deal closure probability using AI"""
+    try:
+        if not enhanced_ai_service:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        predictions = await enhanced_ai_service.predict_deal_closure(deals_data)
+        return predictions
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Deal prediction failed: {str(e)}")
+
+@api_router.post("/ai/task-automation", response_model=dict)
+async def generate_task_automation(task_data: dict):
+    """Generate AI-powered task automation suggestions"""
+    try:
+        if not enhanced_ai_service:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        automation = await enhanced_ai_service.generate_task_automation(task_data)
+        return automation
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Task automation failed: {str(e)}")
+
 # Comprehensive AI Stack Integration Routes
 
 # Conversational CRM AI Features
