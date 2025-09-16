@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { initializeCamera, capturePhoto, stopCameraStream, checkCameraAvailability } from '../utils/cameraUtils';
 
 const CameraComponent = ({ onPhotoCapture, onClose, title = "Camera Capture" }) => {
   const [cameraActive, setCameraActive] = useState(false);
