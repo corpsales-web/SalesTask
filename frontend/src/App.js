@@ -301,13 +301,87 @@ const App = () => {
   };
 
   return (
-              <Card className="bg-white shadow-lg border-emerald-100 hover:shadow-xl transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Leads</CardTitle>
-                  <Users className="h-4 w-4 text-emerald-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-gray-900">{dashboardStats.totalLeads}</div>
+    <TabProvider>
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
+        {/* Header */}
+        <header className="bg-white shadow-lg border-b-2 border-emerald-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">A</span>
+                  </div>
+                  <h1 className="ml-3 text-2xl font-bold text-gray-900">Aavana Greens CRM</h1>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setShowFileUploadModal(true)}
+                    className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload
+                  </button>
+                  <button
+                    onClick={() => setShowVoiceModal(true)}
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center"
+                  >
+                    <Mic className="h-4 w-4 mr-2" />
+                    Voice
+                  </button>
+                  <button
+                    onClick={() => setShowCheckInModal(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Check-In
+                  </button>
+                  <button className="relative bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200">
+                    <Bell className="h-5 w-5" />
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      3
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="space-y-6">
+            {/* New Tab Navigation */}
+            <TabNavigation />
+
+            {/* Content Area - New Tab System */}
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                <span className="ml-2 text-gray-600">Loading...</span>
+              </div>
+            ) : (
+              <TabContent
+                dashboardStats={dashboardStats}
+                leads={leads}
+                tasks={tasks}
+                showLeadActionsPanel={showLeadActionsPanel}
+                selectedLead={selectedLead}
+                setShowLeadActionsPanel={setShowLeadActionsPanel}
+                onActionComplete={handleActionComplete}
+              />
+            )}
+          </div>
+        </main>
+
+        {/* Modals and other components would go here */}
+      </div>
+    </TabProvider>
+  );
+};
                   <p className="text-xs text-gray-500 mt-1">Active pipeline</p>
                 </CardContent>
               </Card>
