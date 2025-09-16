@@ -13,6 +13,7 @@ import DigitalMarketingDashboard from './DigitalMarketingDashboard';
 import BulkExcelUploadComponent from './BulkExcelUploadComponent';
 import NotificationSystem from './NotificationSystem';
 import CameraComponent from './CameraComponent';
+import EnhancedPipelineSystem from './EnhancedPipelineSystem';
 
 const TabContent = ({ 
   dashboardStats,
