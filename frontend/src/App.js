@@ -213,11 +213,9 @@ const App = () => {
     }
   };
 
-  // Direct tab switching with window reload if needed
+  // Legacy function - now handled by TabContext
   const showContent = (tabName) => {
-    console.log(`🔄 SWITCHING TO TAB: ${tabName}`);
-    setLoading(false);
-    console.log(`✅ FORCED UPDATE TO: ${tabName}`);
+    console.log(`🔄 LEGACY TAB SWITCH: ${tabName} - Now handled by TabContext`);
   };
 
   // Lead Management Functions
