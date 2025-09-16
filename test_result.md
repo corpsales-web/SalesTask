@@ -701,18 +701,18 @@ metadata:
 
 test_plan:
   current_focus:
-    - "CRITICAL: Component Integration Issues - Enhanced Features Not Visible"
-    - "Leads Tab - Missing Lead Cards and Action Buttons"
-    - "Tasks Tab - Missing Voice Task and Add Task Functionality"
-    - "Admin Tab - Missing Role/User Management Integration"
-    - "ERP Tab - Missing File Upload Integration"
+    - "CRITICAL: Face Check-in Camera Access Failure"
+    - "CRITICAL: JavaScript Runtime Errors in AI Components"
+    - "CRITICAL: Modal Overlay Issues Blocking User Interactions"
+    - "API Endpoint 404/401 Errors"
+    - "Authentication System Problems"
   stuck_tasks:
-    - "Enhanced Lead Action Buttons Integration"
-    - "Voice STT Component Integration" 
-    - "Role Management Panel Integration"
-    - "File Upload System Integration"
+    - "HRMS Face Check-in Error Fix"
+    - "JavaScript Runtime Errors in New Admin Components"
+    - "Enhanced File Upload System"
+    - "Voice STT Component"
   test_all: false
-  test_priority: "critical_integration_fixes"
+  test_priority: "critical_user_reported_issues"
 
 agent_communication:
   - agent: "main"
