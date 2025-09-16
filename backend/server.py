@@ -2703,6 +2703,58 @@ async def face_recognition_checkin(checkin_data: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Face check-in failed: {str(e)}")
 
+@api_router.post("/hrms/gps-checkin")  
+async def gps_checkin(checkin_data: dict):
+    """GPS-based check-in for containerized environments"""
+    try:
+        employee_id = checkin_data.get("employee_id", "DEMO_USER")
+        location = checkin_data.get("location", {})
+        timestamp = checkin_data.get("timestamp")
+        device_info = checkin_data.get("device_info", {})
+        
+        if not location or not location.get("latitude") or not location.get("longitude"):
+            raise HTTPException(status_code=400, detail="Valid GPS location is required")
+        
+        check_in_time = datetime.now(timezone.utc)
+        
+        # Create result
+        result = {
+            "status": "success", 
+            "message": "GPS check-in successful",
+            "employee_id": employee_id,
+            "check_in_time": check_in_time,
+            "location": location,
+            "attendance_id": f"ATT_GPS_{int(check_in_time.timestamp())}"
+        }
+        
+        # Create attendance record
+        attendance = Attendance(
+            employee_id=employee_id,
+            date=check_in_time.date(),
+            check_in=check_in_time,
+            location=f"GPS: {location.get('latitude'):.4f}, {location.get('longitude'):.4f}",
+            status="Present"
+        )
+        attendance_dict = prepare_for_mongo(attendance.dict())
+        
+        # Add GPS metadata
+        attendance_dict.update({
+            "coordinates": {
+                "lat": location.get("latitude"),
+                "lng": location.get("longitude")
+            },
+            "location_accuracy": location.get("accuracy"),
+            "device_info": device_info,
+            "verification_method": "gps_location",
+            "attendance_id": result["attendance_id"]
+        })
+        
+        await db.attendance.insert_one(attendance_dict)
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"GPS check-in failed: {str(e)}")
+
 @api_router.get("/hrms/salary-calculation/{employee_id}")
 async def calculate_employee_salary(employee_id: str, month: int, year: int):
     """Calculate monthly salary for employee"""
