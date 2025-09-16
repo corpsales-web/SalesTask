@@ -150,11 +150,6 @@ const App = () => {
           {/* Direct Conditional Content Rendering */}
           <div key={forceUpdate}>
           
-          {/* Debug Info */}
-          <div className="mb-4 p-2 bg-yellow-100 rounded text-sm">
-            <strong>Debug:</strong> Current activeTab = "{activeTab}" | Force Update = {forceUpdate}
-          </div>
-          
           {/* Dashboard Content */}
           {activeTab === "dashboard" && (
             <div className="space-y-6">
