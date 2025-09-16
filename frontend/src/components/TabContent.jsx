@@ -14,6 +14,8 @@ import BulkExcelUploadComponent from './BulkExcelUploadComponent';
 import NotificationSystem from './NotificationSystem';
 import CameraComponent from './CameraComponent';
 import EnhancedPipelineSystem from './EnhancedPipelineSystem';
+import EnhancedHRMSSystem from './EnhancedHRMSSystem';
+import EnhancedTaskSystem from './EnhancedTaskSystem';
 
 const TabContent = ({ 
   dashboardStats,
