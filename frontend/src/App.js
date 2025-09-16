@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './com
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { Badge } from './components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog';
 import { Label } from './components/ui/label';
 import { Textarea } from './components/ui/textarea';
@@ -26,22 +25,9 @@ import indianCitiesStates from './data/indianCitiesStates';
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const App = () => {
-  // Window-based tab management for reliable switching
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [pageContent, setPageContent] = useState("dashboard");
-  
-  // Direct tab switching function
-  const switchTab = (tabName) => {
-    console.log(`Direct tab switch to: ${tabName}`);
-    setActiveTab(tabName);
-    setPageContent(tabName);
-    // Force immediate re-render
-    window.requestAnimationFrame(() => {
-      document.body.className = `tab-${tabName}`;
-    });
-  };
-  
-  const [dashboardStats, setDashboardStats] = useState({
+  // Simplified state management
+  const [currentView, setCurrentView] = useState("dashboard");
+  const [dashboardStats] = useState({
     totalLeads: 26,
     activeLeads: 18,
     conversion_rate: 75,
@@ -49,110 +35,17 @@ const App = () => {
     pendingTasks: 12
   });
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
-      {/* Header */}
-      <header className="bg-white shadow-lg border-b-2 border-emerald-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">A</span>
-                </div>
-                <h1 className="ml-3 text-2xl font-bold text-gray-900">Aavana Greens CRM</h1>
-              </div>
-            </div>
+  // Direct tab switching function
+  const showContent = (tabName) => {
+    console.log(`Showing content for: ${tabName}`);
+    setCurrentView(tabName);
+  };
 
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" className="flex items-center">
-                  📎 Upload
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center">
-                  🎤 Voice
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center">
-                  📷 Check-In
-                </Button>
-                <div className="relative">
-                  <NotificationSystem showTestingPanel={false} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Simple Tab Navigation */}
-        <div className="space-y-6">
-          <div className="grid w-full grid-cols-8 bg-white shadow-sm border border-emerald-100 text-xs rounded-lg overflow-hidden">
-            <button 
-              onClick={() => switchTab("dashboard")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "dashboard" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
-            >
-              <Activity className="h-3 w-3 mr-1" />
-              Dashboard
-            </button>
-            <button 
-              onClick={() => switchTab("leads")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "leads" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
-            >
-              <Users className="h-3 w-3 mr-1" />
-              Leads
-            </button>
-            <button 
-              onClick={() => switchTab("pipeline")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "pipeline" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
-            >
-              <Target className="h-3 w-3 mr-1" />
-              Pipeline
-            </button>
-            <button 
-              onClick={() => switchTab("tasks")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "tasks" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
-            >
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Tasks
-            </button>
-            <button 
-              onClick={() => switchTab("erp")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "erp" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
-            >
-              <Package className="h-3 w-3 mr-1" />
-              ERP
-            </button>
-            <button 
-              onClick={() => switchTab("hrms")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "hrms" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
-            >
-              <UserCheck className="h-3 w-3 mr-1" />
-              HRMS
-            </button>
-            <button 
-              onClick={() => switchTab("ai")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "ai" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
-            >
-              <Brain className="h-3 w-3 mr-1" />
-              AI
-            </button>
-            <button 
-              onClick={() => switchTab("admin")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "admin" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
-            >
-              <Settings className="h-3 w-3 mr-1" />
-              Admin
-            </button>
-          </div>
-
-          {/* Direct Content Rendering based on pageContent */}
-          <div>
-          
-          {/* Dashboard Content */}
-          {pageContent === "dashboard" && (
-            <div className="space-y-6">
+  const renderContent = () => {
+    switch(currentView) {
+      case 'dashboard':
+        return (
+          <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="bg-white shadow-lg border-emerald-100">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -251,115 +144,229 @@ const App = () => {
                 </CardContent>
               </Card>
             </div>
-            </div>
-          )}
-
-          {/* HRMS Content */}
-          {pageContent === "hrms" && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
-                    <p className="text-gray-600">Manage employee attendance and records</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-blue-700">
-                        <UserCheck className="h-5 w-5" />
-                        Face Check-in
-                      </CardTitle>
-                      <CardDescription>Face recognition + GPS tracking</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <FaceCheckInComponent />
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-green-700">
-                        <Calendar className="h-5 w-5" />
-                        Leave Management
-                      </CardTitle>
-                      <CardDescription>Apply and track leave requests</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
-                        Apply Leave
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-purple-700">
-                        <Clock className="h-5 w-5" />
-                        Attendance
-                      </CardTitle>
-                      <CardDescription>View attendance history</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
-                        View History
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Other Tabs */}
-          {pageContent === "leads" && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Lead Management</h2>
-              <p className="text-gray-600">Manage your leads and prospects</p>
-            </div>
-          )}
-
-          {pageContent === "tasks" && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Task Management</h2>
-              <p className="text-gray-600">Track and manage your tasks</p>
-            </div>
-          )}
-
-          {pageContent === "erp" && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Business Management & Operations</h2>
-              <p className="text-gray-600">Manage projects and operations</p>
-            </div>
-          )}
-
-          {pageContent === "pipeline" && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Sales Pipeline</h2>
-              <p className="text-gray-600">Track your sales pipeline</p>
-            </div>
-          )}
-
-          {pageContent === "ai" && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">AI Assistant</h2>
-              <p className="text-gray-600">AI-powered insights and automation</p>
-            </div>
-          )}
-
-          {pageContent === "admin" && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Super Admin Panel</h2>
-              <p className="text-gray-600">System administration and settings</p>
-              <div className="mt-6">
-                <NotificationSystem showTestingPanel={true} />
-              </div>
-            </div>
-          )}
-
           </div>
+        );
+
+      case 'hrms':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
+                  <p className="text-gray-600">Manage employee attendance and records</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-blue-700">
+                      <UserCheck className="h-5 w-5" />
+                      Face Check-in
+                    </CardTitle>
+                    <CardDescription>Face recognition + GPS tracking</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <FaceCheckInComponent />
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-green-700">
+                      <Calendar className="h-5 w-5" />
+                      Leave Management
+                    </CardTitle>
+                    <CardDescription>Apply and track leave requests</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                      Apply Leave
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-purple-700">
+                      <Clock className="h-5 w-5" />
+                      Attendance
+                    </CardTitle>
+                    <CardDescription>View attendance history</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
+                      View History
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'leads':
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Lead Management</h2>
+            <p className="text-gray-600">Manage your leads and prospects</p>
+          </div>
+        );
+
+      case 'tasks':
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Task Management</h2>
+            <p className="text-gray-600">Track and manage your tasks</p>
+          </div>
+        );
+
+      case 'erp':
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Business Management & Operations</h2>
+            <p className="text-gray-600">Manage projects and operations</p>
+          </div>
+        );
+
+      case 'pipeline':
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Sales Pipeline</h2>
+            <p className="text-gray-600">Track your sales pipeline</p>
+          </div>
+        );
+
+      case 'ai':
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">AI Assistant</h2>
+            <p className="text-gray-600">AI-powered insights and automation</p>
+          </div>
+        );
+
+      case 'admin':
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Super Admin Panel</h2>
+            <p className="text-gray-600">System administration and settings</p>
+            <div className="mt-6">
+              <NotificationSystem showTestingPanel={true} />
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Content Not Found</h2>
+            <p className="text-gray-600">The requested content could not be found.</p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
+      {/* Header */}
+      <header className="bg-white shadow-lg border-b-2 border-emerald-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-green-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">A</span>
+                </div>
+                <h1 className="ml-3 text-2xl font-bold text-gray-900">Aavana Greens CRM</h1>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm" className="flex items-center">
+                  📎 Upload
+                </Button>
+                <Button variant="outline" size="sm" className="flex items-center">
+                  🎤 Voice
+                </Button>
+                <Button variant="outline" size="sm" className="flex items-center">
+                  📷 Check-In
+                </Button>
+                <div className="relative">
+                  <NotificationSystem showTestingPanel={false} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
+          {/* Tab Navigation */}
+          <div className="grid w-full grid-cols-8 bg-white shadow-sm border border-emerald-100 text-xs rounded-lg overflow-hidden">
+            <button 
+              onClick={() => showContent("dashboard")}
+              className={`p-3 flex items-center justify-center transition-colors ${currentView === "dashboard" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              <Activity className="h-3 w-3 mr-1" />
+              Dashboard
+            </button>
+            <button 
+              onClick={() => showContent("leads")}
+              className={`p-3 flex items-center justify-center transition-colors ${currentView === "leads" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              <Users className="h-3 w-3 mr-1" />
+              Leads
+            </button>
+            <button 
+              onClick={() => showContent("pipeline")}
+              className={`p-3 flex items-center justify-center transition-colors ${currentView === "pipeline" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              <Target className="h-3 w-3 mr-1" />
+              Pipeline
+            </button>
+            <button 
+              onClick={() => showContent("tasks")}
+              className={`p-3 flex items-center justify-center transition-colors ${currentView === "tasks" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Tasks
+            </button>
+            <button 
+              onClick={() => showContent("erp")}
+              className={`p-3 flex items-center justify-center transition-colors ${currentView === "erp" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              <Package className="h-3 w-3 mr-1" />
+              ERP
+            </button>
+            <button 
+              onClick={() => showContent("hrms")}
+              className={`p-3 flex items-center justify-center transition-colors ${currentView === "hrms" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              <UserCheck className="h-3 w-3 mr-1" />
+              HRMS
+            </button>
+            <button 
+              onClick={() => showContent("ai")}
+              className={`p-3 flex items-center justify-center transition-colors ${currentView === "ai" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              <Brain className="h-3 w-3 mr-1" />
+              AI
+            </button>
+            <button 
+              onClick={() => showContent("admin")}
+              className={`p-3 flex items-center justify-center transition-colors ${currentView === "admin" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              <Settings className="h-3 w-3 mr-1" />
+              Admin
+            </button>
+          </div>
+
+          {/* Content Area */}
+          {renderContent()}
         </div>
       </main>
     </div>
