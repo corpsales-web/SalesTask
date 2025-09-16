@@ -1314,8 +1314,11 @@ const App = () => {
               <span className="ml-2 text-gray-600">Loading...</span>
             </div>
           ) : (
-            <div key={currentView} className="content-wrapper">
-              {renderContent()}
+            <div key={`content-${currentView}-${Date.now()}`} className="content-wrapper">
+              {(() => {
+                console.log(`🎯 RENDERING CONTENT - currentView: ${currentView}`);
+                return renderContent();
+              })()}
             </div>
           )}
         </div>
