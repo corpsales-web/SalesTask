@@ -27,7 +27,8 @@ const WorkflowAuthoringPanel = () => {
     description: '',
     trigger: 'manual',
     steps: [],
-    is_active: true
+    is_active: true,
+    variables: []
   });
 
   // New Template State
