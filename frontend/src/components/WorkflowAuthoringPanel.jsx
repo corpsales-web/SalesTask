@@ -540,7 +540,7 @@ const WorkflowAuthoringPanel = () => {
               </div>
 
               <div className="space-y-4">
-                {newWorkflow.steps.map((step, index) => (
+                {Array.isArray(newWorkflow.steps) && newWorkflow.steps.map((step, index) => (
                   <Card key={step.id} className="p-4">
                     <div className="flex justify-between items-start mb-3">
                       <h4 className="font-medium">Step {index + 1}</h4>
