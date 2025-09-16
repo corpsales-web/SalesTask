@@ -1216,77 +1216,8 @@ const App = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
-          {/* Tab Navigation */}
-          <div className="grid w-full grid-cols-8 bg-white shadow-sm border border-emerald-100 text-xs rounded-lg overflow-hidden">
-            <button 
-              onClick={() => showContent("dashboard")}
-              className="p-3 flex items-center justify-center transition-colors bg-emerald-100 text-emerald-700 font-bold"
-            >
-              <Activity className="h-3 w-3 mr-1" />
-              Dashboard
-            </button>
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showContent("leads");
-              }}
-              className="p-3 flex items-center justify-center transition-colors text-gray-600 hover:bg-gray-50"
-            >
-              <Users className="h-3 w-3 mr-1" />
-              Leads
-            </button>
-            <button 
-              onClick={() => showContent("pipeline")}
-              className="p-3 flex items-center justify-center transition-colors text-gray-600 hover:bg-gray-50"
-            >
-              <Target className="h-3 w-3 mr-1" />
-              Pipeline
-            </button>
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showContent("tasks");
-              }}
-              className="p-3 flex items-center justify-center transition-colors text-gray-600 hover:bg-gray-50"
-            >
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Tasks
-            </button>
-            <button 
-              onClick={() => showContent("erp")}
-              className="p-3 flex items-center justify-center transition-colors text-gray-600 hover:bg-gray-50"
-            >
-              <Package className="h-3 w-3 mr-1" />
-              ERP
-            </button>
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showContent("hrms");
-              }}
-              className="p-3 flex items-center justify-center transition-colors text-gray-600 hover:bg-gray-50"
-            >
-              <UserCheck className="h-3 w-3 mr-1" />
-              HRMS
-            </button>
-            <button 
-              onClick={() => showContent("ai")}
-              className="p-3 flex items-center justify-center transition-colors text-gray-600 hover:bg-gray-50"
-            >
-              <Brain className="h-3 w-3 mr-1" />
-              AI
-            </button>
-            <button 
-              onClick={() => showContent("admin")}
-              className="p-3 flex items-center justify-center transition-colors text-gray-600 hover:bg-gray-50"
-            >
-              <Settings className="h-3 w-3 mr-1" />
-              Admin
-            </button>
-          </div>
+          {/* New Tab Navigation */}
+          <TabNavigation />
 
           {/* Debug Info Removed - Production Ready */}
           
