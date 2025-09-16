@@ -216,12 +216,7 @@ const App = () => {
   // Direct tab switching with window reload if needed
   const showContent = (tabName) => {
     console.log(`🔄 SWITCHING TO TAB: ${tabName}`);
-    
-    // Force immediate state update
-    setCurrentView(tabName);
-    setForceUpdate(Date.now()); // Use timestamp for absolute uniqueness
-    setLoading(false); // Additional trigger
-    
+    setLoading(false);
     console.log(`✅ FORCED UPDATE TO: ${tabName}`);
   };
 
