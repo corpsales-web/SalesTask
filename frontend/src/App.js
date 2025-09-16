@@ -298,7 +298,6 @@ const App = () => {
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('current_user');
-    setIsAuthenticated(false);
     setCurrentUser(null);
     toast({ title: "Success", description: "Logged out successfully" });
   };
