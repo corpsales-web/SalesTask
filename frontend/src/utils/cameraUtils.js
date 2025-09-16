@@ -133,16 +133,16 @@ export const stopCameraStream = (stream) => {
  */
 const getErrorMessage = (errorType) => {
   const messages = {
-    'NO_MEDIA_DEVICES_API': '📷 Camera API not available in this browser. Please use a modern browser with camera support.',
-    'NO_CAMERA_DEVICES': '📷 No camera devices found on this system. This is common in containerized or server environments.',
-    'ENUMERATION_FAILED': '📷 Unable to detect camera devices. Camera access may be restricted.',
-    'NotAllowedError': '📷 Camera access denied. Please allow camera permissions in your browser settings.',
-    'NotFoundError': '📷 No camera device found. Please ensure a camera is connected and accessible.',
-    'NotReadableError': '📷 Camera is already in use by another application. Please close other apps using the camera.',
-    'OverconstrainedError': '📷 Camera settings not supported. Trying with basic settings.',
-    'SecurityError': '📷 Camera access blocked due to security restrictions. Please enable camera permissions.',
-    'AbortError': '📷 Camera initialization was interrupted. Please try again.',
-    'UNKNOWN_ERROR': '📷 Camera initialization failed due to an unknown error.'
+    'NO_MEDIA_DEVICES_API': '📷 Camera API not available. Please use a modern browser like Chrome, Firefox, or Safari.',
+    'NO_CAMERA_DEVICES': '📷 No camera found. Please ensure your camera is connected and working.',
+    'ENUMERATION_FAILED': '📷 Unable to access camera. Please check your camera permissions.',
+    'NotAllowedError': '📷 Camera access denied. Please click "Allow" when prompted for camera permissions.',
+    'NotFoundError': '📷 Camera not found. Please ensure your camera is connected and working properly.',
+    'NotReadableError': '📷 Camera is busy. Please close other apps using the camera and try again.',
+    'OverconstrainedError': '📷 Camera settings not supported. Trying with standard settings.',
+    'SecurityError': '📷 Camera blocked by security settings. Please enable camera access for this site.',
+    'AbortError': '📷 Camera access interrupted. Please try again.',
+    'UNKNOWN_ERROR': '📷 Camera error. Please try again or contact support.'
   };
 
   return messages[errorType] || messages['UNKNOWN_ERROR'];
