@@ -22,6 +22,7 @@ import DigitalMarketingDashboard from './components/DigitalMarketingDashboard';
 import LeadRoutingPanel from './components/LeadRoutingPanel';
 import WorkflowAuthoringPanel from './components/WorkflowAuthoringPanel';
 import CameraComponent from './components/CameraComponent';
+import EnhancedFileUploadHeader from './components/EnhancedFileUploadHeader';
 import axios from 'axios';
 import { useToast } from './hooks/use-toast';
 import { toast } from './hooks/use-toast';
