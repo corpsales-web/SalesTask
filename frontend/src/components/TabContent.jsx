@@ -204,60 +204,14 @@ const TabContent = ({
               <div className="flex items-center">
                 <span className="text-purple-600 text-lg mr-2">👥</span>
                 <div>
-                  <h3 className="font-semibold text-purple-800">HRMS Active - Camera Ready!</h3>
-                  <p className="text-purple-600 text-sm">Human resource management with face check-in</p>
+                  <h3 className="font-semibold text-purple-800">Enhanced HRMS - Full Suite!</h3>
+                  <p className="text-purple-600 text-sm">Complete HR management with face check-in, leave management, and reporting</p>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
-                <p className="text-gray-600">Manage employee attendance and records</p>
-              </div>
-            </div>
-            
-            {/* Face Check-in Component */}
-            <div className="bg-white p-6 rounded-lg shadow border">
-              <FaceCheckInComponent 
-                onCheckInComplete={(result) => {
-                  console.log('Check-in completed:', result);
-                }}
-              />
-            </div>
-            
-            {/* Additional HRMS Features */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow border">
-                <h3 className="text-lg font-semibold mb-4">Leave Management</h3>
-                <div className="space-y-2">
-                  <button className="w-full text-left p-3 bg-gray-50 rounded hover:bg-gray-100">
-                    Request Leave
-                  </button>
-                  <button className="w-full text-left p-3 bg-gray-50 rounded hover:bg-gray-100">
-                    View Leave History
-                  </button>
-                  <button className="w-full text-left p-3 bg-gray-50 rounded hover:bg-gray-100">
-                    Leave Calendar
-                  </button>
-                </div>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow border">
-                <h3 className="text-lg font-semibold mb-4">Attendance</h3>
-                <div className="space-y-2">
-                  <button className="w-full text-left p-3 bg-gray-50 rounded hover:bg-gray-100">
-                    View Attendance
-                  </button>
-                  <button className="w-full text-left p-3 bg-gray-50 rounded hover:bg-gray-100">
-                    Monthly Report
-                  </button>
-                  <button className="w-full text-left p-3 bg-gray-50 rounded hover:bg-gray-100">
-                    Overtime Tracking
-                  </button>
-                </div>
-              </div>
-            </div>
+            {/* Enhanced HRMS System */}
+            <EnhancedHRMSSystem />
           </div>
         );
         
