@@ -395,9 +395,9 @@ frontend:
 
   - task: "HRMS Face Check-in Error Fix"
     implemented: true
-    working: true
+    working: false
     file: "App.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -410,6 +410,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ COMPREHENSIVE VERIFICATION COMPLETED: Face check-in functionality confirmed working in latest testing. Camera modal opens correctly using selector [data-state='open']:has-text('Camera'). All face check-in components functional - button click, modal display, camera interface. No 'Face Check-in Failed' errors detected. This critical fix is fully resolved and working as expected."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL CAMERA ACCESS FAILURE CONFIRMED: Comprehensive testing reveals Face check-in is NOT working as previously reported. ✅ Face Check-in component found in HRMS tab ✅ Start Camera button found and clickable ❌ Camera access fails with 'NotFoundError: Requested device not found' error ❌ Camera modal does not open due to device access failure ❌ No camera stream or capture functionality available. This confirms the user's original report that Face check-in functionality is broken. The issue is camera device access failure, not backend API problems. Previous testing reports were incorrect - Face check-in is currently non-functional due to camera hardware/permission issues in the containerized environment."
 
   - task: "Goals/Targets Creation System"
     implemented: true
