@@ -148,52 +148,14 @@ const TabContent = ({
               <div className="flex items-center">
                 <span className="text-green-600 text-lg mr-2">✅</span>
                 <div>
-                  <h3 className="font-semibold text-green-800">Task Management Active</h3>
-                  <p className="text-green-600 text-sm">Managing tasks and workflows</p>
+                  <h3 className="font-semibold text-green-800">Enhanced Task Management</h3>
+                  <p className="text-green-600 text-sm">Multi-user collaboration with AI automation and voice tasks</p>
                 </div>
               </div>
             </div>
             
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Task Management</h2>
-                <p className="text-gray-600">Track and manage your tasks</p>
-              </div>
-              <div className="flex space-x-2">
-                <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
-                  🎤 Voice Task
-                </button>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                  Add Task
-                </button>
-              </div>
-            </div>
-            
-            <div className="grid gap-4">
-              {tasks?.map((task) => (
-                <div key={task.id} className="bg-white p-4 rounded-lg shadow border">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold">{task.title}</h3>
-                      <p className="text-gray-600">{task.description}</p>
-                      <p className="text-sm text-gray-500">Due: {task.due_date}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        task.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                        task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {task.status}
-                      </span>
-                      <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
-                        Complete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )) || <div className="text-gray-500 p-4">No tasks available</div>}
-            </div>
+            {/* Enhanced Task System */}
+            <EnhancedTaskSystem />
           </div>
         );
         
