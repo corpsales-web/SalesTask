@@ -79,27 +79,42 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
     setError(null);
   }, [cameraStream]);
 
-  const capturePhoto = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
+  const handleCapturePhoto = useCallback(() => {
+    if (!videoRef.current || !cameraStream) {
+      setError('Camera not ready for capture');
+      return;
+    }
 
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    // Set canvas size to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // Draw video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Convert to data URL
-    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    setCapturedImage(imageDataUrl);
-
-    // Stop camera after capture
-    stopCamera();
-  }, [stopCamera]);
+    try {
+      setIsProcessing(true);
+      
+      // Use the comprehensive capture utility
+      const result = capturePhoto(videoRef.current, 0.8);
+      
+      if (result.success) {
+        setCapturedImage(result.dataURL);
+        console.log('✅ Photo captured successfully:', result.dimensions);
+        
+        // Stop camera after successful capture
+        if (cameraStream) {
+          stopCameraStream(cameraStream);
+        }
+        setCameraStream(null);
+        setCameraActive(false);
+        setError(null);
+        
+      } else {
+        setError(result.message);
+        console.error('Photo capture failed:', result.error);
+      }
+      
+    } catch (err) {
+      console.error('Unexpected capture error:', err);
+      setError('📷 Failed to capture photo. Please try again or use GPS Check-in.');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [cameraStream]);
 
   const completeCheckIn = useCallback(async () => {
     if (!capturedImage) return;
