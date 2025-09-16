@@ -1276,7 +1276,9 @@ const App = () => {
               <span className="ml-2 text-gray-600">Loading...</span>
             </div>
           ) : (
-            renderContent()
+            <div key={currentView} className="content-wrapper">
+              {renderContent()}
+            </div>
           )}
         </div>
       </main>
