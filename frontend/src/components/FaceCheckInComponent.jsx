@@ -172,8 +172,21 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         device_info: navigator.userAgent
       };
 
-      // Simulate API call to record attendance
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Make actual API call to record GPS attendance
+      const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${API}/api/hrms/gps-checkin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(attendanceData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
       
       // Set success state
       setCheckInComplete(true);
