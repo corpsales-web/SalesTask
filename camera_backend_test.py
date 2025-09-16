@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class CameraBackendTest:
     def __init__(self):
         # Get backend URL from environment
-        self.backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://aavana-greens-crm.preview.emergentagent.com')
+        self.backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://navdebug-crm.preview.emergentagent.com')
         self.api_base = f"{self.backend_url}/api"
         
         # Authentication token

@@ -6,7 +6,7 @@ import time
 
 def test_ai_endpoint(name, method, endpoint, params=None, data=None, timeout=60):
     """Test an AI endpoint with extended timeout"""
-    base_url = "https://aavana-greens-crm.preview.emergentagent.com/api"
+    base_url = "https://navdebug-crm.preview.emergentagent.com/api"
     url = f"{base_url}/{endpoint}"
     headers = {'Content-Type': 'application/json'}
     
@@ -70,7 +70,7 @@ def main():
     # Get a real lead ID for testing
     print("\n📋 Getting real lead ID for testing...")
     try:
-        response = requests.get("https://aavana-greens-crm.preview.emergentagent.com/api/leads", timeout=10)
+        response = requests.get("https://navdebug-crm.preview.emergentagent.com/api/leads", timeout=10)
         if response.status_code == 200:
             leads = response.json()
             if leads:

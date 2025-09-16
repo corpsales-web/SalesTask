@@ -1,6 +1,6 @@
 {
   "timestamp": "2025-09-15T11:21:47.786582",
-  "backend_url": "https://aavana-greens-crm.preview.emergentagent.com",
+  "backend_url": "https://navdebug-crm.preview.emergentagent.com",
   "summary": {
     "total_tests": 5,
     "working_tests": 0,
@@ -13,7 +13,7 @@
       {
         "endpoint": "/hrms/face-checkin",
         "method": "POST",
-        "url": "https://aavana-greens-crm.preview.emergentagent.com/api/hrms/face-checkin",
+        "url": "https://navdebug-crm.preview.emergentagent.com/api/hrms/face-checkin",
         "status_code": 500,
         "response_time_ms": 49.43,
         "error": null,
@@ -36,7 +36,7 @@
       {
         "endpoint": "/upload/file",
         "method": "POST",
-        "url": "https://aavana-greens-crm.preview.emergentagent.com/api/upload/file",
+        "url": "https://navdebug-crm.preview.emergentagent.com/api/upload/file",
         "status_code": 403,
         "response_time_ms": 11.89,
         "error": null,
@@ -57,7 +57,7 @@
       {
         "endpoint": "/upload/multiple",
         "method": "POST",
-        "url": "https://aavana-greens-crm.preview.emergentagent.com/api/upload/multiple",
+        "url": "https://navdebug-crm.preview.emergentagent.com/api/upload/multiple",
         "status_code": 403,
         "response_time_ms": 11.87,
         "error": null,
@@ -78,7 +78,7 @@
       {
         "endpoint": "/upload/presigned-url",
         "method": "POST",
-        "url": "https://aavana-greens-crm.preview.emergentagent.com/api/upload/presigned-url",
+        "url": "https://navdebug-crm.preview.emergentagent.com/api/upload/presigned-url",
         "status_code": 403,
         "response_time_ms": 6.89,
         "error": null,
@@ -101,7 +101,7 @@
       {
         "endpoint": "/ai/generate-content",
         "method": "POST",
-        "url": "https://aavana-greens-crm.preview.emergentagent.com/api/ai/generate-content",
+        "url": "https://navdebug-crm.preview.emergentagent.com/api/ai/generate-content",
         "status_code": 422,
         "response_time_ms": 50.11,
         "error": null,
@@ -141,7 +141,7 @@
       {
         "endpoint": "/hrms/face-checkin",
         "method": "OPTIONS",
-        "url": "https://aavana-greens-crm.preview.emergentagent.com/api/hrms/face-checkin",
+        "url": "https://navdebug-crm.preview.emergentagent.com/api/hrms/face-checkin",
         "status_code": 200,
         "response_time_ms": 6.69,
         "error": null,
@@ -150,7 +150,7 @@
           "Access-Control-Allow-Credentials": "true",
           "Access-Control-Allow-Headers": "Content-Type",
           "Access-Control-Allow-Methods": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT",
-          "Access-Control-Allow-Origin": "https://aavana-greens-crm.preview.emergentagent.com",
+          "Access-Control-Allow-Origin": "https://navdebug-crm.preview.emergentagent.com",
           "Access-Control-Max-Age": "600",
           "Content-Length": "2",
           "Content-Type": "text/plain; charset=utf-8",
@@ -168,7 +168,7 @@
       {
         "endpoint": "/hrms/face-checkin",
         "method": "POST",
-        "url": "https://aavana-greens-crm.preview.emergentagent.com/api/hrms/face-checkin",
+        "url": "https://navdebug-crm.preview.emergentagent.com/api/hrms/face-checkin",
         "status_code": 500,
         "response_time_ms": 5.77,
         "error": null,
