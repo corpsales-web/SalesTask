@@ -110,7 +110,7 @@ backend:
   - task: "Comprehensive Backend Audit - All Endpoints and Functionality"
     implemented: true
     working: true
-    file: "server.py, comprehensive_backend_test.py"
+    file: "server.py, comprehensive_ai_backend_test.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
