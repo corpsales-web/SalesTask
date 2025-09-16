@@ -132,15 +132,15 @@ const App = () => {
               HRMS
             </button>
             <button 
-              onClick={() => setActiveTab("ai")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "ai" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+              onClick={() => switchTab("ai")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "ai" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <Brain className="h-3 w-3 mr-1" />
               AI
             </button>
             <button 
-              onClick={() => setActiveTab("admin")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "admin" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+              onClick={() => switchTab("admin")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "admin" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <Settings className="h-3 w-3 mr-1" />
               Admin
