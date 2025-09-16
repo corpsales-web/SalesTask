@@ -97,29 +97,29 @@ const App = () => {
               Dashboard
             </button>
             <button 
-              onClick={() => setActiveTab("leads")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "leads" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+              onClick={() => switchTab("leads")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "leads" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <Users className="h-3 w-3 mr-1" />
               Leads
             </button>
             <button 
-              onClick={() => setActiveTab("pipeline")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "pipeline" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+              onClick={() => switchTab("pipeline")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "pipeline" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <Target className="h-3 w-3 mr-1" />
               Pipeline
             </button>
             <button 
-              onClick={() => setActiveTab("tasks")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "tasks" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+              onClick={() => switchTab("tasks")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "tasks" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <CheckCircle className="h-3 w-3 mr-1" />
               Tasks
             </button>
             <button 
-              onClick={() => setActiveTab("erp")}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "erp" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+              onClick={() => switchTab("erp")}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "erp" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <Package className="h-3 w-3 mr-1" />
               ERP
