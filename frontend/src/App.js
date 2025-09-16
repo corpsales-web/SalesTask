@@ -26,9 +26,17 @@ import indianCitiesStates from './data/indianCitiesStates';
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const App = () => {
-  // Basic State Management
-  const [activeTab, setActiveTab] = useState("dashboard");
+  // Basic State Management with hash-based navigation
+  const [activeTab, setActiveTab] = useState(() => {
+    return window.location.hash.replace('#', '') || "dashboard";
+  });
   const [renderKey, setRenderKey] = useState(0);
+  
+  // Update URL hash when tab changes
+  useEffect(() => {
+    window.location.hash = activeTab;
+  }, [activeTab]);
+  
   const [dashboardStats, setDashboardStats] = useState({
     totalLeads: 26,
     activeLeads: 18,
