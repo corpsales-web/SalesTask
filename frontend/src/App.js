@@ -122,11 +122,12 @@ const App = () => {
             </button>
             <button 
               onClick={() => {
+                console.log("HRMS clicked - setting activeTab to hrms");
                 setActiveTab("hrms");
                 setRenderKey(prev => prev + 1);
-                console.log("HRMS clicked, activeTab set to hrms");
+                window.location.hash = "hrms";
               }}
-              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "hrms" ? "bg-emerald-100 text-emerald-700" : "text-gray-600 hover:bg-gray-50"}`}
+              className={`p-3 flex items-center justify-center transition-colors ${activeTab === "hrms" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <UserCheck className="h-3 w-3 mr-1" />
               HRMS
