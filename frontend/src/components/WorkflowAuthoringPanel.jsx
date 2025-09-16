@@ -691,7 +691,7 @@ const WorkflowAuthoringPanel = () => {
               <div>
                 <Label>Detected Variables</Label>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {newTemplate.variables.map((variable, index) => (
+                  {Array.isArray(newTemplate.variables) && newTemplate.variables.map((variable, index) => (
                     <Badge key={index} variant="outline">
                       {variable}
                     </Badge>
