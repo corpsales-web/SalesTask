@@ -175,6 +175,38 @@
   }
 }
 
+/* Modal and Dialog fixes */
+[role="dialog"],
+[data-state="open"] {
+  z-index: 1000000 !important; /* Highest priority for modals */
+}
+
+/* Modal overlay fixes */
+[data-radix-popper-content-wrapper],
+.fixed.inset-0.bg-black {
+  z-index: 999999 !important;
+}
+
+/* Specific modal content positioning */
+.fixed.inset-0.bg-black.bg-opacity-50 {
+  z-index: 999999 !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+/* Dialog content */
+.bg-white.rounded-lg.max-w-md.w-full.mx-4.max-h-\[90vh\].overflow-y-auto,
+.bg-white.rounded-lg.shadow-lg {
+  z-index: 1000000 !important;
+  position: relative !important;
+}
+
+/* Prevent modal from being hidden behind other elements */
+.modal-container,
+.dialog-container {
+  z-index: 1000000 !important;
+  position: fixed !important;
+}
+
 /* Focus states for accessibility */
 [data-sonner-toast]:focus,
 .error-banner:focus,
