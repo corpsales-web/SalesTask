@@ -1261,10 +1261,7 @@ const App = () => {
             </button>
           </div>
 
-          {/* Debug Info */}
-          <div className="mb-4 p-2 bg-yellow-100 rounded text-sm">
-            <strong>Debug:</strong> currentView = "{currentView}"
-          </div>
+          {/* Debug Info Removed - Production Ready */}
           
           {/* Content Area */}
           {loading ? (
