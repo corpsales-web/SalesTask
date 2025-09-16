@@ -300,7 +300,7 @@ const WorkflowAuthoringPanel = () => {
       {/* Workflows Tab */}
       {activeTab === 'workflows' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {workflows.map((workflow) => (
+          {Array.isArray(workflows) && workflows.map((workflow) => (
             <Card key={workflow.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">
