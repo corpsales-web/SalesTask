@@ -68,32 +68,28 @@ const CameraComponent = ({ onPhotoCapture, onClose, title = "Camera Capture" }) 
     setCameraActive(false);
   }, [cameraStream]);
 
-  const capturePhoto = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
+  const handleCapturePhoto = useCallback(() => {
+    if (!videoRef.current || !cameraStream) {
+      setError('Camera not ready for capture');
+      return;
+    }
 
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    // Set canvas size to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // Draw video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Convert to blob
-    canvas.toBlob((blob) => {
-      if (blob) {
+    try {
+      // Use the comprehensive capture utility
+      const result = capturePhoto(videoRef.current, 0.8);
+      
+      if (result.success) {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `camera-capture-${timestamp}.jpg`;
         
         const newImage = {
           id: Date.now(),
-          file: new File([blob], filename, { type: 'image/jpeg' }),
-          blob,
-          url: URL.createObjectURL(blob),
-          timestamp: new Date()
+          file: new File([result.blob], filename, { type: 'image/jpeg' }),
+          blob: result.blob,
+          dataURL: result.dataURL,
+          url: URL.createObjectURL(result.blob),
+          timestamp: new Date(),
+          dimensions: result.dimensions
         };
         
         setCapturedImages(prev => [...prev, newImage]);
@@ -102,9 +98,20 @@ const CameraComponent = ({ onPhotoCapture, onClose, title = "Camera Capture" }) 
         if (onPhotoCapture) {
           onPhotoCapture(newImage);
         }
+
+        setError(null);
+        console.log('✅ Photo captured successfully:', result.dimensions);
+        
+      } else {
+        setError(result.message);
+        console.error('Photo capture failed:', result.error);
       }
-    }, 'image/jpeg', 0.8);
-  }, [onPhotoCapture]);
+      
+    } catch (error) {
+      console.error('Unexpected capture error:', error);
+      setError('📷 Failed to capture photo. Please try again.');
+    }
+  }, [onPhotoCapture, cameraStream]);
 
   const removeImage = useCallback((imageId) => {
     setCapturedImages(prev => {
