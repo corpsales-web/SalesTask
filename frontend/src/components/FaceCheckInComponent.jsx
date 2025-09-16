@@ -190,16 +190,16 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       
       // Set success state
       setCheckInComplete(true);
-      setAttendanceId(`ATT_${Date.now()}`);
+      setAttendanceId(result.attendance_id || `ATT_${Date.now()}`);
       setError(null);
       
       if (onCheckInComplete) {
         onCheckInComplete({
           success: true,
           method: 'gps_checkin',
-          timestamp: attendanceData.check_in_time,
+          timestamp: result.check_in_time || attendanceData.check_in_time,
           location: attendanceData.location,
-          attendance_id: `ATT_${Date.now()}`
+          attendance_id: result.attendance_id
         });
       }
     } catch (error) {
