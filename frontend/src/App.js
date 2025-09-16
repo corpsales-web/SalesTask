@@ -1219,7 +1219,7 @@ const App = () => {
           <div className="grid w-full grid-cols-8 bg-white shadow-sm border border-emerald-100 text-xs rounded-lg overflow-hidden">
             <button 
               onClick={() => showContent("dashboard")}
-              className={`p-3 flex items-center justify-center transition-colors ${currentView === "dashboard" ? "bg-emerald-100 text-emerald-700 font-bold" : "text-gray-600 hover:bg-gray-50"}`}
+              className="p-3 flex items-center justify-center transition-colors bg-emerald-100 text-emerald-700 font-bold"
             >
               <Activity className="h-3 w-3 mr-1" />
               Dashboard
