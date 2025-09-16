@@ -41,6 +41,10 @@ const WorkflowAuthoringPanel = () => {
   });
 
   useEffect(() => {
+    // Initialize with empty arrays to prevent .map() errors
+    setWorkflows([]);
+    setTemplates([]);
+    
     fetchWorkflows();
     fetchTemplates();
   }, []);
