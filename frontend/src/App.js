@@ -218,6 +218,16 @@ const App = () => {
     console.log(`🔄 LEGACY TAB SWITCH: ${tabName} - Now handled by TabContext`);
   };
 
+  // Action completion handler for lead actions
+  const handleActionComplete = (result) => {
+    console.log('Action completed:', result);
+    setShowLeadActionsPanel(false);
+    // Refresh data if needed
+    if (result.success) {
+      fetchLeads();
+    }
+  };
+
   // Lead Management Functions
   const createLead = async (leadData) => {
     try {
