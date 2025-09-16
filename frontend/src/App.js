@@ -805,8 +805,12 @@ const App = () => {
         );
 
       case 'hrms':
+        console.log(`👥 RENDERING HRMS`);
         return (
           <div className="space-y-6">
+            <div className="bg-green-50 p-2 rounded mb-4">
+              <small>Current View: HRMS - Employee Management</small>
+            </div>
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
