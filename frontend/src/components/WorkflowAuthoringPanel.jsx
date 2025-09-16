@@ -408,7 +408,7 @@ const WorkflowAuthoringPanel = () => {
                     </div>
                   </div>
                   
-                  {template.variables.length > 0 && (
+                  {Array.isArray(template.variables) && template.variables.length > 0 && (
                     <div>
                       <Label className="text-sm font-medium">Variables:</Label>
                       <div className="mt-1 flex flex-wrap gap-1">
