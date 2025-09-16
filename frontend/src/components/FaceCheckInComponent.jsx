@@ -7,9 +7,10 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
   const [cameraStream, setCameraStream] = useState(null);
+  const [checkInComplete, setCheckInComplete] = useState(false);
+  const [attendanceId, setAttendanceId] = useState(null);
   
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
 
   const startCamera = useCallback(async () => {
     setError(null);
