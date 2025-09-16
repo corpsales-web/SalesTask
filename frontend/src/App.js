@@ -212,10 +212,16 @@ const App = () => {
     }
   };
 
-  // Tab switching function
+  // Tab switching function with enhanced debugging
   const showContent = (tabName) => {
-    console.log(`Switching to tab: ${tabName}`);
+    console.log(`🔄 SWITCHING TO TAB: ${tabName}`);
+    console.log(`🔄 PREVIOUS VIEW: ${currentView}`);
     setCurrentView(tabName);
+    
+    // Force a small delay to ensure state update
+    setTimeout(() => {
+      console.log(`✅ NEW VIEW SET TO: ${tabName}`);
+    }, 100);
   };
 
   // Lead Management Functions
