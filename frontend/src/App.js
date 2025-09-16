@@ -1326,8 +1326,12 @@ const App = () => {
               <DialogDescription>Perform actions for this lead</DialogDescription>
             </DialogHeader>
             <LeadActionsPanel 
-              lead={selectedLead} 
-              onClose={() => setShowLeadActionsPanel(false)}
+              leadId={selectedLead.id}
+              leadData={selectedLead}
+              onActionComplete={(result) => {
+                console.log('Action completed:', result);
+                setShowLeadActionsPanel(false);
+              }}
             />
           </DialogContent>
         </Dialog>
