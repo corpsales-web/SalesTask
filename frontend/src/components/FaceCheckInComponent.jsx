@@ -69,7 +69,7 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
 
   const stopCamera = useCallback(() => {
     if (cameraStream) {
-      cameraStream.getTracks().forEach(track => track.stop());
+      stopCameraStream(cameraStream);
       setCameraStream(null);
     }
     if (videoRef.current) {
