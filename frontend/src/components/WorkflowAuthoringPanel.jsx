@@ -195,15 +195,15 @@ const WorkflowAuthoringPanel = () => {
   const toggleWorkflow = async (workflowId, isActive) => {
     try {
       await axios.put(`${API}/api/workflows/${workflowId}`, { is_active: !isActive });
-      setWorkflows(prev => prev.map(w => 
+      setWorkflows(prev => Array.isArray(prev) ? prev.map(w => 
         w.id === workflowId ? { ...w, is_active: !isActive } : w
-      ));
+      ) : []);
     } catch (error) {
       console.error('Toggle workflow error:', error);
       // Update demo data
-      setWorkflows(prev => prev.map(w => 
+      setWorkflows(prev => Array.isArray(prev) ? prev.map(w => 
         w.id === workflowId ? { ...w, is_active: !isActive } : w
-      ));
+      ) : []);
     }
   };
 
