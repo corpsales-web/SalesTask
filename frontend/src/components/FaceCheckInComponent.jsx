@@ -159,22 +159,47 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         });
       });
 
-      // Simulate attendance recording with GPS
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Create attendance record with GPS data
+      const attendanceData = {
+        employee_id: 'current_user', // This would come from auth context
+        check_in_time: new Date().toISOString(),
+        method: 'gps',
+        location: {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy
+        },
+        device_info: navigator.userAgent
+      };
+
+      // Simulate API call to record attendance
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Set success state
+      setCheckInComplete(true);
+      setAttendanceId(`ATT_${Date.now()}`);
+      setError(null);
       
       if (onCheckInComplete) {
         onCheckInComplete({
           success: true,
           method: 'gps_checkin',
-          timestamp: new Date().toISOString(),
-          location: {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          }
+          timestamp: attendanceData.check_in_time,
+          location: attendanceData.location,
+          attendance_id: `ATT_${Date.now()}`
         });
       }
     } catch (error) {
-      setError('GPS check-in failed. Please try manual check-in.');
+      console.error('GPS check-in error:', error);
+      if (error.code === 1) {
+        setError('📍 Location access denied. Please enable location permissions or try manual check-in.');
+      } else if (error.code === 2) {
+        setError('📍 Location unavailable. Please check your GPS settings or try manual check-in.');
+      } else if (error.code === 3) {
+        setError('📍 Location request timed out. Please try again or use manual check-in.');
+      } else {
+        setError('📍 GPS check-in failed. Please try manual check-in or contact support.');
+      }
     } finally {
       setIsProcessing(false);
     }
