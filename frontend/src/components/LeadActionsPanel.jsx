@@ -214,47 +214,54 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
     setCameraError(null);
   }, [cameraStream]);
 
-  const capturePhoto = useCallback(() => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-      
-      // Set canvas dimensions to match video
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      // Draw the current video frame to canvas
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      // Convert to blob and add to captured images
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const imageUrl = URL.createObjectURL(blob);
-          const newImage = {
-            id: Date.now(),
-            blob,
-            url: imageUrl,
-            timestamp: new Date(),
-            leadId: leadId,
-            leadName: leadData.name
-          };
-          
-          setCapturedImages(prev => [...prev, newImage]);
-          
-          // Update action data with captured image
-          setActionData(prev => ({
-            ...prev,
-            images: [...(prev.images || []), newImage],
-            capture_mode: 'camera',
-            lead_specific: true,
-            lead_id: leadId,
-            lead_name: leadData.name
-          }));
-        }
-      }, 'image/jpeg', 0.8);
+  const handleCapturePhoto = useCallback(() => {
+    if (!videoRef.current || !cameraStream) {
+      setCameraError('Camera not ready for capture');
+      return;
     }
-  }, [leadId, leadData.name]);
+
+    try {
+      // Use the comprehensive capture utility
+      const result = capturePhoto(videoRef.current, 0.8);
+      
+      if (result.success) {
+        const imageUrl = URL.createObjectURL(result.blob);
+        const newImage = {
+          id: Date.now(),
+          blob: result.blob,
+          dataURL: result.dataURL,
+          url: imageUrl,
+          timestamp: new Date(),
+          leadId: leadId,
+          leadName: leadData.name,
+          dimensions: result.dimensions
+        };
+        
+        setCapturedImages(prev => [...prev, newImage]);
+        
+        // Update action data with captured image
+        setActionData(prev => ({
+          ...prev,
+          images: [...(prev.images || []), newImage],
+          capture_mode: 'camera',
+          lead_specific: true,
+          lead_id: leadId,
+          lead_name: leadData.name
+        }));
+
+        setCameraError(null);
+        console.log('✅ Photo captured successfully for lead:', leadData.name, result.dimensions);
+        
+      } else {
+        setCameraError(result.message);
+        console.error('Photo capture failed:', result.error);
+      }
+      
+    } catch (error) {
+      console.error('Unexpected capture error:', error);
+      setCameraError('📷 Failed to capture photo. Please try again or use file upload.');
+    }
+  }, [leadId, leadData.name, cameraStream]);
 
   const removeImage = useCallback((imageId) => {
     setCapturedImages(prev => {
