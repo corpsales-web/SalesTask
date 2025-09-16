@@ -147,11 +147,11 @@ const App = () => {
             </button>
           </div>
 
-          {/* Direct Conditional Content Rendering */}
-          <div key={forceUpdate}>
+          {/* Direct Content Rendering based on pageContent */}
+          <div>
           
           {/* Dashboard Content */}
-          {activeTab === "dashboard" && (
+          {pageContent === "dashboard" && (
             <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="bg-white shadow-lg border-emerald-100">
