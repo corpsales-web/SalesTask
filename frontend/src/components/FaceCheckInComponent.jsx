@@ -11,74 +11,61 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const checkCameraAvailability = useCallback(async () => {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      return videoDevices.length > 0;
-    } catch (err) {
-      console.log('Cannot enumerate devices:', err);
-      return false;
-    }
-  }, []);
-
   const startCamera = useCallback(async () => {
     setError(null);
+    setIsProcessing(true);
     
-    // First check if camera devices are available
-    const cameraAvailable = await checkCameraAvailability();
-    if (!cameraAvailable) {
-      setError('⚠️ No camera devices found on this system. This is common in containerized or server environments. GPS Check-in is the recommended method for attendance.');
-      setCameraActive(false);
-      return;
-    }
-
     try {
       // Stop any existing stream
       if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
+        stopCameraStream(cameraStream);
+        setCameraStream(null);
       }
 
-      // Simple, reliable camera constraints
-      const constraints = {
+      // Initialize camera with comprehensive error handling
+      const result = await initializeCamera({
         video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
           facingMode: 'user'
-        },
-        audio: false
-      };
+        }
+      });
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
-        };
+      if (result.success) {
+        // Set up video element
+        if (videoRef.current) {
+          videoRef.current.srcObject = result.stream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current.play().catch(err => {
+              console.error('Video play failed:', err);
+              setError('📷 Failed to start video preview. Camera may still work for capture.');
+            });
+          };
+        }
+        
+        setCameraStream(result.stream);
+        setCameraActive(true);
+        setError(null);
+        console.log('✅ Camera initialized successfully');
+        
+      } else {
+        // Handle camera initialization failure
+        setError(result.message);
+        setCameraActive(false);
+        
+        // Log device info for debugging
+        const deviceInfo = await getDeviceInfo();
+        console.log('Camera initialization failed. Device info:', deviceInfo);
       }
-      
-      setCameraStream(stream);
-      setCameraActive(true);
-      setError(null);
       
     } catch (err) {
-      console.error('Camera access error:', err);
-      
-      // Provide specific error messages based on error type
-      if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        setError('⚠️ Camera hardware not accessible. This is expected in containerized environments. GPS Check-in is your primary attendance option.');
-      } else if (err.name === 'NotAllowedError') {
-        setError('📷 Camera access denied by browser. Please allow camera permissions or use GPS Check-in as an alternative.');
-      } else if (err.name === 'NotReadableError') {
-        setError('📷 Camera is already in use by another application. Please close other apps using the camera or use GPS Check-in.');
-      } else {
-        setError('📷 Camera initialization failed. GPS Check-in is available as a reliable alternative.');
-      }
-      
+      console.error('Unexpected camera error:', err);
+      setError('📷 Unexpected camera error. Please try GPS Check-in instead.');
       setCameraActive(false);
+    } finally {
+      setIsProcessing(false);
     }
-  }, [cameraStream, onCheckInComplete, checkCameraAvailability]);
+  }, [cameraStream]);
 
   const stopCamera = useCallback(() => {
     if (cameraStream) {
