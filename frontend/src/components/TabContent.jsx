@@ -142,6 +142,24 @@ const TabContent = ({
           </div>
         );
       
+      case 'pipeline':
+        return (
+          <div className="space-y-6">
+            <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
+              <div className="flex items-center">
+                <span className="text-orange-600 text-lg mr-2">📊</span>
+                <div>
+                  <h3 className="font-semibold text-orange-800">Enhanced Sales Pipeline</h3>
+                  <p className="text-orange-600 text-sm">AI-powered pipeline with deal prediction and advanced analytics</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Enhanced Pipeline System */}
+            <EnhancedPipelineSystem />
+          </div>
+        );
+      
       case 'tasks':
         return (
           <div className="space-y-6">
