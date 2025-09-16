@@ -404,7 +404,7 @@ const WorkflowAuthoringPanel = () => {
                   <div>
                     <Label className="text-sm font-medium">Template Content:</Label>
                     <div className="mt-1 p-3 bg-gray-50 rounded-lg text-sm">
-                      {template.template}
+                      {template.template || 'No template content'}
                     </div>
                   </div>
                   
