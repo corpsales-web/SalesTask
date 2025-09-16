@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 import uuid
 
 class LoadingIssuesTester:
-    def __init__(self, base_url="https://navdebug-crm.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://greenstack-ai.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
@@ -59,7 +59,7 @@ class LoadingIssuesTester:
         try:
             # Test preflight request
             headers = {
-                'Origin': 'https://navdebug-crm.preview.emergentagent.com',
+                'Origin': 'https://greenstack-ai.preview.emergentagent.com',
                 'Access-Control-Request-Method': 'GET',
                 'Access-Control-Request-Headers': 'Content-Type'
             }

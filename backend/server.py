@@ -766,7 +766,7 @@ async def send_password_reset_email(email: str, reset_token: str, user_name: str
     """Send password reset email"""
     try:
         # Create reset link (in production, use your domain)
-        reset_link = f"https://navdebug-crm.preview.emergentagent.com/reset-password?token={reset_token}"
+        reset_link = f"https://greenstack-ai.preview.emergentagent.com/reset-password?token={reset_token}"
         
         html_body = f"""
         <!DOCTYPE html>
@@ -874,7 +874,7 @@ async def send_welcome_email(email: str, user_name: str, username: str, temporar
                     
                     <p>Please log in to your account and {"change your password" if temporary_password else "explore the features"}:</p>
                     <p style="text-align: center; margin: 30px 0;">
-                        <a href="https://navdebug-crm.preview.emergentagent.com" style="display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Login to Your Account</a>
+                        <a href="https://greenstack-ai.preview.emergentagent.com" style="display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Login to Your Account</a>
                     </p>
                     
                     <h3>What you can do:</h3>

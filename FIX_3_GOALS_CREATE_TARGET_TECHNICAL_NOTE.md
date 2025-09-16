@@ -146,7 +146,7 @@ User Feedback: Success toasts and error handling
 
 ## QA Verification
 
-**Staging URL**: https://navdebug-crm.preview.emergentagent.com
+**Staging URL**: https://greenstack-ai.preview.emergentagent.com
 
 **Demo Steps for Complete Flow**:
 
