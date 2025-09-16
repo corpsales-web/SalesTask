@@ -122,19 +122,47 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
 
     setIsProcessing(true);
     try {
-      // Simulate attendance recording
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Prepare data for face check-in API
+      const checkinData = {
+        employee_id: 'current_user', // This would come from auth context
+        face_image: capturedImage,
+        timestamp: new Date().toISOString(),
+        device_info: navigator.userAgent
+      };
+
+      // Make actual API call to record face attendance
+      const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${API}/api/hrms/face-checkin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(checkinData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      // Set success state
+      setCheckInComplete(true);
+      setAttendanceId(`ATT_FACE_${Date.now()}`);
+      setError(null);
       
       if (onCheckInComplete) {
         onCheckInComplete({
           success: true,
           method: 'face_checkin',
-          timestamp: new Date().toISOString(),
-          image: capturedImage
+          timestamp: result.check_in_time || checkinData.timestamp,
+          image: capturedImage,
+          confidence: result.recognition_confidence
         });
       }
     } catch (error) {
-      setError('Failed to record attendance. Please try again.');
+      console.error('Face check-in error:', error);
+      setError('Failed to record attendance. Please try again or use GPS check-in.');
     } finally {
       setIsProcessing(false);
     }
