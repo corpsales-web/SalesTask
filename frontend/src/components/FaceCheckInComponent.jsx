@@ -187,13 +187,25 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
             <div className="text-4xl mb-2">📸</div>
             <p className="text-gray-600">Ready to capture your photo</p>
           </div>
-          <button
-            onClick={startCamera}
-            disabled={isProcessing}
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
-          >
-            {isProcessing ? 'Processing...' : '📷 Start Camera'}
-          </button>
+          <div className="space-y-3">
+            <button
+              onClick={startCamera}
+              disabled={isProcessing}
+              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
+            >
+              {isProcessing ? 'Processing...' : '📷 Start Camera'}
+            </button>
+            
+            <div className="text-gray-500 text-sm">or</div>
+            
+            <button
+              onClick={completeGPSCheckIn}
+              disabled={isProcessing}
+              className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium"
+            >
+              📍 GPS Check-In Instead
+            </button>
+          </div>
         </div>
       )}
 
