@@ -288,17 +288,17 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
           <p className="text-red-700 text-sm">{error}</p>
           <div className="mt-2 flex space-x-2">
             <button
-              onClick={completeGPSCheckIn}
-              disabled={isProcessing}
-              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+              onClick={() => setError(null)}
+              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
             >
-              📍 Use GPS Instead
+              🔄 Try Camera Again
             </button>
             <button
-              onClick={() => setError(null)}
-              className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50"
+              onClick={completeGPSCheckIn}
+              disabled={isProcessing}
+              className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 disabled:opacity-50"
             >
-              Try Again
+              📍 Use GPS Instead
             </button>
           </div>
         </div>
