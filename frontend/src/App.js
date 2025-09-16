@@ -873,84 +873,131 @@ const App = () => {
                 <h2 className="text-2xl font-bold text-gray-900">AI Assistant</h2>
                 <p className="text-gray-600">AI-powered insights and automation</p>
               </div>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={() => setShowAavana2(!showAavana2)}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                >
+                  <Brain className="h-4 w-4 mr-2" />
+                  {showAavana2 ? 'Close AI Chat' : 'Open AI Chat'}
+                </Button>
+              </div>
+            </div>
+
+            {/* AI Feature Tabs */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <Button
-                onClick={() => setShowAavana2(!showAavana2)}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                variant={activeAdminPanel === 'insights' ? 'default' : 'outline'}
+                onClick={() => setActiveAdminPanel('insights')}
+                className="flex items-center justify-center"
               >
                 <Brain className="h-4 w-4 mr-2" />
-                {showAavana2 ? 'Close AI Chat' : 'Open AI Chat'}
+                AI Insights
+              </Button>
+              <Button
+                variant={activeAdminPanel === 'workflows' ? 'default' : 'outline'}
+                onClick={() => setActiveAdminPanel('workflows')}
+                className="flex items-center justify-center"
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Workflows
+              </Button>
+              <Button
+                variant={activeAdminPanel === 'routing' ? 'default' : 'outline'}
+                onClick={() => setActiveAdminPanel('routing')}
+                className="flex items-center justify-center"
+              >
+                <MapPin className="h-4 w-4 mr-2" />
+                Lead Routing
+              </Button>
+              <Button
+                variant={activeAdminPanel === 'marketing' ? 'default' : 'outline'}
+                onClick={() => setActiveAdminPanel('marketing')}
+                className="flex items-center justify-center"
+              >
+                <Target className="h-4 w-4 mr-2" />
+                Digital Marketing
               </Button>
             </div>
 
-            {/* AI Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-purple-700">
-                    <Brain className="h-5 w-5" />
-                    Lead Scoring
-                  </CardTitle>
-                  <CardDescription>AI-powered lead qualification</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
-                    Analyze Leads
-                  </Button>
-                </CardContent>
-              </Card>
+            {/* AI Content */}
+            {activeAdminPanel === 'insights' && (
+              <div className="space-y-6">
+                {/* AI Features */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-purple-700">
+                        <Brain className="h-5 w-5" />
+                        Lead Scoring
+                      </CardTitle>
+                      <CardDescription>AI-powered lead qualification</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50">
+                        Analyze Leads
+                      </Button>
+                    </CardContent>
+                  </Card>
 
-              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-blue-700">
-                    <TrendingUp className="h-5 w-5" />
-                    Sales Insights
-                  </CardTitle>
-                  <CardDescription>Predictive analytics and trends</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-50">
-                    View Insights
-                  </Button>
-                </CardContent>
-              </Card>
+                  <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-blue-700">
+                        <TrendingUp className="h-5 w-5" />
+                        Sales Insights
+                      </CardTitle>
+                      <CardDescription>Predictive analytics and trends</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-50">
+                        View Insights
+                      </Button>
+                    </CardContent>
+                  </Card>
 
-              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-green-700">
-                    <MessageSquare className="h-5 w-5" />
-                    Auto Responses
-                  </CardTitle>
-                  <CardDescription>Automated customer communication</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full border-green-200 text-green-700 hover:bg-green-50">
-                    Configure
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* AI Insights Display */}
-            <Card className="bg-white shadow-lg">
-              <CardHeader>
-                <CardTitle>AI Insights Dashboard</CardTitle>
-                <CardDescription>Real-time AI analysis and recommendations</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <h4 className="font-medium text-purple-900 mb-2">Lead Quality Score</h4>
-                    <p className="text-2xl font-bold text-purple-700">8.7/10</p>
-                    <p className="text-sm text-purple-600">Above average quality leads this month</p>
-                  </div>
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-2">Conversion Prediction</h4>
-                    <p className="text-2xl font-bold text-blue-700">74%</p>
-                    <p className="text-sm text-blue-600">Expected conversion rate for current pipeline</p>
-                  </div>
+                  <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-green-700">
+                        <MessageSquare className="h-5 w-5" />
+                        Auto Responses
+                      </CardTitle>
+                      <CardDescription>Automated customer communication</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button variant="outline" className="w-full border-green-200 text-green-700 hover:bg-green-50">
+                        Configure
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* AI Insights Display */}
+                <Card className="bg-white shadow-lg">
+                  <CardHeader>
+                    <CardTitle>AI Insights Dashboard</CardTitle>
+                    <CardDescription>Real-time AI analysis and recommendations</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="p-4 bg-purple-50 rounded-lg">
+                        <h4 className="font-medium text-purple-900 mb-2">Lead Quality Score</h4>
+                        <p className="text-2xl font-bold text-purple-700">8.7/10</p>
+                        <p className="text-sm text-purple-600">Above average quality leads this month</p>
+                      </div>
+                      <div className="p-4 bg-blue-50 rounded-lg">
+                        <h4 className="font-medium text-blue-900 mb-2">Conversion Prediction</h4>
+                        <p className="text-2xl font-bold text-blue-700">74%</p>
+                        <p className="text-sm text-blue-600">Expected conversion rate for current pipeline</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {activeAdminPanel === 'workflows' && <WorkflowAuthoringPanel />}
+            {activeAdminPanel === 'routing' && <LeadRoutingPanel />}
+            {activeAdminPanel === 'marketing' && <DigitalMarketingDashboard />}
           </div>
         );
 
