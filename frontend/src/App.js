@@ -21,6 +21,7 @@ import BulkExcelUploadComponent from './components/BulkExcelUploadComponent';
 import DigitalMarketingDashboard from './components/DigitalMarketingDashboard';
 import LeadRoutingPanel from './components/LeadRoutingPanel';
 import WorkflowAuthoringPanel from './components/WorkflowAuthoringPanel';
+import LeadRoutingPanel from './components/LeadRoutingPanel';
 import CameraComponent from './components/CameraComponent';
 import axios from 'axios';
 import { useToast } from './hooks/use-toast';
