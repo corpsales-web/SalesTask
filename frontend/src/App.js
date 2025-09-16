@@ -314,42 +314,42 @@ const App = () => {
           )}
 
           {/* Other Tabs */}
-          {activeTab === "leads" && (
+          {pageContent === "leads" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Lead Management</h2>
               <p className="text-gray-600">Manage your leads and prospects</p>
             </div>
           )}
 
-          {activeTab === "tasks" && (
+          {pageContent === "tasks" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Task Management</h2>
               <p className="text-gray-600">Track and manage your tasks</p>
             </div>
           )}
 
-          {activeTab === "erp" && (
+          {pageContent === "erp" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Business Management & Operations</h2>
               <p className="text-gray-600">Manage projects and operations</p>
             </div>
           )}
 
-          {activeTab === "pipeline" && (
+          {pageContent === "pipeline" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Sales Pipeline</h2>
               <p className="text-gray-600">Track your sales pipeline</p>
             </div>
           )}
 
-          {activeTab === "ai" && (
+          {pageContent === "ai" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">AI Assistant</h2>
               <p className="text-gray-600">AI-powered insights and automation</p>
             </div>
           )}
 
-          {activeTab === "admin" && (
+          {pageContent === "admin" && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Super Admin Panel</h2>
               <p className="text-gray-600">System administration and settings</p>
