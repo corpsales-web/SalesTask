@@ -35,9 +35,7 @@ const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const App = () => {
   // Core State Management
-  const [currentView, setCurrentView] = useState("dashboard");
-  const [forceUpdate, setForceUpdate] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   // Data States
   const [dashboardStats, setDashboardStats] = useState({
