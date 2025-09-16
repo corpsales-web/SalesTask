@@ -677,12 +677,18 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Comprehensive Multi-Agent Style Audit - All Components"
-    - "Cross-Device Compatibility Testing" 
-    - "UI/UX Error Detection and Fixes"
-  stuck_tasks: []
-  test_all: true
-  test_priority: "comprehensive_audit"
+    - "CRITICAL: Component Integration Issues - Enhanced Features Not Visible"
+    - "Leads Tab - Missing Lead Cards and Action Buttons"
+    - "Tasks Tab - Missing Voice Task and Add Task Functionality"
+    - "Admin Tab - Missing Role/User Management Integration"
+    - "ERP Tab - Missing File Upload Integration"
+  stuck_tasks:
+    - "Enhanced Lead Action Buttons Integration"
+    - "Voice STT Component Integration" 
+    - "Role Management Panel Integration"
+    - "File Upload System Integration"
+  test_all: false
+  test_priority: "critical_integration_fixes"
 
 agent_communication:
   - agent: "main"
