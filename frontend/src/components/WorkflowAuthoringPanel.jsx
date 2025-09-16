@@ -336,7 +336,7 @@ const WorkflowAuthoringPanel = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 mb-4">
-                  <p className="text-sm"><strong>Trigger:</strong> {workflow.trigger.replace('_', ' ')}</p>
+                  <p className="text-sm"><strong>Trigger:</strong> {(workflow.trigger || '').replace('_', ' ') || 'Manual'}</p>
                   <p className="text-sm"><strong>Steps:</strong> {workflow.steps}</p>
                   <p className="text-sm"><strong>Created:</strong> {new Date(workflow.created_at).toLocaleDateString()}</p>
                 </div>
