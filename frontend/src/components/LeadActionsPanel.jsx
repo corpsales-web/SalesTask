@@ -160,30 +160,54 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
     setCameraError(null);
     
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: { ideal: 1280 }, 
-          height: { ideal: 720 },
-          facingMode: 'environment' // Use back camera if available
-        } 
-      });
-      
-      setCameraStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+      // Stop any existing stream first
+      if (cameraStream) {
+        stopCameraStream(cameraStream);
+        setCameraStream(null);
       }
-      setShowCameraCapture(true);
+
+      // Initialize camera with comprehensive error handling
+      const result = await initializeCamera({
+        video: { 
+          width: { ideal: 1280, max: 1920 }, 
+          height: { ideal: 720, max: 1080 },
+          facingMode: 'environment' // Use back camera if available for better quality
+        }
+      });
+
+      if (result.success) {
+        setCameraStream(result.stream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = result.stream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current.play().catch(err => {
+              console.error('Video play failed:', err);
+              setCameraError('📷 Video preview failed but camera may still work for capture.');
+            });
+          };
+        }
+        setShowCameraCapture(true);
+        setCameraError(null);
+        console.log('✅ Lead Actions camera initialized successfully');
+        
+      } else {
+        setCameraError(result.message);
+        setShowCameraCapture(false);
+        console.error('Camera initialization failed:', result.error);
+      }
+      
     } catch (error) {
-      console.error('Error accessing camera:', error);
-      setCameraError('Failed to access camera. Please check permissions and try again.');
+      console.error('Unexpected camera error:', error);
+      setCameraError('📷 Unexpected camera error. Please try again or use file upload instead.');
+      setShowCameraCapture(false);
     } finally {
       setIsInitializingCamera(false);
     }
-  }, []);
+  }, [cameraStream]);
 
   const stopCamera = useCallback(() => {
     if (cameraStream) {
-      cameraStream.getTracks().forEach(track => track.stop());
+      stopCameraStream(cameraStream);
       setCameraStream(null);
     }
     setShowCameraCapture(false);
