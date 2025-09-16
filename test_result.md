@@ -536,9 +536,9 @@ frontend:
 
   - task: "JavaScript Runtime Errors in New Admin Components"
     implemented: true
-    working: "partial"
+    working: false
     file: "components/DigitalMarketingDashboard.jsx, components/LeadRoutingPanel.jsx, components/WorkflowAuthoringPanel.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -548,6 +548,9 @@ frontend:
       - working: "partial"
         agent: "testing"
         comment: "⚠️ BACKEND CONNECTIVITY ISSUES IDENTIFIED: Comprehensive testing reveals the JavaScript errors are primarily 502 Backend Gateway errors, not frontend runtime errors. Admin management buttons (Marketing Manager, Lead Routing, Workflow Authoring) are present and clickable, but trigger backend API failures (502 errors). Frontend UI components are working correctly - the issue is backend service unavailability. 24 console errors detected, all related to failed API calls (AxiosError, 502 status). Admin panel UI is functional, buttons respond correctly, but backend integration is failing."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL JAVASCRIPT RUNTIME ERRORS CONFIRMED: Comprehensive testing reveals severe JavaScript runtime errors in AI components. ✅ AI Insights sub-tab working ✅ Workflows sub-tab clickable BUT has critical errors: 'workflows.map is not a function' TypeError ❌, 404 errors for /api/workflow-templates endpoint ❌, React error boundary triggered with 'An error occurred in the <WorkflowAuthoringPanel> component' ❌. ❌ Lead Routing and Digital Marketing sub-tabs completely missing/not found ❌. ❌ AI Chat functionality not found ❌. These are genuine frontend JavaScript runtime errors, not just backend connectivity issues. The WorkflowAuthoringPanel component is crashing due to undefined data being passed to .map() function, indicating improper error handling and data validation in the component."
 
   - task: "Lead Actions Panel"
     implemented: true
