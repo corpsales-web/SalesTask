@@ -310,8 +310,6 @@ const App = () => {
             <div className="bg-blue-50 p-2 rounded mb-4">
               <small>Current View: Dashboard</small>
             </div>
-        return (
-          <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="bg-white shadow-lg border-emerald-100 hover:shadow-xl transition-shadow">
