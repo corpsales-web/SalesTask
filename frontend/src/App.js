@@ -1583,6 +1583,7 @@ const App = () => {
         </div>
       )}
     </div>
+    </TabProvider>
   );
 };
 
