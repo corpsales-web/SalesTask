@@ -43,19 +43,17 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       
     } catch (err) {
       console.error('Camera access error:', err);
-      setError('Camera access failed. Please ensure camera permissions are granted.');
-      setCameraActive(false);
       
-      // Provide working alternatives
-      setTimeout(() => {
-        if (onCheckInComplete) {
-          // Offer GPS check-in as working alternative
-          const useGPS = window.confirm('Camera not available. Would you like to use GPS check-in instead?');
-          if (useGPS) {
-            completeGPSCheckIn();
-          }
-        }
-      }, 1000);
+      // Check if it's a containerized environment or no camera available
+      if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setError('No camera detected on this system. In containerized environments, camera access may not be available. Please use GPS check-in below.');
+      } else if (err.name === 'NotAllowedError') {
+        setError('Camera access denied. Please allow camera permissions in your browser or use GPS check-in as an alternative.');
+      } else {
+        setError('Camera initialization failed. This may be due to system restrictions. GPS check-in is available as a reliable alternative.');
+      }
+      
+      setCameraActive(false);
     }
   }, [cameraStream, onCheckInComplete]);
 
