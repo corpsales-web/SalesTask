@@ -83,11 +83,6 @@ const App = () => {
     initializeApp();
   }, []);
 
-  // Debug currentView changes
-  useEffect(() => {
-    console.log(`🎯 CURRENT VIEW CHANGED TO: ${currentView}`);
-  }, [currentView]);
-
   const initializeApp = async () => {
     setLoading(true);
     try {
