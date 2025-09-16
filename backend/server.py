@@ -28,6 +28,14 @@ from ai_service import (
     ContentGenerationResponse
 )
 
+# Import enhanced AI service
+try:
+    from enhanced_ai_service import enhanced_ai_service, AIRequest, AIResponse
+    print("✅ Enhanced AI service imported successfully")
+except ImportError as e:
+    print(f"❌ Enhanced AI service import failed: {e}")
+    enhanced_ai_service = None
+
 # Import new services
 from telephony_service import (
     telephony_service,
