@@ -26,6 +26,10 @@ import axios from 'axios';
 import { useToast } from './hooks/use-toast';
 import { toast } from './hooks/use-toast';
 import indianCitiesStates from './data/indianCitiesStates';
+// Import new tab system
+import { TabProvider } from './contexts/TabContext';
+import TabNavigation from './components/TabNavigation'; 
+import TabContent from './components/TabContent';
 
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
