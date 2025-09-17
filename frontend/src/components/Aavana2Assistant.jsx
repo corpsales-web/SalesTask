@@ -404,7 +404,34 @@ const Aavana2Assistant = ({ isOpen, onClose }) => {
                   {isSpeaking ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => {
-                  alert('🔧 Aavana 2.0 Settings\n\n📱 Current Configuration:\n• Language: ' + languages.find(l => l.code === selectedLanguage)?.name + '\n• Voice Output: ' + (isSpeaking ? 'Enabled' : 'Disabled') + '\n• Model: Multi-AI (GPT-5, Claude Sonnet 4, Gemini 2.5 Pro)\n\n💡 Tip: Use the language dropdown and voice toggle to customize your experience!');
+                  const settingsInfo = `🔧 Aavana 2.0 Settings
+
+📱 Current Configuration:
+• Language: ${languages.find(l => l.code === selectedLanguage)?.name}
+• Voice Output: ${isSpeaking ? 'Enabled' : 'Disabled'}
+• AI Models: Multi-Model Support
+  - OpenAI GPT-4o (Primary)
+  - Claude Sonnet 4 (Available)
+  - Gemini 2.0 Flash (Available)
+
+🎯 Features Available:
+• Lead Management & CRM
+• HRMS & Face Check-in
+• Task Management & Voice Tasks
+• Sales Pipeline & Analytics
+• Digital Marketing Manager
+• Training & System Guidance
+
+💡 Tips:
+• Use voice input with the microphone button
+• Ask me to help with any CRM function
+• I can provide step-by-step training
+• Switch languages using the dropdown
+• I integrate with all your business data
+
+🔄 Updates: Now powered by advanced AI with real-time business intelligence!`;
+                  
+                  alert(settingsInfo);
                 }}>
                   <Settings className="h-4 w-4" />
                 </Button>
