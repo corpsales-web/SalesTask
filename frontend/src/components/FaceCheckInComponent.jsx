@@ -91,31 +91,35 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       setIsProcessing(true);
       setError(null);
       
-      // Force capture using canvas directly from the stream
       const video = videoRef.current;
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       
-      // Set canvas size
-      canvas.width = 640;
-      canvas.height = 480;
+      // Use video dimensions if available, otherwise default
+      const width = video.videoWidth || 640;
+      const height = video.videoHeight || 480;
       
-      // Draw from video (even if readyState is 0, this might work)
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.width = width;
+      canvas.height = height;
       
-      // Get image data
+      // Draw the current video frame
+      context.drawImage(video, 0, 0, width, height);
+      
+      // Convert to data URL
       const dataURL = canvas.toDataURL('image/jpeg', 0.8);
       
-      console.log('🔍 Image capture details:', {
-        dataURL_length: dataURL ? dataURL.length : 0,
-        dataURL_preview: dataURL ? dataURL.substring(0, 50) + '...' : 'null',
-        canvas_width: canvas.width,
-        canvas_height: canvas.height
+      console.log('📸 Capture result:', {
+        videoWidth: video.videoWidth,
+        videoHeight: video.videoHeight,
+        canvasWidth: width,
+        canvasHeight: height,
+        dataLength: dataURL.length,
+        readyState: video.readyState
       });
       
-      if (dataURL && dataURL !== 'data:,' && dataURL.length > 1000) {
+      if (dataURL && dataURL.length > 5000) { // Valid image should be larger
         setCapturedImage(dataURL);
-        console.log('✅ Photo captured successfully, image set');
+        console.log('✅ Photo captured and set successfully');
         
         // Stop camera
         if (cameraStream) {
@@ -123,14 +127,12 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         }
         setCameraStream(null);
         setCameraActive(false);
-        setError(null);
       } else {
-        console.log('❌ Invalid image data:', dataURL ? dataURL.substring(0, 100) : 'null');
-        setError('📷 Failed to capture photo. Please try again.');
+        setError('📷 Failed to capture photo. Please ensure camera is working.');
       }
       
     } catch (err) {
-      console.error('Capture error:', err);
+      console.error('❌ Capture error:', err);
       setError('📷 Failed to capture photo. Please try again.');
     } finally {
       setIsProcessing(false);
