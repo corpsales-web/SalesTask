@@ -513,7 +513,19 @@ const DigitalMarketingManager = ({ isOpen, onClose }) => {
           <p className="text-gray-600">Create and schedule social media content</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => setShowScheduleModal(true)}>
+          <Button variant="outline" onClick={() => {
+            setContentForm({
+              title: '',
+              type: 'image',
+              content: '',
+              platforms: ['instagram'],
+              schedule_date: new Date().toISOString().split('T')[0],
+              schedule_time: '10:00',
+              hashtags: '#AavanaGreens #GreenLiving #BalconyGarden',
+              target_audience: 'Urban homeowners'
+            });
+            setShowContentModal(true);
+          }}>
             <Calendar className="h-4 w-4 mr-2" />
             Schedule
           </Button>
