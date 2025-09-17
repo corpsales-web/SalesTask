@@ -110,9 +110,16 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       // Get image data
       const dataURL = canvas.toDataURL('image/jpeg', 0.8);
       
-      if (dataURL && dataURL !== 'data:,') {
+      console.log('🔍 Image capture details:', {
+        dataURL_length: dataURL ? dataURL.length : 0,
+        dataURL_preview: dataURL ? dataURL.substring(0, 50) + '...' : 'null',
+        canvas_width: canvas.width,
+        canvas_height: canvas.height
+      });
+      
+      if (dataURL && dataURL !== 'data:,' && dataURL.length > 1000) {
         setCapturedImage(dataURL);
-        console.log('✅ Photo captured successfully');
+        console.log('✅ Photo captured successfully, image set');
         
         // Stop camera
         if (cameraStream) {
@@ -122,6 +129,7 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         setCameraActive(false);
         setError(null);
       } else {
+        console.log('❌ Invalid image data:', dataURL ? dataURL.substring(0, 100) : 'null');
         setError('📷 Failed to capture photo. Please try again.');
       }
       
