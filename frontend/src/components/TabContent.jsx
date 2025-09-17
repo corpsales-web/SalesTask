@@ -274,11 +274,7 @@ const TabContent = ({
               <FileUploadComponent />
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow border">
-                <h3 className="text-lg font-semibold mb-4">Project Gallery</h3>
-                <p className="text-gray-600">Manage project files and documents</p>
-              </div>
+            <ProjectGalleryManager />
               
               <div className="bg-white p-6 rounded-lg shadow border">
                 <h3 className="text-lg font-semibold mb-4">Product Catalog</h3>
