@@ -13,9 +13,9 @@ load_dotenv()
 # AI Models Configuration
 class AIOrchestrator:
     def __init__(self):
-        self.api_key = os.environ.get('EMERGENT_LLM_KEY')
+        self.api_key = os.environ.get('OPENAI_API_KEY') or os.environ.get('EMERGENT_LLM_KEY')
         if not self.api_key:
-            raise ValueError("EMERGENT_LLM_KEY not found in environment")
+            raise ValueError("OpenAI API key not found in environment")
         
         # Initialize different AI models for different purposes
         self.gpt5_chat = LlmChat(
