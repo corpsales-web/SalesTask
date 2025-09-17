@@ -592,10 +592,24 @@ const DigitalMarketingManager = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="flex space-x-2 ml-4">
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={() => {
+                    alert(`📊 Post Analytics: ${post.title}\n\n📈 Performance:\n• Likes: ${post.metrics.likes}\n• Comments: ${post.metrics.comments}\n• Shares: ${post.metrics.shares}\n• Reach: ${post.metrics.reach.toLocaleString()}\n• Engagement Rate: ${post.metrics.engagement_rate}%\n\n📱 Platform: ${post.platform}\n📅 Status: ${post.status}`);
+                  }}>
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={() => {
+                    setContentForm({
+                      title: post.title,
+                      type: post.type,
+                      content: post.content,
+                      platforms: [post.platform],
+                      schedule_date: post.scheduled_date ? post.scheduled_date.split('T')[0] : '',
+                      schedule_time: post.scheduled_date ? post.scheduled_date.split('T')[1].split(':').slice(0,2).join(':') : '',
+                      hashtags: post.hashtags ? post.hashtags.join(' ') : '',
+                      target_audience: 'Urban homeowners interested in green living'
+                    });
+                    setShowContentModal(true);
+                  }}>
                     <Edit className="h-4 w-4" />
                   </Button>
                 </div>
