@@ -55,11 +55,21 @@ export const initializeCamera = async (constraints = {}) => {
   } catch (error) {
     console.error('Camera initialization failed:', error);
     
+    // Log additional debug information
+    console.log('Camera error details:', {
+      name: error.name,
+      message: error.message,
+      constraint: error.constraint,
+      userAgent: navigator.userAgent,
+      isHttps: window.location.protocol === 'https:',
+      isLocalhost: window.location.hostname === 'localhost'
+    });
+    
     return {
       success: false,
       error: error.name || 'UNKNOWN_ERROR',
       message: getErrorMessage(error.name || 'UNKNOWN_ERROR'),
-      fallbackOptions: getFallbackOptions(error.name)
+      fallbackOptions: getFallbackOptions(error.name || 'UNKNOWN_ERROR')
     };
   }
 };
