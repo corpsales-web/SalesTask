@@ -408,8 +408,8 @@ const App = () => {
           onClose={() => setShowGoalsModal(false)}
         />
 
-        {/* Digital Marketing Manager Modal */}
-        <DigitalMarketingManager 
+        {/* Comprehensive Digital Marketing Manager Modal */}
+        <ComprehensiveDigitalMarketingManager 
           isOpen={showMarketingModal}
           onClose={() => setShowMarketingModal(false)}
         />
