@@ -34,35 +34,49 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       });
 
       if (result.success) {
-        // Set up video element
+        // Set up video element with proper event handling
         if (videoRef.current) {
-          videoRef.current.srcObject = result.stream;
+          const video = videoRef.current;
           
-          // Wait for metadata to load before playing
-          videoRef.current.onloadedmetadata = () => {
-            console.log('✅ Video metadata loaded, starting playback');
-            videoRef.current.play().then(() => {
+          // Set up event handlers before setting srcObject
+          video.onloadedmetadata = () => {
+            console.log('✅ Video metadata loaded:', {
+              readyState: video.readyState,
+              videoWidth: video.videoWidth,
+              videoHeight: video.videoHeight
+            });
+            
+            video.play().then(() => {
               console.log('✅ Video playing successfully');
+              // Only set camera as active after video is actually playing
+              setCameraActive(true);
+              setError(null);
             }).catch(err => {
               console.error('Video play failed:', err);
               setError('📷 Failed to start video preview. Camera may still work for capture.');
             });
           };
           
-          // Handle video errors
-          videoRef.current.onerror = (err) => {
+          video.onloadeddata = () => {
+            console.log('✅ Video data loaded - ready for capture');
+          };
+          
+          video.onerror = (err) => {
             console.error('Video element error:', err);
             setError('📷 Video display error. Please try again.');
           };
           
-          // Force load the video
-          videoRef.current.load();
+          video.oncanplay = () => {
+            console.log('✅ Video can start playing');
+          };
+          
+          // Set the stream
+          video.srcObject = result.stream;
         }
         
         setCameraStream(result.stream);
-        setCameraActive(true);
-        setError(null);
-        console.log('✅ Camera initialized successfully');
+        // Don't set cameraActive here - wait for video to be ready
+        console.log('✅ Camera stream obtained successfully');
         
       } else {
         // Handle camera initialization failure
