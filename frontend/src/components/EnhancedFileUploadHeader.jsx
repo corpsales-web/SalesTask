@@ -482,6 +482,51 @@ const EnhancedFileUploadHeader = ({ onFileUpload, maxFiles = 5, maxFileSize = 10
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Camera Capture Modal */}
+      {showCameraModal && (
+        <Dialog open={showCameraModal} onOpenChange={setShowCameraModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>📸 Capture Photo</DialogTitle>
+              <DialogDescription>
+                Take a photo using your device camera
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="bg-gray-100 rounded-lg p-8 text-center">
+                <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Camera Access</h3>
+                <p className="text-gray-600 mb-4">
+                  For the best camera experience, please use the "Take Photo" button which will use your device's native camera interface.
+                </p>
+                
+                <div className="space-y-3">
+                  <button
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2"
+                  >
+                    <Camera className="h-5 w-5" />
+                    <span>Open Camera</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowCameraModal(false)}
+                    className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                
+                <div className="mt-4 text-sm text-gray-500">
+                  <p>💡 Tip: Make sure to allow camera permissions when prompted</p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
