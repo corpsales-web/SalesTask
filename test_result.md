@@ -459,6 +459,14 @@ frontend:
     stuck_count: 0
     priority: "high"
     needs_retesting: false
+  
+  - task: "Goals Management System Enhancement"
+    implemented: true
+    working: true
+    file: "components/GoalsManagementSystem.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
     status_history:
       - working: false
         agent: "testing"
