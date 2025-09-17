@@ -465,13 +465,35 @@ const DigitalMarketingManager = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="flex space-x-2 ml-4">
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={() => {
+                    alert(`Viewing campaign: ${campaign.name}\n\nDetails:\n- Budget: ₹${campaign.budget.toLocaleString()}\n- Spent: ₹${campaign.spent.toLocaleString()}\n- CTR: ${campaign.metrics.ctr}%\n- Conversions: ${campaign.metrics.conversions}`);
+                  }}>
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={() => {
+                    setCampaignForm({
+                      name: campaign.name,
+                      type: campaign.type,
+                      objective: campaign.objective,
+                      target_audience: 'Urban homeowners and businesses',
+                      budget: campaign.budget.toString(),
+                      start_date: campaign.start_date,
+                      end_date: campaign.end_date,
+                      platforms: campaign.platforms,
+                      content: '',
+                      status: campaign.status
+                    });
+                    setShowCampaignModal(true);
+                  }}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={() => {
+                    const newStatus = campaign.status === 'active' ? 'paused' : 'active';
+                    setCampaigns(prev => prev.map(c => 
+                      c.id === campaign.id ? { ...c, status: newStatus } : c
+                    ));
+                    alert(`Campaign ${campaign.name} ${newStatus === 'active' ? 'resumed' : 'paused'}`);
+                  }}>
                     {campaign.status === 'active' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                   </Button>
                 </div>
