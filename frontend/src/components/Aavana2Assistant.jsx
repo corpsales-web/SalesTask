@@ -20,7 +20,18 @@ const Aavana2Assistant = ({ isOpen, onClose }) => {
     {
       id: '1',
       type: 'assistant',
-      content: 'Hello! I\'m Aavana 2.0, your intelligent AI assistant for all CRM needs. How can I help you today?',
+      content: `Hello! I'm Aavana 2.0, your intelligent business assistant. I can help you with:
+
+🎯 **Lead Management** - Track prospects and conversions
+👥 **HRMS & Attendance** - Manage employee check-ins and records
+📋 **Task Management** - Create and organize your work
+📊 **Sales Pipeline** - Analyze deals and predictions
+📱 **Digital Marketing** - Create campaigns and content
+🎓 **Training & Support** - Get help with any feature
+
+**💬 Voice Commands Available:** Use the microphone button to speak naturally!
+
+How can I assist you today?`,
       timestamp: new Date()
     }
   ]);
