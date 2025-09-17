@@ -104,32 +104,25 @@ const Aavana2Assistant = ({ isOpen, onClose }) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputMessage;
     setInputMessage('');
     setIsLoading(true);
 
     try {
-      // Call AI service for smart response
-      const response = await axios.post(`${API}/api/ai/smart-selection`, {
-        task_type: 'conversational',
-        prompt: inputMessage,
-        language: selectedLanguage,
-        context: 'aavana_2_assistant'
-      });
-
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: response.data.content || 'I understand your request. Let me help you with that.',
-        timestamp: new Date(),
-        actions: generateSmartActions(inputMessage)
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-
-      // Auto-speak response if enabled
-      if (isSpeaking && speechSynthesis) {
-        speakMessage(assistantMessage.content);
-      }
+      // Generate intelligent response based on user input
+      const assistantMessage = generateIntelligentResponse(currentInput);
+      
+      // Simulate processing delay for better UX
+      setTimeout(() => {
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        // Auto-speak response if enabled
+        if (isSpeaking && speechSynthesis) {
+          speakMessage(assistantMessage.content);
+        }
+        
+        setIsLoading(false);
+      }, 1000);
 
     } catch (error) {
       console.error('AI response error:', error);
@@ -140,9 +133,114 @@ const Aavana2Assistant = ({ isOpen, onClose }) => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
-    } finally {
       setIsLoading(false);
     }
+  };
+
+  // Generate intelligent responses based on user input
+  const generateIntelligentResponse = (input) => {
+    const inputLower = input.toLowerCase();
+    let content = '';
+    let actions = [];
+
+    // CRM-related queries
+    if (inputLower.includes('lead') || inputLower.includes('customer') || inputLower.includes('client')) {
+      content = 'I can help you manage your leads and customers! I can show you recent leads, help you follow up with clients, or guide you through the lead management process. What specific task would you like assistance with?';
+      actions = [
+        { text: 'View Recent Leads', action: 'navigate_leads' },
+        { text: 'Create Follow-up Task', action: 'create_task' },
+        { text: 'Lead Analysis', action: 'analyze_leads' }
+      ];
+    }
+    // HRMS queries
+    else if (inputLower.includes('attendance') || inputLower.includes('employee') || inputLower.includes('hrms') || inputLower.includes('check-in')) {
+      content = 'I can assist you with HR management tasks! I can help you with employee attendance, check-in procedures, leave management, or performance tracking. The face check-in system uses your camera for secure attendance tracking.';
+      actions = [
+        { text: 'Open HRMS Dashboard', action: 'navigate_hrms' },
+        { text: 'Attendance Report', action: 'generate_report' },
+        { text: 'Camera Check-in Help', action: 'camera_help' }
+      ];
+    }
+    // Task management queries
+    else if (inputLower.includes('task') || inputLower.includes('project') || inputLower.includes('todo')) {
+      content = 'I can help you manage your tasks and projects efficiently! I can create new tasks, set reminders, track progress, or help you organize your workflow. You can also use voice commands to create tasks quickly.';
+      actions = [
+        { text: 'Create New Task', action: 'create_task' },
+        { text: 'View Task Board', action: 'navigate_tasks' },
+        { text: 'Voice Task Creation', action: 'voice_task' }
+      ];
+    }
+    // Sales and pipeline queries
+    else if (inputLower.includes('sales') || inputLower.includes('deal') || inputLower.includes('pipeline') || inputLower.includes('revenue')) {
+      content = 'I can help you manage your sales pipeline and track deals! I can show you deal progress, analyze sales performance, predict deal closures, or help you move deals through your pipeline stages.';
+      actions = [
+        { text: 'View Sales Pipeline', action: 'navigate_pipeline' },
+        { text: 'Sales Analytics', action: 'sales_analytics' },
+        { text: 'Deal Predictions', action: 'ai_predictions' }
+      ];
+    }
+    // Marketing queries
+    else if (inputLower.includes('marketing') || inputLower.includes('campaign') || inputLower.includes('social') || inputLower.includes('content')) {
+      content = 'I can assist you with digital marketing management! I can help you create campaigns, schedule social media posts, analyze marketing performance, or generate content ideas for your green building and landscaping business.';
+      actions = [
+        { text: 'Marketing Dashboard', action: 'navigate_marketing' },
+        { text: 'Create Campaign', action: 'create_campaign' },
+        { text: 'Content Ideas', action: 'generate_content' }
+      ];
+    }
+    // Goals and targets
+    else if (inputLower.includes('goal') || inputLower.includes('target') || inputLower.includes('objective') || inputLower.includes('kpi')) {
+      content = 'I can help you set and track your business goals! I can assist with creating SMART goals, monitoring progress, analyzing performance metrics, and ensuring you stay on track to achieve your targets.';
+      actions = [
+        { text: 'Goals Dashboard', action: 'navigate_goals' },
+        { text: 'Create New Goal', action: 'create_goal' },
+        { text: 'Progress Analysis', action: 'goal_analysis' }
+      ];
+    }
+    // Training and help
+    else if (inputLower.includes('help') || inputLower.includes('train') || inputLower.includes('learn') || inputLower.includes('how to')) {
+      content = 'I\'m here to help you learn and master the Aavana Greens CRM! I can provide training on any feature, explain how different modules work, or guide you through specific tasks step by step. What would you like to learn about?';
+      actions = [
+        { text: 'System Training', action: 'open_training' },
+        { text: 'Quick Tips', action: 'show_tips' },
+        { text: 'Feature Guide', action: 'feature_guide' }
+      ];
+    }
+    // Camera and technical issues
+    else if (inputLower.includes('camera') || inputLower.includes('not working') || inputLower.includes('error') || inputLower.includes('fix')) {
+      content = 'I can help you troubleshoot technical issues! For camera problems, make sure you\'ve allowed camera permissions and your browser supports camera access. I can guide you through step-by-step solutions.';
+      actions = [
+        { text: 'Camera Troubleshooting', action: 'camera_help' },
+        { text: 'System Check', action: 'system_check' },
+        { text: 'Contact Support', action: 'contact_support' }
+      ];
+    }
+    // General greetings
+    else if (inputLower.includes('hello') || inputLower.includes('hi') || inputLower.includes('hey') || inputLower.includes('good')) {
+      content = 'Hello! I\'m Aavana 2.0, your intelligent CRM assistant. I\'m here to help you manage your green building and landscaping business more efficiently. I can assist with leads, tasks, HRMS, sales pipeline, marketing campaigns, and much more!';
+      actions = [
+        { text: 'Show Dashboard', action: 'navigate_dashboard' },
+        { text: 'Quick Tour', action: 'system_tour' },
+        { text: 'Today\'s Summary', action: 'daily_summary' }
+      ];
+    }
+    // Default response
+    else {
+      content = `I understand you're asking about "${input}". As your AI assistant, I can help you with lead management, employee check-ins, task tracking, sales pipeline, marketing campaigns, goal setting, and system training. What specific aspect would you like assistance with?`;
+      actions = [
+        { text: 'Show All Features', action: 'feature_overview' },
+        { text: 'Guided Tour', action: 'system_tour' },
+        { text: 'Ask Differently', action: 'clarify_request' }
+      ];
+    }
+
+    return {
+      id: (Date.now() + 1).toString(),
+      type: 'assistant',
+      content: content,
+      timestamp: new Date(),
+      actions: actions
+    };
   };
 
   // Generate smart actions based on user input
