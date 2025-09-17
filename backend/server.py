@@ -3982,14 +3982,14 @@ async def aavana2_chat(request: ChatRequest):
     Fast responses with cached common queries
     """
     try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        from openai import AsyncOpenAI
         from dotenv import load_dotenv
         
         load_dotenv()
-        api_key = os.getenv('EMERGENT_LLM_KEY')
+        api_key = os.getenv('OPENAI_API_KEY')
         
         if not api_key:
-            raise HTTPException(status_code=500, detail="LLM API key not configured")
+            raise HTTPException(status_code=500, detail="OpenAI API key not configured")
         
         # Check cache for instant responses to common queries
         query_lower = request.message.lower().strip()
