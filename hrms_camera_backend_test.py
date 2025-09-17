@@ -215,12 +215,18 @@ class HRMSCameraBackendTester:
         # Test with JPEG format indicator
         face_checkin_data = {
             "employee_id": self.test_employee_id,
-            "image_data": "data:image/jpeg;base64," + self.generate_mock_face_image(),
-            "latitude": 12.9716,  # Bangalore coordinates
-            "longitude": 77.5946,
+            "face_image": "data:image/jpeg;base64," + self.generate_mock_face_image(),
+            "location": {
+                "latitude": 12.9716,  # Bangalore coordinates
+                "longitude": 77.5946,
+                "accuracy": 15.0,
+                "address": "Aavana Greens Bangalore Office"
+            },
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "check_type": "check_in",
-            "image_format": "jpeg"
+            "device_info": {
+                "device_type": "mobile",
+                "image_format": "jpeg"
+            }
         }
         
         return self.run_test("HRMS Face Check-in Different Formats", "POST", "hrms/face-checkin", 200, data=face_checkin_data)
