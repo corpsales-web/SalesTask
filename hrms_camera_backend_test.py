@@ -237,17 +237,23 @@ class HRMSCameraBackendTester:
         checkin_data = {
             "employee_id": "EMP003",
             "employee_name": "Amit Patel",
-            "latitude": 23.0225,  # Ahmedabad coordinates
-            "longitude": 72.5714,
-            "accuracy": 12.0,
+            "location": {
+                "latitude": 23.0225,  # Ahmedabad coordinates
+                "longitude": 72.5714,
+                "accuracy": 12.0,
+                "address": "Aavana Greens Ahmedabad Office"
+            },
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "check_type": "check_in"
+            "device_info": {
+                "device_type": "mobile",
+                "check_type": "check_in"
+            }
         }
         
         success1, _ = self.run_test("HRMS Multiple Check-ins (First)", "POST", "hrms/gps-checkin", 200, data=checkin_data)
         
         # Second check-out
-        checkin_data["check_type"] = "check_out"
+        checkin_data["device_info"]["check_type"] = "check_out"
         checkin_data["timestamp"] = datetime.now(timezone.utc).isoformat()
         
         success2, _ = self.run_test("HRMS Multiple Check-ins (Second)", "POST", "hrms/gps-checkin", 200, data=checkin_data)
