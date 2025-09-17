@@ -152,11 +152,26 @@ How can I assist you today?`,
       }
       
     } catch (error) {
-      console.error('AI response error:', error);
+      console.error('🚨 Aavana 2.0 API Error:', error);
+      console.error('🔍 Error Details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        url: `${API}/api/aavana2/chat`
+      });
+      
+      let errorContent = 'I apologize, but I\'m having trouble connecting to my AI services right now. Please try again in a moment.';
+      
+      if (error.response) {
+        errorContent = `❌ API Error (${error.response.status}): ${error.response.data?.detail || 'Unknown error'}`;
+      } else if (error.request) {
+        errorContent = '❌ Network Error: Unable to reach AI services. Please check your connection.';
+      }
+      
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'I apologize, but I\'m having trouble connecting to my AI services right now. Please try again in a moment.',
+        content: errorContent,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
