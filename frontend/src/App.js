@@ -394,19 +394,7 @@ const App = () => {
           </div>
         </main>
 
-        {/* Face Check-In Modal */}
-        {showFaceCheckInModal && (
-          <FaceCheckInComponent 
-            onClose={() => setShowFaceCheckInModal(false)}
-            onCheckInComplete={(result) => {
-              console.log('Check-in completed:', result);
-              setShowFaceCheckInModal(false);
-              if (result.success) {
-                toast({ title: "Success", description: "Check-in completed successfully" });
-              }
-            }}
-          />
-        )}
+        {/* Face Check-In removed - now available only in HRMS tab */}
 
         {/* Floating Chatbot - Aavana 2.0 AI Assistant */}
         <FloatingChatbot />
