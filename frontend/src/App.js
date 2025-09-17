@@ -25,6 +25,7 @@ import CameraComponent from './components/CameraComponent';
 import EnhancedFileUploadHeader from './components/EnhancedFileUploadHeader';
 import Aavana2Assistant from './components/Aavana2Assistant';
 import GoalsManagementSystem from './components/GoalsManagementSystem';
+import ComprehensiveDigitalMarketingManager from './components/ComprehensiveDigitalMarketingManager';
 import notificationManager from './utils/notificationManager';
 import FloatingChatbot from './components/FloatingChatbot';
 import axios from 'axios';
