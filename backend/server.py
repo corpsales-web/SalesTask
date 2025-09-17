@@ -4009,36 +4009,38 @@ async def aavana2_chat(request: ChatRequest):
                 actions=actions
             )
         
+        # Initialize OpenAI client
+        client = AsyncOpenAI(api_key=api_key)
+        
         # Optimized system message for speed
         system_message = f"""You are Aavana 2.0, AI assistant for Aavana Greens CRM. Help with leads, HRMS, tasks, sales, and marketing. Be concise, helpful, and professional. Language: {request.language}"""
 
-        # Initialize chat with selected model
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=request.session_id,
-            system_message=system_message
-        )
-        
-        # Optimized model selection for speed
-        if request.provider == "gemini":
-            chat.with_model("gemini", "gemini-2.0-flash-exp")  # Fastest model
-        elif request.provider == "anthropic":
-            chat.with_model("anthropic", "claude-3-haiku-20240307")  # Fastest Claude
-        else:  # Default to fastest OpenAI
-            chat.with_model("openai", "gpt-4o-mini")  # Much faster than gpt-4o
-        
-        # Create user message
-        user_message = UserMessage(text=request.message)
+        # Prepare messages for OpenAI API
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": request.message}
+        ]
         
         # Get AI response with timeout for speed
         import asyncio
         try:
-            ai_response = await asyncio.wait_for(
-                chat.send_message(user_message), 
-                timeout=8.0  # 8 second max timeout
+            response = await asyncio.wait_for(
+                client.chat.completions.create(
+                    model="gpt-4o-mini",  # Cost-effective model
+                    messages=messages,
+                    max_tokens=1000,  # Limit for cost control
+                    temperature=0.7,
+                    timeout=8.0
+                ), 
+                timeout=10.0  # 10 second max timeout
             )
+            ai_response = response.choices[0].message.content
+            
         except asyncio.TimeoutError:
             ai_response = "I apologize for the delay. Could you please rephrase your question?"
+        except Exception as e:
+            logger.error(f"OpenAI API error: {e}")
+            ai_response = "I'm having trouble connecting to OpenAI. Please try again."
         
         # Generate contextual actions (optimized)
         actions = generate_contextual_actions(request.message, ai_response)
