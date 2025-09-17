@@ -16,6 +16,8 @@ import CameraComponent from './CameraComponent';
 import EnhancedPipelineSystem from './EnhancedPipelineSystem';
 import EnhancedHRMSSystem from './EnhancedHRMSSystem';
 import EnhancedTaskSystem from './EnhancedTaskSystem';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Camera } from 'lucide-react';
 
 const TabContent = ({ 
   dashboardStats,
