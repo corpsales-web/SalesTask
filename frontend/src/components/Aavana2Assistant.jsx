@@ -468,7 +468,7 @@ const Aavana2Assistant = ({ isOpen, onClose }) => {
                               size="sm"
                               variant="outline"
                               className="h-6 text-xs"
-                              onClick={() => handleSmartAction(action.action)}
+                              onClick={() => handleSmartAction(action)}
                             >
                               {action.text}
                             </Button>
