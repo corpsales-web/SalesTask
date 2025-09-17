@@ -355,7 +355,13 @@ const TabContent = ({
         <LeadActionsPanel 
           leadId={selectedLead.id}
           leadData={selectedLead}
-          onActionComplete={onActionComplete}
+          initialActionType={leadActionType}
+          onActionComplete={(result) => {
+            setShowLeadActionsPanel(false);
+            setSelectedLead(null);
+            setLeadActionType(null);
+            onActionComplete(result);
+          }}
         />
       )}
     </div>
