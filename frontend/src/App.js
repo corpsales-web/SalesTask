@@ -387,7 +387,10 @@ const App = () => {
                 tasks={tasks}
                 showLeadActionsPanel={showLeadActionsPanel}
                 selectedLead={selectedLead}
+                leadActionType={leadActionType}
                 setShowLeadActionsPanel={setShowLeadActionsPanel}
+                setSelectedLead={setSelectedLead}
+                setLeadActionType={setLeadActionType}
                 onActionComplete={handleActionComplete}
               />
             )}
