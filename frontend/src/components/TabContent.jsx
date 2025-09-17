@@ -149,6 +149,17 @@ const TabContent = ({
                       >
                         Images
                       </button>
+                      <button 
+                        className="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700"
+                        onClick={() => {
+                          console.log('📋 Catalogue button clicked for lead:', lead.id);
+                          setSelectedLead(lead);
+                          setShowLeadActionsPanel(true);
+                          setLeadActionType('send_catalogue');
+                        }}
+                      >
+                        Catalogue
+                      </button>
                     </div>
                   </div>
                 </div>
