@@ -178,7 +178,7 @@ class Aavana2PerformanceTester:
         success, response, response_time = self.run_timed_test(
             "Aavana 2.0 Chat History", 
             "GET", 
-            f"aavana2/chat/history?session_id={self.session_id}", 
+            f"aavana2/chat/history/{self.session_id}", 
             200,
             timeout=10
         )
