@@ -31,12 +31,6 @@ export const checkCameraAvailability = async () => {
  */
 export const initializeCamera = async (constraints = {}) => {
   try {
-    // Check availability first
-    const availability = await checkCameraAvailability();
-    if (!availability.available) {
-      throw new Error(getErrorMessage(availability.reason));
-    }
-
     // Default constraints for reliable camera access
     const defaultConstraints = {
       video: {
