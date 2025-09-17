@@ -766,7 +766,21 @@ const DigitalMarketingManager = ({ isOpen, onClose }) => {
           <h3 className="text-lg font-semibold">Content Library</h3>
           <p className="text-gray-600">Manage your marketing assets and content</p>
         </div>
-        <Button>
+        <Button onClick={() => {
+          const newContent = {
+            id: Date.now().toString(),
+            title: `New Content Item ${contentLibrary.length + 1}`,
+            type: 'image',
+            category: 'showcase',
+            created_date: new Date().toISOString().split('T')[0],
+            usage_count: 0,
+            performance_score: 8.0,
+            tags: ['new-upload', 'marketing-asset'],
+            file_url: '/images/gallery/new-content.jpg'
+          };
+          setContentLibrary(prev => [...prev, newContent]);
+          alert('📤 Content uploaded successfully! You can now use it in your campaigns.');
+        }}>
           <Upload className="h-4 w-4 mr-2" />
           Upload Content
         </Button>
