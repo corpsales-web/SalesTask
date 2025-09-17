@@ -106,11 +106,18 @@ class HRMSCameraBackendTester:
         """Test HRMS face check-in endpoint accessibility"""
         face_checkin_data = {
             "employee_id": self.test_employee_id,
-            "image_data": self.generate_mock_face_image(),
-            "latitude": 19.0760,
-            "longitude": 72.8777,
+            "face_image": self.generate_mock_face_image(),
+            "location": {
+                "latitude": 19.0760,
+                "longitude": 72.8777,
+                "accuracy": 10.0,
+                "address": "Mumbai Office"
+            },
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "check_type": "check_in"
+            "device_info": {
+                "device_type": "mobile",
+                "browser": "Chrome"
+            }
         }
         
         return self.run_test("HRMS Face Check-in Endpoint Access", "POST", "hrms/face-checkin", 200, data=face_checkin_data)
