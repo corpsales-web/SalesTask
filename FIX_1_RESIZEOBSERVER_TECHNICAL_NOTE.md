@@ -107,7 +107,7 @@ Total console messages: 7 (all normal application logs)
 
 ## QA Verification
 
-**Staging URL**: https://greenstack-ai.preview.emergentagent.com
+**Staging URL**: https://aavana-greens.preview.emergentagent.com
 
 **Test Steps:**
 1. Open browser developer console

@@ -2,7 +2,7 @@ import requests
 import json
 
 def test_auth_flow():
-    base_url = "https://greenstack-ai.preview.emergentagent.com/api"
+    base_url = "https://aavana-greens.preview.emergentagent.com/api"
     
     print("🔐 Testing Authentication Flow...")
     

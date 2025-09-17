@@ -5,7 +5,7 @@ from datetime import datetime
 
 def test_endpoint(name, endpoint, method="POST", data=None, params=None):
     """Test an endpoint with basic connectivity check"""
-    base_url = "https://greenstack-ai.preview.emergentagent.com/api"
+    base_url = "https://aavana-greens.preview.emergentagent.com/api"
     url = f"{base_url}/{endpoint}"
     headers = {'Content-Type': 'application/json'}
     
@@ -82,7 +82,7 @@ def main():
     test_lead_id = None
     try:
         response = requests.post(
-            "https://greenstack-ai.preview.emergentagent.com/api/leads",
+            "https://aavana-greens.preview.emergentagent.com/api/leads",
             json=test_lead,
             headers={'Content-Type': 'application/json'},
             timeout=10
@@ -230,7 +230,7 @@ def main():
     if test_lead_id:
         try:
             requests.delete(
-                f"https://greenstack-ai.preview.emergentagent.com/api/leads/{test_lead_id}",
+                f"https://aavana-greens.preview.emergentagent.com/api/leads/{test_lead_id}",
                 timeout=10
             )
             print(f"\n🧹 Cleaned up test lead")

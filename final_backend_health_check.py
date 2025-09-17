@@ -11,7 +11,7 @@ import time
 from datetime import datetime, timezone
 
 class FinalBackendHealthCheck:
-    def __init__(self, base_url="https://greenstack-ai.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://aavana-greens.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

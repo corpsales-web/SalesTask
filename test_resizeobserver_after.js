@@ -50,7 +50,7 @@ async function testUnifiedResizeObserverHandler() {
     });
 
     try {
-      await page.goto('https://greenstack-ai.preview.emergentagent.com');
+      await page.goto('https://aavana-greens.preview.emergentagent.com');
       await page.waitForTimeout(3000);
 
       console.log('Testing unified ResizeObserver handler...');
