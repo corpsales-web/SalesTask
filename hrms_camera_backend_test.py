@@ -268,13 +268,20 @@ class HRMSCameraBackendTester:
         attendance_data = {
             "employee_id": unique_employee_id,
             "employee_name": "Test Employee",
-            "image_data": self.generate_mock_face_image(),
-            "latitude": 18.5204,  # Pune coordinates
-            "longitude": 73.8567,
-            "accuracy": 7.5,
+            "face_image": self.generate_mock_face_image(),
+            "location": {
+                "latitude": 18.5204,  # Pune coordinates
+                "longitude": 73.8567,
+                "accuracy": 7.5,
+                "address": "Aavana Greens Pune Office",
+                "lat": 18.5204,
+                "lng": 73.8567
+            },
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "check_type": "check_in",
-            "notes": "Test attendance record"
+            "device_info": {
+                "device_type": "mobile",
+                "notes": "Test attendance record"
+            }
         }
         
         return self.run_test("HRMS Attendance Data Persistence", "POST", "hrms/face-checkin", 200, data=attendance_data)
