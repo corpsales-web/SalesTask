@@ -632,7 +632,10 @@ const EnhancedTaskSystem = () => {
           <p className="text-gray-600">Collaborative task management with AI automation</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => setShowWorkflowModal(true)}>
+          <Button variant="outline" onClick={() => {
+            console.log('🔧 Workflow button clicked');
+            setShowWorkflowModal(true);
+          }}>
             <Zap className="h-4 w-4 mr-2" />
             Workflow
           </Button>
