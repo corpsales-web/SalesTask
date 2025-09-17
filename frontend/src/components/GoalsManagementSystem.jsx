@@ -531,10 +531,77 @@ const GoalsManagementSystem = ({ isOpen, onClose }) => {
             {!loading && activeView === 'overview' && renderOverview()}
             {!loading && activeView === 'goals' && renderGoalsList()}
             {!loading && activeView === 'templates' && (
-              <div className="text-center py-12">
-                <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Goal Templates</h3>
-                <p className="text-gray-600">Pre-built goal templates coming soon</p>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Goal Templates</h3>
+                  <Badge>{goalTemplates.length} templates available</Badge>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {goalTemplates.map(template => (
+                    <Card key={template.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                      <CardContent className="p-6">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold text-lg">{template.name}</h4>
+                            <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                          </div>
+                          <Badge variant="outline" className="capitalize">
+                            {template.category.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-2 mb-4">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Target Type:</span>
+                            <span className="capitalize">{template.target_type}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Duration:</span>
+                            <span>{template.default_duration}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Suggested Target:</span>
+                            <span>
+                              {template.target_type === 'currency' 
+                                ? `₹${(template.suggested_target / 1000)}K`
+                                : template.target_type === 'percentage'
+                                ? `${template.suggested_target}%`
+                                : template.suggested_target
+                              }
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <Button 
+                          className="w-full" 
+                          size="sm"
+                          onClick={() => {
+                            // Pre-fill form with template data
+                            setGoalForm({
+                              title: template.name,
+                              description: template.description,
+                              type: 'team',
+                              category: template.category,
+                              target_value: template.suggested_target.toString(),
+                              current_value: 0,
+                              metric_unit: template.target_type,
+                              start_date: new Date().toISOString().split('T')[0],
+                              end_date: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0], // 30 days from now
+                              assigned_to: [],
+                              priority: 'medium',
+                              status: 'active'
+                            });
+                            setShowCreateGoalModal(true);
+                          }}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Use Template
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             )}
             {!loading && activeView === 'analytics' && (
