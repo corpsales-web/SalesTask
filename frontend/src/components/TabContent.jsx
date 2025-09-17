@@ -270,17 +270,58 @@ const TabContent = ({
               </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow border">
-              <h3 className="text-lg font-semibold mb-4">File Upload</h3>
-              <FileUploadComponent />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div className="bg-white p-6 rounded-lg shadow border">
+                <h3 className="text-lg font-semibold mb-4">📁 File Upload System</h3>
+                <p className="text-gray-600 mb-4">Upload business documents and files</p>
+                <FileUploadComponent />
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow border">
+                <h3 className="text-lg font-semibold mb-4">📦 Product Catalog</h3>
+                <p className="text-gray-600 mb-4">Manage product information and inventory</p>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        🌱
+                      </div>
+                      <div>
+                        <h4 className="font-medium">Green Building Materials</h4>
+                        <p className="text-sm text-gray-600">Sustainable construction supplies</p>
+                      </div>
+                    </div>
+                    <span className="text-sm text-green-600 font-medium">45 items</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        🏡
+                      </div>
+                      <div>
+                        <h4 className="font-medium">Landscaping Equipment</h4>
+                        <p className="text-sm text-gray-600">Tools and machinery</p>
+                      </div>
+                    </div>
+                    <span className="text-sm text-blue-600 font-medium">23 items</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        ⚡
+                      </div>
+                      <div>
+                        <h4 className="font-medium">Renewable Energy Systems</h4>
+                        <p className="text-sm text-gray-600">Solar panels and components</p>
+                      </div>
+                    </div>
+                    <span className="text-sm text-yellow-600 font-medium">12 items</span>
+                  </div>
+                </div>
+              </div>
             </div>
             
             <ProjectGalleryManager />
-              
-            <div className="bg-white p-6 rounded-lg shadow border">
-              <h3 className="text-lg font-semibold mb-4">Product Catalog</h3>
-              <p className="text-gray-600">Manage product information and inventory</p>
-            </div>
           </div>
         );
         
