@@ -105,22 +105,54 @@ export const initializeCamera = async (constraints = {}) => {
  */
 export const capturePhoto = (videoElement, quality = 0.8) => {
   try {
-    if (!videoElement || videoElement.readyState !== 4) {
-      throw new Error('Video element not ready');
+    console.log('📸 Starting photo capture...');
+    
+    if (!videoElement) {
+      throw new Error('Video element not provided');
+    }
+    
+    console.log('📸 Video element state:', {
+      readyState: videoElement.readyState,
+      videoWidth: videoElement.videoWidth,
+      videoHeight: videoElement.videoHeight,
+      paused: videoElement.paused,
+      ended: videoElement.ended
+    });
+    
+    // More lenient check for Safari - allow readyState 2 (HAVE_CURRENT_DATA) or higher
+    if (videoElement.readyState < 2) {
+      throw new Error('Video not ready for capture (readyState: ' + videoElement.readyState + ')');
+    }
+    
+    // Check if video has actual dimensions
+    if (!videoElement.videoWidth || !videoElement.videoHeight) {
+      throw new Error('Video dimensions not available (width: ' + videoElement.videoWidth + ', height: ' + videoElement.videoHeight + ')');
     }
 
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     
+    if (!context) {
+      throw new Error('Could not get canvas 2D context');
+    }
+    
     // Set canvas dimensions to match video
-    canvas.width = videoElement.videoWidth || 640;
-    canvas.height = videoElement.videoHeight || 480;
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    
+    console.log('📸 Canvas dimensions:', { width: canvas.width, height: canvas.height });
     
     // Draw current video frame to canvas
     context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
     
-    // Convert to blob
+    // Convert to data URL
     const dataURL = canvas.toDataURL('image/jpeg', quality);
+    
+    if (!dataURL || dataURL === 'data:,') {
+      throw new Error('Failed to generate image data from canvas');
+    }
+    
+    console.log('📸 Photo captured successfully, data size:', dataURL.length);
     
     return {
       success: true,
@@ -130,7 +162,7 @@ export const capturePhoto = (videoElement, quality = 0.8) => {
     };
 
   } catch (error) {
-    console.error('Photo capture failed:', error);
+    console.error('📸 Photo capture failed:', error);
     return {
       success: false,
       error: error.message,
