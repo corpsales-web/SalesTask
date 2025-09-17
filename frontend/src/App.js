@@ -39,7 +39,10 @@ import TabContent from './components/TabContent';
 
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
-const App = () => {
+// Inner component that can use the TabContext
+const AppContent = () => {
+  const { setActiveTab } = useTab();
+  
   // Core State Management
   const [loading, setLoading] = useState(true);
   
