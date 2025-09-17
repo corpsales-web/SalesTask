@@ -1,755 +1,225 @@
+#!/usr/bin/env python3
+"""
+Backend API Testing for 502 Error Resolution
+Focus: Testing specific endpoints reported with 502 errors by user
+"""
+
 import requests
-import sys
 import json
-from datetime import datetime, timezone
-import uuid
+import time
+import sys
+from datetime import datetime
 
-class AavanaGreensCRMTester:
-    def __init__(self, base_url="https://aavana-greens.preview.emergentagent.com/api"):
-        self.base_url = base_url
-        self.tests_run = 0
-        self.tests_passed = 0
-        self.created_leads = []
-        self.created_tasks = []
-        self.auth_token = None
-        self.test_user_id = None
-        self.created_user_id = None
+# Configuration
+BACKEND_URL = "https://aavana-greens.preview.emergentagent.com/api"
+TIMEOUT = 30
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
-        """Run a single API test"""
-        url = f"{self.base_url}/{endpoint}" if endpoint else self.base_url
-        headers = {'Content-Type': 'application/json'}
-
-        self.tests_run += 1
-        print(f"\n🔍 Testing {name}...")
-        print(f"   URL: {url}")
+class BackendTester:
+    def __init__(self):
+        self.results = []
+        self.total_tests = 0
+        self.passed_tests = 0
+        self.failed_tests = 0
+        
+    def log_result(self, test_name, status, details="", response_time=0):
+        """Log test result"""
+        self.total_tests += 1
+        if status == "PASS":
+            self.passed_tests += 1
+            print(f"✅ {test_name}: {status} ({response_time:.2f}s)")
+        else:
+            self.failed_tests += 1
+            print(f"❌ {test_name}: {status} - {details}")
+        
+        self.results.append({
+            "test": test_name,
+            "status": status,
+            "details": details,
+            "response_time": response_time,
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    def test_endpoint(self, method, endpoint, test_name, expected_status=200, data=None, headers=None):
+        """Generic endpoint testing"""
+        url = f"{BACKEND_URL}{endpoint}"
+        start_time = time.time()
         
         try:
-            if method == 'GET':
-                response = requests.get(url, headers=headers, params=params)
-            elif method == 'POST':
-                response = requests.post(url, json=data, headers=headers)
-            elif method == 'PUT':
-                response = requests.put(url, json=data, headers=headers)
-            elif method == 'DELETE':
-                response = requests.delete(url, headers=headers)
-
-            success = response.status_code == expected_status
-            if success:
-                self.tests_passed += 1
-                print(f"✅ Passed - Status: {response.status_code}")
-                try:
-                    response_data = response.json()
-                    if isinstance(response_data, dict) and len(str(response_data)) < 200:
-                        print(f"   Response: {response_data}")
-                    elif isinstance(response_data, list):
-                        print(f"   Response: List with {len(response_data)} items")
-                    return True, response_data
-                except:
-                    return True, {}
+            if method.upper() == "GET":
+                response = requests.get(url, timeout=TIMEOUT, headers=headers)
+            elif method.upper() == "POST":
+                response = requests.post(url, json=data, timeout=TIMEOUT, headers=headers)
+            elif method.upper() == "PUT":
+                response = requests.put(url, json=data, timeout=TIMEOUT, headers=headers)
             else:
-                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
+                self.log_result(test_name, "FAIL", f"Unsupported method: {method}")
+                return None
+            
+            response_time = time.time() - start_time
+            
+            if response.status_code == expected_status:
+                self.log_result(test_name, "PASS", f"Status: {response.status_code}", response_time)
+                return response
+            else:
+                error_detail = f"Expected {expected_status}, got {response.status_code}"
+                if response.status_code == 502:
+                    error_detail += " - BACKEND GATEWAY ERROR"
                 try:
-                    error_data = response.json()
-                    print(f"   Error: {error_data}")
+                    error_detail += f" - Response: {response.text[:200]}"
                 except:
-                    print(f"   Error: {response.text}")
-                return False, {}
-
+                    pass
+                self.log_result(test_name, "FAIL", error_detail, response_time)
+                return None
+                
+        except requests.exceptions.Timeout:
+            self.log_result(test_name, "FAIL", "Request timeout")
+            return None
+        except requests.exceptions.ConnectionError:
+            self.log_result(test_name, "FAIL", "Connection error")
+            return None
         except Exception as e:
-            print(f"❌ Failed - Error: {str(e)}")
-            return False, {}
-
-    def test_health_check(self):
-        """Test basic health check"""
-        return self.run_test("Health Check", "GET", "", 200)
-
-    def test_dashboard_stats(self):
-        """Test dashboard statistics endpoint"""
-        return self.run_test("Dashboard Stats", "GET", "dashboard/stats", 200)
-
-    def test_create_lead(self, lead_data):
-        """Test creating a new lead"""
-        success, response = self.run_test("Create Lead", "POST", "leads", 200, data=lead_data)
-        if success and 'id' in response:
-            self.created_leads.append(response['id'])
-            return True, response
-        return False, {}
-
-    def test_get_leads(self):
-        """Test getting all leads"""
-        return self.run_test("Get All Leads", "GET", "leads", 200)
-
-    def test_get_lead_by_id(self, lead_id):
-        """Test getting a specific lead"""
-        return self.run_test("Get Lead by ID", "GET", f"leads/{lead_id}", 200)
-
-    def test_update_lead(self, lead_id, update_data):
-        """Test updating a lead"""
-        return self.run_test("Update Lead", "PUT", f"leads/{lead_id}", 200, data=update_data)
-
-    def test_delete_lead(self, lead_id):
-        """Test deleting a lead"""
-        return self.run_test("Delete Lead", "DELETE", f"leads/{lead_id}", 200)
-
-    def test_create_task(self, task_data):
-        """Test creating a new task"""
-        success, response = self.run_test("Create Task", "POST", "tasks", 200, data=task_data)
-        if success and 'id' in response:
-            self.created_tasks.append(response['id'])
-            return True, response
-        return False, {}
-
-    def test_get_tasks(self):
-        """Test getting all tasks"""
-        return self.run_test("Get All Tasks", "GET", "tasks", 200)
-
-    def test_update_task(self, task_id, update_data):
-        """Test updating a task"""
-        return self.run_test("Update Task", "PUT", f"tasks/{task_id}", 200, data=update_data)
-
-    # Aavana 2.0 Orchestration Tests
-    def test_aavana_health_check(self):
-        """Test Aavana 2.0 health check endpoint"""
-        return self.run_test("Aavana 2.0 Health Check", "GET", "aavana/health", 200)
-
-    def test_aavana_conversation_english(self):
-        """Test Aavana 2.0 conversation processing with English message"""
-        data = {
-            "message": "Hello, I need help with plants",
-            "channel": "in_app_chat",
-            "user_id": "test_user_001",
-            "language": "en"
-        }
-        return self.run_test("Aavana 2.0 Conversation (English)", "POST", "aavana/conversation", 200, data=data)
-
-    def test_aavana_conversation_hindi(self):
-        """Test Aavana 2.0 conversation processing with Hindi message"""
-        data = {
-            "message": "नमस्ते, मुझे पौधों की जानकारी चाहिए",
-            "channel": "in_app_chat", 
-            "user_id": "test_user_002",
-            "language": "hi"
-        }
-        return self.run_test("Aavana 2.0 Conversation (Hindi)", "POST", "aavana/conversation", 200, data=data)
-
-    def test_aavana_conversation_hinglish(self):
-        """Test Aavana 2.0 conversation processing with Hinglish message"""
-        data = {
-            "message": "kya haal hai, garden ke liye help chahiye",
-            "channel": "in_app_chat",
-            "user_id": "test_user_003", 
-            "language": "hinglish"
-        }
-        return self.run_test("Aavana 2.0 Conversation (Hinglish)", "POST", "aavana/conversation", 200, data=data)
-
-    def test_aavana_language_detect_english(self):
-        """Test Aavana 2.0 language detection with English text"""
-        data = {"text": "Hello, how are you today?"}
-        return self.run_test("Aavana 2.0 Language Detection (English)", "POST", "aavana/language-detect", 200, data=data)
-
-    def test_aavana_language_detect_hindi(self):
-        """Test Aavana 2.0 language detection with Hindi text"""
-        data = {"text": "नमस्ते, आप कैसे हैं?"}
-        return self.run_test("Aavana 2.0 Language Detection (Hindi)", "POST", "aavana/language-detect", 200, data=data)
-
-    def test_aavana_language_detect_hinglish(self):
-        """Test Aavana 2.0 language detection with Hinglish text"""
-        data = {"text": "Hello yaar, kya chal raha hai?"}
-        return self.run_test("Aavana 2.0 Language Detection (Hinglish)", "POST", "aavana/language-detect", 200, data=data)
-
-    def test_aavana_audio_templates_english(self):
-        """Test Aavana 2.0 audio templates for English"""
-        return self.run_test("Aavana 2.0 Audio Templates (English)", "GET", "aavana/audio-templates", 200, params={"language": "en"})
-
-    def test_aavana_audio_templates_hindi(self):
-        """Test Aavana 2.0 audio templates for Hindi"""
-        return self.run_test("Aavana 2.0 Audio Templates (Hindi)", "GET", "aavana/audio-templates", 200, params={"language": "hi"})
-
-    def test_aavana_audio_templates_hinglish(self):
-        """Test Aavana 2.0 audio templates for Hinglish"""
-        return self.run_test("Aavana 2.0 Audio Templates (Hinglish)", "GET", "aavana/audio-templates", 200, params={"language": "hinglish"})
-
-    def test_aavana_whatsapp_integration(self):
-        """Test Aavana 2.0 WhatsApp integration with mock data"""
-        mock_whatsapp_data = {
-            "from": "919876543210",
-            "id": "wamid.test123",
-            "text": {
-                "body": "Hi, I want to know about your garden services"
-            },
-            "timestamp": "1640995200"
-        }
-        return self.run_test("Aavana 2.0 WhatsApp Integration", "POST", "aavana/whatsapp", 200, data=mock_whatsapp_data)
-
-    # Admin Panel Authentication Tests
-    def test_user_registration_valid(self):
-        """Test user registration with valid data"""
-        import time
-        timestamp = str(int(time.time()))
-        user_data = {
-            "username": f"testuser{timestamp}",
-            "email": f"testuser{timestamp}@example.com",
-            "phone": f"987654{timestamp[-4:]}",
-            "full_name": "Test User",
-            "role": "Employee",
-            "password": "SecurePass123!",
-            "department": "Sales"
-        }
-        success, response = self.run_test("User Registration (Valid)", "POST", "auth/register", 200, data=user_data)
-        if success and 'id' in response:
-            self.auth_token = None  # Will be set during login
-            self.test_user_id = response.get('id')
-            self.test_username = user_data['username']
-            self.test_email = user_data['email']
-            self.test_phone = user_data['phone']
-            self.test_password = user_data['password']
-            return True, response
-        return False, {}
-
-    def test_user_registration_duplicate(self):
-        """Test user registration with duplicate username/email"""
-        user_data = {
-            "username": "testuser123",  # Same as above
-            "email": "testuser@example.com",  # Same as above
-            "phone": "9876543211",
-            "full_name": "Duplicate User",
-            "role": "Employee",
-            "password": "SecurePass123!"
-        }
-        return self.run_test("User Registration (Duplicate)", "POST", "auth/register", 400, data=user_data)
-
-    def test_user_registration_invalid_email(self):
-        """Test user registration with invalid email format"""
-        user_data = {
-            "username": "testuser456",
-            "email": "invalid-email-format",
-            "phone": "9876543212",
-            "full_name": "Invalid Email User",
-            "role": "Employee",
-            "password": "SecurePass123!"
-        }
-        return self.run_test("User Registration (Invalid Email)", "POST", "auth/register", 422, data=user_data)
-
-    def test_user_registration_missing_fields(self):
-        """Test user registration with missing required fields"""
-        user_data = {
-            "username": "testuser789",
-            # Missing email, full_name, password
-            "phone": "9876543213",
-            "role": "Employee"
-        }
-        return self.run_test("User Registration (Missing Fields)", "POST", "auth/register", 422, data=user_data)
-
-    def test_user_login_username(self):
-        """Test user login with username/password"""
-        if not hasattr(self, 'test_username'):
-            print("⚠️ Skipping test - no test user available")
-            return False, {}
+            self.log_result(test_name, "FAIL", f"Exception: {str(e)}")
+            return None
+    
+    def test_critical_endpoints(self):
+        """Test the specific endpoints mentioned in review request"""
+        print("🎯 TESTING CRITICAL ENDPOINTS FOR 502 ERROR RESOLUTION")
+        print("=" * 60)
         
-        login_data = {
-            "identifier": self.test_username,
-            "password": self.test_password
-        }
-        success, response = self.run_test("User Login (Username)", "POST", "auth/login", 200, data=login_data)
-        if success and 'access_token' in response:
-            self.auth_token = response['access_token']
-            return True, response
-        return False, {}
-
-    def test_user_login_email(self):
-        """Test user login with email/password"""
-        if not hasattr(self, 'test_email'):
-            print("⚠️ Skipping test - no test user available")
-            return False, {}
+        # 1. Dashboard Stats (should be working)
+        print("\n📊 Testing Dashboard Stats...")
+        self.test_endpoint("GET", "/dashboard/stats", "Dashboard Stats API")
         
-        login_data = {
-            "identifier": self.test_email,
-            "password": self.test_password
-        }
-        success, response = self.run_test("User Login (Email)", "POST", "auth/login", 200, data=login_data)
-        if success and 'access_token' in response:
-            self.auth_token = response['access_token']
-            return True, response
-        return False, {}
-
-    def test_user_login_phone(self):
-        """Test user login with phone/password"""
-        if not hasattr(self, 'test_phone'):
-            print("⚠️ Skipping test - no test user available")
-            return False, {}
+        # 2. Leads Endpoint (reported 502 error)
+        print("\n👥 Testing Leads Endpoints...")
+        self.test_endpoint("GET", "/leads", "Get All Leads")
+        self.test_endpoint("GET", "/leads?limit=10", "Get Leads with Limit")
         
-        login_data = {
-            "identifier": self.test_phone,
-            "password": self.test_password
-        }
-        success, response = self.run_test("User Login (Phone)", "POST", "auth/login", 200, data=login_data)
-        if success and 'access_token' in response:
-            self.auth_token = response['access_token']
-            return True, response
-        return False, {}
-
-    def test_user_login_invalid_credentials(self):
-        """Test user login with invalid credentials"""
-        login_data = {
-            "identifier": "testuser123",
-            "password": "WrongPassword123!"
-        }
-        return self.run_test("User Login (Invalid Credentials)", "POST", "auth/login", 401, data=login_data)
-
-    def test_phone_login_otp_generation(self):
-        """Test phone-based login OTP generation"""
-        phone_data = {
-            "phone": "9876543210"
-            # No OTP field - should generate OTP
-        }
-        return self.run_test("Phone Login (OTP Generation)", "POST", "auth/phone-login", 200, data=phone_data)
-
-    def test_phone_login_otp_verification(self):
-        """Test phone-based login OTP verification"""
-        phone_data = {
-            "phone": "9876543210",
-            "otp": "123456"  # Mock OTP
-        }
-        return self.run_test("Phone Login (OTP Verification)", "POST", "auth/phone-login", 200, data=phone_data)
-
-    def test_phone_login_invalid_otp(self):
-        """Test phone-based login with invalid OTP"""
-        phone_data = {
-            "phone": "9876543210",
-            "otp": "000000"  # Invalid OTP
-        }
-        return self.run_test("Phone Login (Invalid OTP)", "POST", "auth/phone-login", 400, data=phone_data)
-
-    def test_forgot_password_request(self):
-        """Test forgot password request"""
-        forgot_data = {
-            "email": "testuser@example.com"
-        }
-        return self.run_test("Forgot Password Request", "POST", "auth/forgot-password", 200, data=forgot_data)
-
-    def test_reset_password_valid_token(self):
-        """Test reset password with valid token"""
-        reset_data = {
-            "token": "mock_reset_token_123",
-            "new_password": "NewSecurePass123!"
-        }
-        return self.run_test("Reset Password (Valid Token)", "POST", "auth/reset-password", 200, data=reset_data)
-
-    def test_reset_password_invalid_token(self):
-        """Test reset password with invalid/expired token"""
-        reset_data = {
-            "token": "invalid_token_xyz",
-            "new_password": "NewSecurePass123!"
-        }
-        return self.run_test("Reset Password (Invalid Token)", "POST", "auth/reset-password", 400, data=reset_data)
-
-    def test_get_current_user_valid_token(self):
-        """Test getting current user profile with valid token"""
-        if not hasattr(self, 'auth_token'):
-            print("⚠️ Skipping test - no auth token available")
-            return False, {}
+        # 3. Tasks Endpoint (reported 502 error)  
+        print("\n📋 Testing Tasks Endpoints...")
+        self.test_endpoint("GET", "/tasks", "Get All Tasks")
+        self.test_endpoint("GET", "/tasks?limit=10", "Get Tasks with Limit")
         
-        headers = {'Authorization': f'Bearer {self.auth_token}'}
-        url = f"{self.base_url}/auth/me"
+        # 4. Workflow Templates (should be working)
+        print("\n🔄 Testing Workflow Templates...")
+        self.test_endpoint("GET", "/workflow-templates", "Get Workflow Templates")
         
-        self.tests_run += 1
-        print(f"\n🔍 Testing Get Current User (Valid Token)...")
-        print(f"   URL: {url}")
+        # 5. Workflows Endpoint (reported 502 error)
+        print("\n⚙️ Testing Workflows Endpoints...")
+        self.test_endpoint("GET", "/workflows", "Get All Workflows")
         
+        # Additional critical endpoints
+        print("\n🔍 Testing Additional Critical Endpoints...")
+        self.test_endpoint("GET", "/", "Root API Endpoint")
+        
+    def test_backend_health(self):
+        """Test overall backend health"""
+        print("\n🏥 BACKEND HEALTH CHECK")
+        print("=" * 30)
+        
+        # Test basic connectivity
         try:
-            response = requests.get(url, headers=headers)
-            success = response.status_code == 200
-            if success:
-                self.tests_passed += 1
-                print(f"✅ Passed - Status: {response.status_code}")
-                try:
-                    response_data = response.json()
-                    print(f"   Response: User profile retrieved")
-                    return True, response_data
-                except:
-                    return True, {}
+            response = requests.get(f"{BACKEND_URL}/", timeout=10)
+            if response.status_code == 200:
+                print("✅ Backend is responding")
+                print(f"📡 Response: {response.json()}")
             else:
-                print(f"❌ Failed - Expected 200, got {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print(f"   Error: {error_data}")
-                except:
-                    print(f"   Error: {response.text}")
-                return False, {}
+                print(f"⚠️ Backend responding with status: {response.status_code}")
         except Exception as e:
-            print(f"❌ Failed - Error: {str(e)}")
-            return False, {}
-
-    def test_get_current_user_invalid_token(self):
-        """Test getting current user profile with invalid token"""
-        headers = {'Authorization': 'Bearer invalid_token_xyz'}
-        url = f"{self.base_url}/auth/me"
-        
-        self.tests_run += 1
-        print(f"\n🔍 Testing Get Current User (Invalid Token)...")
-        print(f"   URL: {url}")
-        
-        try:
-            response = requests.get(url, headers=headers)
-            success = response.status_code == 401
-            if success:
-                self.tests_passed += 1
-                print(f"✅ Passed - Status: {response.status_code}")
-                return True, {}
-            else:
-                print(f"❌ Failed - Expected 401, got {response.status_code}")
-                return False, {}
-        except Exception as e:
-            print(f"❌ Failed - Error: {str(e)}")
-            return False, {}
-
-    def test_get_users_list(self):
-        """Test getting users list (requires authentication)"""
-        if not hasattr(self, 'auth_token'):
-            print("⚠️ Skipping test - no auth token available")
-            return False, {}
-        
-        headers = {'Authorization': f'Bearer {self.auth_token}'}
-        url = f"{self.base_url}/users"
-        
-        self.tests_run += 1
-        print(f"\n🔍 Testing Get Users List...")
-        print(f"   URL: {url}")
-        
-        try:
-            response = requests.get(url, headers=headers)
-            success = response.status_code == 200
-            if success:
-                self.tests_passed += 1
-                print(f"✅ Passed - Status: {response.status_code}")
-                try:
-                    response_data = response.json()
-                    print(f"   Response: List with {len(response_data)} users")
-                    return True, response_data
-                except:
-                    return True, {}
-            else:
-                print(f"❌ Failed - Expected 200, got {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print(f"   Error: {error_data}")
-                except:
-                    print(f"   Error: {response.text}")
-                return False, {}
-        except Exception as e:
-            print(f"❌ Failed - Error: {str(e)}")
-            return False, {}
-
-    def test_create_user_admin(self):
-        """Test creating new user (admin only)"""
-        if not hasattr(self, 'auth_token'):
-            print("⚠️ Skipping test - no auth token available")
-            return False, {}
-        
-        user_data = {
-            "username": "newemployee123",
-            "email": "newemployee@example.com",
-            "phone": "9876543214",
-            "full_name": "New Employee",
-            "role": "Employee",
-            "password": "SecurePass123!",
-            "department": "Marketing"
-        }
-        
-        headers = {'Authorization': f'Bearer {self.auth_token}', 'Content-Type': 'application/json'}
-        url = f"{self.base_url}/users"
-        
-        self.tests_run += 1
-        print(f"\n🔍 Testing Create User (Admin)...")
-        print(f"   URL: {url}")
-        
-        try:
-            response = requests.post(url, json=user_data, headers=headers)
-            success = response.status_code in [200, 201]
-            if success:
-                self.tests_passed += 1
-                print(f"✅ Passed - Status: {response.status_code}")
-                try:
-                    response_data = response.json()
-                    if 'id' in response_data:
-                        self.created_user_id = response_data['id']
-                    return True, response_data
-                except:
-                    return True, {}
-            else:
-                print(f"❌ Failed - Expected 200/201, got {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print(f"   Error: {error_data}")
-                except:
-                    print(f"   Error: {response.text}")
-                return False, {}
-        except Exception as e:
-            print(f"❌ Failed - Error: {str(e)}")
-            return False, {}
-
-    def test_update_user(self):
-        """Test updating user information"""
-        if not hasattr(self, 'auth_token') or not hasattr(self, 'created_user_id'):
-            print("⚠️ Skipping test - no auth token or user ID available")
-            return False, {}
-        
-        update_data = {
-            "full_name": "Updated Employee Name",
-            "department": "Sales",
-            "status": "Active"
-        }
-        
-        headers = {'Authorization': f'Bearer {self.auth_token}', 'Content-Type': 'application/json'}
-        url = f"{self.base_url}/users/{self.created_user_id}"
-        
-        self.tests_run += 1
-        print(f"\n🔍 Testing Update User...")
-        print(f"   URL: {url}")
-        
-        try:
-            response = requests.put(url, json=update_data, headers=headers)
-            success = response.status_code == 200
-            if success:
-                self.tests_passed += 1
-                print(f"✅ Passed - Status: {response.status_code}")
-                return True, {}
-            else:
-                print(f"❌ Failed - Expected 200, got {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print(f"   Error: {error_data}")
-                except:
-                    print(f"   Error: {response.text}")
-                return False, {}
-        except Exception as e:
-            print(f"❌ Failed - Error: {str(e)}")
-            return False, {}
-
-    def test_delete_user_admin(self):
-        """Test deleting user (admin only)"""
-        if not hasattr(self, 'auth_token') or not hasattr(self, 'created_user_id'):
-            print("⚠️ Skipping test - no auth token or user ID available")
-            return False, {}
-        
-        headers = {'Authorization': f'Bearer {self.auth_token}'}
-        url = f"{self.base_url}/users/{self.created_user_id}"
-        
-        self.tests_run += 1
-        print(f"\n🔍 Testing Delete User (Admin)...")
-        print(f"   URL: {url}")
-        
-        try:
-            response = requests.delete(url, headers=headers)
-            success = response.status_code == 200
-            if success:
-                self.tests_passed += 1
-                print(f"✅ Passed - Status: {response.status_code}")
-                return True, {}
-            else:
-                print(f"❌ Failed - Expected 200, got {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print(f"   Error: {error_data}")
-                except:
-                    print(f"   Error: {response.text}")
-                return False, {}
-        except Exception as e:
-            print(f"❌ Failed - Error: {str(e)}")
-            return False, {}
-
-    def test_unauthorized_access(self):
-        """Test accessing protected endpoints without authentication"""
-        return self.run_test("Unauthorized Access to Users", "GET", "users", 401)
-
-def main():
-    print("🚀 Starting Aavana Greens CRM API Tests")
-    print("=" * 50)
+            print(f"❌ Backend connectivity failed: {str(e)}")
     
-    tester = AavanaGreensCRMTester()
-
-    # Test 1: Health Check
-    success, _ = tester.test_health_check()
-    if not success:
-        print("❌ Health check failed, stopping tests")
-        return 1
-
-    # Test 2: Dashboard Stats (initial state)
-    print("\n📊 Testing Dashboard Stats...")
-    tester.test_dashboard_stats()
-
-    # Test 3: Admin Panel Authentication System Tests
-    print("\n🔐 Testing Admin Panel Authentication System...")
-    print("=" * 60)
-    
-    # User Registration Tests
-    print("\n👤 Testing User Registration...")
-    tester.test_user_registration_valid()
-    tester.test_user_registration_duplicate()
-    tester.test_user_registration_invalid_email()
-    tester.test_user_registration_missing_fields()
-    
-    # User Login Tests
-    print("\n🔑 Testing User Login...")
-    tester.test_user_login_username()
-    tester.test_user_login_email()
-    tester.test_user_login_phone()
-    tester.test_user_login_invalid_credentials()
-    
-    # Phone-based Login Tests
-    print("\n📱 Testing Phone-based Login...")
-    tester.test_phone_login_otp_generation()
-    tester.test_phone_login_otp_verification()
-    tester.test_phone_login_invalid_otp()
-    
-    # Password Reset Tests
-    print("\n🔄 Testing Password Reset Flow...")
-    tester.test_forgot_password_request()
-    tester.test_reset_password_valid_token()
-    tester.test_reset_password_invalid_token()
-    
-    # Authentication Middleware Tests
-    print("\n🛡️ Testing Authentication Middleware...")
-    tester.test_get_current_user_valid_token()
-    tester.test_get_current_user_invalid_token()
-    
-    # User Management CRUD Tests
-    print("\n👥 Testing User Management CRUD...")
-    tester.test_unauthorized_access()
-    tester.test_get_users_list()
-    tester.test_create_user_admin()
-    tester.test_update_user()
-    tester.test_delete_user_admin()
-
-    # Test 4: Create multiple leads with different data
-    print("\n👥 Testing Lead Management...")
-    
-    test_leads = [
-        {
-            "name": "Rajesh Kumar",
-            "phone": "9876543210",
-            "email": "rajesh@example.com",
-            "budget": 500000,
-            "space_size": "2 BHK",
-            "location": "Bangalore",
-            "notes": "Interested in green building features",
-            "tags": ["premium", "eco-friendly"],
-            "assigned_to": "Sales Team A"
-        },
-        {
-            "name": "Priya Sharma",
-            "phone": "8765432109",
-            "email": "priya@example.com",
-            "budget": 750000,
-            "space_size": "3 BHK",
-            "location": "Mumbai",
-            "notes": "Looking for immediate possession",
-            "tags": ["urgent", "high-value"],
-            "assigned_to": "Sales Team B"
-        },
-        {
-            "name": "Amit Patel",
-            "phone": "7654321098",
-            "budget": 300000,
-            "location": "Pune",
-            "notes": "First-time buyer, needs guidance"
-        }
-    ]
-
-    created_lead_ids = []
-    for i, lead_data in enumerate(test_leads):
-        success, response = tester.test_create_lead(lead_data)
-        if success:
-            created_lead_ids.append(response['id'])
-
-    # Test 5: Get all leads
-    tester.test_get_leads()
-
-    # Test 6: Get specific lead
-    if created_lead_ids:
-        tester.test_get_lead_by_id(created_lead_ids[0])
-
-    # Test 7: Update lead status (simulate pipeline progression)
-    if created_lead_ids:
-        print("\n🔄 Testing Lead Status Updates...")
-        statuses = ["Qualified", "Proposal", "Negotiation", "Won"]
+    def test_specific_502_scenarios(self):
+        """Test scenarios that commonly cause 502 errors"""
+        print("\n🚨 TESTING 502 ERROR SCENARIOS")
+        print("=" * 35)
         
-        for i, status in enumerate(statuses):
-            if i < len(created_lead_ids):
-                tester.test_update_lead(created_lead_ids[i], {"status": status})
-
-    # Test 8: Create tasks
-    print("\n📋 Testing Task Management...")
+        # Test with different HTTP methods
+        endpoints_to_test = [
+            ("/leads", "GET"),
+            ("/tasks", "GET"), 
+            ("/workflows", "GET"),
+            ("/dashboard/stats", "GET")
+        ]
+        
+        for endpoint, method in endpoints_to_test:
+            print(f"\n🔍 Testing {method} {endpoint} for 502 errors...")
+            response = self.test_endpoint(method, endpoint, f"{method} {endpoint} - 502 Check")
+            
+            if response and response.status_code == 502:
+                print(f"🚨 CONFIRMED: 502 error on {endpoint}")
+                print(f"Response headers: {dict(response.headers)}")
+                print(f"Response body: {response.text[:500]}")
     
-    test_tasks = [
-        {
-            "title": "Follow up with Rajesh Kumar",
-            "description": "Call to discuss green building features and pricing",
-            "priority": "High",
-            "assigned_to": "Sales Team A",
-            "lead_id": created_lead_ids[0] if created_lead_ids else None,
-            "due_date": "2024-12-31T10:00:00Z"
-        },
-        {
-            "title": "Prepare proposal for Priya Sharma",
-            "description": "Create detailed proposal with floor plans",
-            "priority": "Urgent",
-            "assigned_to": "Sales Team B",
-            "lead_id": created_lead_ids[1] if len(created_lead_ids) > 1 else None,
-            "due_date": "2024-12-30T15:00:00Z"
-        },
-        {
-            "title": "Site visit coordination",
-            "description": "Arrange site visit for interested customers",
-            "priority": "Medium",
-            "assigned_to": "Operations Team"
-        }
-    ]
-
-    created_task_ids = []
-    for task_data in test_tasks:
-        success, response = tester.test_create_task(task_data)
-        if success:
-            created_task_ids.append(response['id'])
-
-    # Test 9: Get all tasks
-    tester.test_get_tasks()
-
-    # Test 10: Update task status
-    if created_task_ids:
-        print("\n✅ Testing Task Status Updates...")
-        tester.test_update_task(created_task_ids[0], {"status": "In Progress"})
-        if len(created_task_ids) > 1:
-            tester.test_update_task(created_task_ids[1], {"status": "Completed"})
-
-    # Test 11: Dashboard stats after changes
-    print("\n📊 Testing Dashboard Stats After Changes...")
-    tester.test_dashboard_stats()
-
-    # Test 12: Error handling - invalid lead ID
-    print("\n🚫 Testing Error Handling...")
-    tester.run_test("Get Invalid Lead", "GET", "leads/invalid-id", 404)
-
-    # Test 13: Delete a lead
-    if created_lead_ids:
-        print("\n🗑️ Testing Lead Deletion...")
-        tester.test_delete_lead(created_lead_ids[-1])
-
-    # Final Results
-    print("\n" + "=" * 50)
-    print(f"📊 FINAL TEST RESULTS")
-    print(f"Tests Run: {tester.tests_run}")
-    print(f"Tests Passed: {tester.tests_passed}")
-    print(f"Tests Failed: {tester.tests_run - tester.tests_passed}")
-    print(f"Success Rate: {(tester.tests_passed/tester.tests_run*100):.1f}%")
+    def run_comprehensive_test(self):
+        """Run all tests"""
+        print("🎯 BACKEND API TESTING FOR 502 ERROR RESOLUTION")
+        print("=" * 55)
+        print(f"🌐 Backend URL: {BACKEND_URL}")
+        print(f"⏰ Timeout: {TIMEOUT}s")
+        print(f"📅 Test Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # Test backend health first
+        self.test_backend_health()
+        
+        # Test critical endpoints
+        self.test_critical_endpoints()
+        
+        # Test specific 502 scenarios
+        self.test_specific_502_scenarios()
+        
+        # Print summary
+        self.print_summary()
     
-    if tester.tests_passed == tester.tests_run:
-        print("🎉 All tests passed! Backend API is working correctly.")
-        return 0
-    else:
-        print("⚠️ Some tests failed. Please check the backend implementation.")
-        return 1
+    def print_summary(self):
+        """Print test summary"""
+        print("\n" + "=" * 60)
+        print("📊 TEST SUMMARY")
+        print("=" * 60)
+        print(f"Total Tests: {self.total_tests}")
+        print(f"✅ Passed: {self.passed_tests}")
+        print(f"❌ Failed: {self.failed_tests}")
+        print(f"📈 Success Rate: {(self.passed_tests/self.total_tests*100):.1f}%" if self.total_tests > 0 else "0%")
+        
+        if self.failed_tests > 0:
+            print("\n🚨 FAILED TESTS:")
+            for result in self.results:
+                if result["status"] == "FAIL":
+                    print(f"   ❌ {result['test']}: {result['details']}")
+        
+        print("\n🎯 CRITICAL FINDINGS:")
+        
+        # Check for 502 errors specifically
+        has_502_errors = any("502" in result["details"] for result in self.results if result["status"] == "FAIL")
+        
+        if has_502_errors:
+            print("🚨 502 BACKEND GATEWAY ERRORS DETECTED:")
+            for result in self.results:
+                if result["status"] == "FAIL" and "502" in result["details"]:
+                    print(f"   🔴 {result['test']}")
+            print("\n💡 RECOMMENDED ACTIONS:")
+            print("   1. Check if backend service is running")
+            print("   2. Verify supervisor backend logs")
+            print("   3. Check for missing dependencies")
+            print("   4. Restart backend service if needed")
+        else:
+            print("✅ No 502 errors detected in tested endpoints")
+        
+        # Check for working endpoints
+        working_endpoints = [result["test"] for result in self.results if result["status"] == "PASS"]
+        if working_endpoints:
+            print(f"\n✅ WORKING ENDPOINTS ({len(working_endpoints)}):")
+            for endpoint in working_endpoints:
+                print(f"   ✅ {endpoint}")
 
 if __name__ == "__main__":
-    sys.exit(main())
+    print("🚀 Starting Backend API Testing for 502 Error Resolution...")
+    tester = BackendTester()
+    tester.run_comprehensive_test()
+    
+    # Exit with appropriate code
+    if tester.failed_tests > 0:
+        print(f"\n⚠️ Testing completed with {tester.failed_tests} failures")
+        sys.exit(1)
+    else:
+        print(f"\n🎉 All tests passed successfully!")
+        sys.exit(0)
