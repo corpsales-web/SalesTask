@@ -1,6 +1,6 @@
 {
   "timestamp": "2025-09-15T11:24:33.480629",
-  "backend_url": "https://aavana-greens.preview.emergentagent.com",
+  "backend_url": "https://green-crm-suite.preview.emergentagent.com",
   "summary": {
     "total_tests": 7,
     "working_tests": 5,
@@ -28,7 +28,7 @@
       {
         "endpoint": "/auth/login",
         "method": "POST",
-        "url": "https://aavana-greens.preview.emergentagent.com/api/auth/login",
+        "url": "https://green-crm-suite.preview.emergentagent.com/api/auth/login",
         "status_code": 200,
         "response_time_ms": 52.35,
         "error": null,
@@ -60,7 +60,7 @@
       {
         "endpoint": "/hrms/face-checkin",
         "method": "POST",
-        "url": "https://aavana-greens.preview.emergentagent.com/api/hrms/face-checkin",
+        "url": "https://green-crm-suite.preview.emergentagent.com/api/hrms/face-checkin",
         "status_code": 500,
         "response_time_ms": 14.44,
         "error": null,
@@ -75,7 +75,7 @@
       {
         "endpoint": "/upload/file",
         "method": "POST",
-        "url": "https://aavana-greens.preview.emergentagent.com/api/upload/file",
+        "url": "https://green-crm-suite.preview.emergentagent.com/api/upload/file",
         "status_code": 500,
         "response_time_ms": 57.13,
         "error": null,
@@ -90,7 +90,7 @@
       {
         "endpoint": "/",
         "method": "GET",
-        "url": "https://aavana-greens.preview.emergentagent.com/api/",
+        "url": "https://green-crm-suite.preview.emergentagent.com/api/",
         "status_code": 200,
         "response_time_ms": 98.23,
         "error": null,
@@ -103,7 +103,7 @@
       {
         "endpoint": "/dashboard/stats",
         "method": "GET",
-        "url": "https://aavana-greens.preview.emergentagent.com/api/dashboard/stats",
+        "url": "https://green-crm-suite.preview.emergentagent.com/api/dashboard/stats",
         "status_code": 200,
         "response_time_ms": 328.88,
         "error": null,
@@ -124,7 +124,7 @@
       {
         "endpoint": "/leads",
         "method": "GET",
-        "url": "https://aavana-greens.preview.emergentagent.com/api/leads",
+        "url": "https://green-crm-suite.preview.emergentagent.com/api/leads",
         "status_code": 200,
         "response_time_ms": 8.79,
         "error": null,
@@ -705,7 +705,7 @@
       {
         "endpoint": "/tasks",
         "method": "GET",
-        "url": "https://aavana-greens.preview.emergentagent.com/api/tasks",
+        "url": "https://green-crm-suite.preview.emergentagent.com/api/tasks",
         "status_code": 200,
         "response_time_ms": 9.76,
         "error": null,

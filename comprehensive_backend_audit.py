@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 import uuid
 
 class ComprehensiveBackendAudit:
-    def __init__(self, base_url="https://aavana-greens.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://green-crm-suite.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
@@ -112,7 +112,7 @@ class ComprehensiveBackendAudit:
         success, _ = self.run_test("Backend Health Check", "GET", "", 200)
         
         # CORS check
-        headers = {'Origin': 'https://aavana-greens.preview.emergentagent.com'}
+        headers = {'Origin': 'https://green-crm-suite.preview.emergentagent.com'}
         self.run_test("CORS Configuration", "GET", "", 200, headers=headers)
         
         return success

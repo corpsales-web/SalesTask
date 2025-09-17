@@ -146,7 +146,7 @@ User Feedback: Success toasts and error handling
 
 ## QA Verification
 
-**Staging URL**: https://aavana-greens.preview.emergentagent.com
+**Staging URL**: https://green-crm-suite.preview.emergentagent.com
 
 **Demo Steps for Complete Flow**:
 

@@ -43,7 +43,7 @@ def test_endpoint(name, url, method="GET", data=None, timeout=15):
 
 def main():
     # Use external URL as specified in review request
-    base_url = "https://aavana-greens.preview.emergentagent.com/api"
+    base_url = "https://green-crm-suite.preview.emergentagent.com/api"
     
     print("🎯 COMPREHENSIVE BACKEND TESTING FOR REVIEW REQUEST")
     print("=" * 80)

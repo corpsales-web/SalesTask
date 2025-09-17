@@ -17,7 +17,7 @@ load_dotenv('/app/backend/.env')
 load_dotenv('/app/frontend/.env')
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://aavana-greens.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://green-crm-suite.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 EMERGENT_LLM_KEY = os.getenv('EMERGENT_LLM_KEY')
 

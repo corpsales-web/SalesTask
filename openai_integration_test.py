@@ -28,7 +28,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 # Configuration
-BACKEND_URL = "https://aavana-greens.preview.emergentagent.com/api"
+BACKEND_URL = "https://green-crm-suite.preview.emergentagent.com/api"
 TEST_SESSION_ID = str(uuid.uuid4())
 
 class OpenAIIntegrationTester:

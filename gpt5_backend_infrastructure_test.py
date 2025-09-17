@@ -13,7 +13,7 @@ from datetime import datetime
 import uuid
 
 # Configuration
-BACKEND_URL = "https://aavana-greens.preview.emergentagent.com/api"
+BACKEND_URL = "https://green-crm-suite.preview.emergentagent.com/api"
 TIMEOUT = 30
 
 class GPT5BackendInfrastructureTester:

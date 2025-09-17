@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import time
 
 class ExtendedAavanaGreensTester:
-    def __init__(self, base_url="https://aavana-greens.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://green-crm-suite.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

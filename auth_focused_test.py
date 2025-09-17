@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 
 class AuthenticationTester:
-    def __init__(self, base_url="https://aavana-greens.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://green-crm-suite.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.test_results = []
         self.auth_token = None

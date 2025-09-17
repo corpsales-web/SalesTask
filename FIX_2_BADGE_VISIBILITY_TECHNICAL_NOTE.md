@@ -121,7 +121,7 @@ Screenshots captured for all viewport sizes showing:
 
 ## QA Verification
 
-**Staging URL**: https://aavana-greens.preview.emergentagent.com
+**Staging URL**: https://green-crm-suite.preview.emergentagent.com
 
 **Test Steps:**
 1. **Desktop Testing (1920x1080)**:
