@@ -347,7 +347,7 @@ const App = () => {
                     maxFileSize={100 * 1024 * 1024}
                   />
                   <button
-                    onClick={() => setShowVoiceModal(true)}
+                    onClick={() => setShowVoiceSTTModal(true)}
                     className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center"
                   >
                     <Mic className="h-4 w-4 mr-2" />
