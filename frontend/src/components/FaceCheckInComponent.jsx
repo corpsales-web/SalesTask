@@ -388,15 +388,20 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
 
       {capturedImage && (
         <div className="text-center">
-          <div className="mb-4">
+          <div className="mb-4 border rounded-lg overflow-hidden">
             <img
               src={capturedImage}
-              alt="Captured"
-              className="w-full rounded-lg border"
+              alt="Captured Photo"
+              style={{
+                width: '100%',
+                height: 'auto',
+                maxHeight: '400px',
+                objectFit: 'cover',
+                display: 'block'
+              }}
               onLoad={() => console.log('✅ Captured image loaded in UI')}
               onError={(e) => console.log('❌ Captured image failed to load:', e)}
             />
-            <p className="text-xs text-gray-500 mt-1">📸 Captured Photo ({capturedImage.length} bytes)</p>
           </div>
           <div className="flex space-x-2">
             <button
