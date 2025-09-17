@@ -37,12 +37,26 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         // Set up video element
         if (videoRef.current) {
           videoRef.current.srcObject = result.stream;
+          
+          // Wait for metadata to load before playing
           videoRef.current.onloadedmetadata = () => {
-            videoRef.current.play().catch(err => {
+            console.log('✅ Video metadata loaded, starting playback');
+            videoRef.current.play().then(() => {
+              console.log('✅ Video playing successfully');
+            }).catch(err => {
               console.error('Video play failed:', err);
               setError('📷 Failed to start video preview. Camera may still work for capture.');
             });
           };
+          
+          // Handle video errors
+          videoRef.current.onerror = (err) => {
+            console.error('Video element error:', err);
+            setError('📷 Video display error. Please try again.');
+          };
+          
+          // Force load the video
+          videoRef.current.load();
         }
         
         setCameraStream(result.stream);
