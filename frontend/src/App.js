@@ -33,7 +33,7 @@ import { useToast } from './hooks/use-toast';
 import { toast } from './hooks/use-toast';
 import indianCitiesStates from './data/indianCitiesStates';
 // Import new tab system
-import { TabProvider } from './contexts/TabContext';
+import { TabProvider, useTab } from './contexts/TabContext';
 import TabNavigation from './components/TabNavigation'; 
 import TabContent from './components/TabContent';
 
