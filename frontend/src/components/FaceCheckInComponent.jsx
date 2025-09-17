@@ -357,7 +357,7 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
 
       {cameraActive && (
         <div className="text-center">
-          <div className="mb-4 bg-black rounded-lg overflow-hidden">
+          <div className="mb-4 bg-black rounded-lg overflow-hidden relative">
             <video
               ref={videoRef}
               autoPlay={true}
