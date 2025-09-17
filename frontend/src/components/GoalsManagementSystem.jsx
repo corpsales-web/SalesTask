@@ -49,29 +49,14 @@ const GoalsManagementSystem = ({ isOpen, onClose }) => {
   // Initialize data
   useEffect(() => {
     if (isOpen) {
-      initializeGoalsData();
+      loadGoalsData();
     }
   }, [isOpen]);
 
-  const initializeGoalsData = async () => {
+  const loadGoalsData = async () => {
     setLoading(true);
     try {
-      // Initialize teams
-      setTeams([
-        { id: '1', name: 'Sales Team', members: ['Rajesh Kumar', 'Priya Sharma'] },
-        { id: '2', name: 'Marketing Team', members: ['Amit Patel', 'Sneha Verma'] },
-        { id: '3', name: 'Operations Team', members: ['Vikram Singh', 'Pooja Mehta'] }
-      ]);
-
-      // Initialize goal templates
-      setGoalTemplates([
-        { id: '1', title: 'Monthly Sales Target', category: 'sales', target_value: 100000, unit: 'currency' },
-        { id: '2', title: 'Lead Generation', category: 'marketing', target_value: 50, unit: 'number' },
-        { id: '3', title: 'Customer Satisfaction', category: 'service', target_value: 95, unit: 'percentage' },
-        { id: '4', title: 'Project Completion', category: 'operations', target_value: 10, unit: 'number' }
-      ]);
-
-      // Initialize goals with comprehensive data
+      // Load enhanced demo data
       setGoals([
         {
           id: '1',
@@ -79,116 +64,128 @@ const GoalsManagementSystem = ({ isOpen, onClose }) => {
           description: 'Achieve quarterly sales revenue target for green building projects',
           type: 'team',
           category: 'sales',
-          target_value: 5000000,
-          current_value: 3250000,
+          target_value: 2500000,
+          current_value: 1650000,
           metric_unit: 'currency',
+          progress: 66,
           start_date: '2024-01-01',
           end_date: '2024-03-31',
-          assigned_to: ['1'], // Sales Team
-          priority: 'high',
           status: 'active',
-          progress: 65,
-          created_by: 'Admin',
-          created_at: '2024-01-01',
-          milestones: [
-            { title: 'Month 1 Target', target: 1500000, achieved: 1200000, status: 'completed' },
-            { title: 'Month 2 Target', target: 3000000, achieved: 2100000, status: 'completed' },
-            { title: 'Month 3 Target', target: 5000000, achieved: 3250000, status: 'in_progress' }
-          ],
-          kpis: [
-            { name: 'Deals Closed', current: 42, target: 60 },
-            { name: 'Average Deal Size', current: 77381, target: 83333 },
-            { name: 'Conversion Rate', current: 28, target: 35 }
-          ]
+          priority: 'high',
+          assigned_to: ['Sales Team', 'Business Development'],
+          created_at: '2024-01-01T00:00:00Z'
         },
         {
           id: '2',
-          title: 'Lead Generation - New Customers',
-          description: 'Generate high-quality leads for balcony garden solutions',
+          title: 'Lead Conversion Rate',
+          description: 'Improve lead to customer conversion rate',
           type: 'team',
           category: 'marketing',
-          target_value: 200,
-          current_value: 156,
-          metric_unit: 'number',
+          target_value: 35,
+          current_value: 28,
+          metric_unit: 'percentage',
+          progress: 80,
           start_date: '2024-01-01',
-          end_date: '2024-03-31',
-          assigned_to: ['2'], // Marketing Team
-          priority: 'high',
+          end_date: '2024-06-30',
           status: 'active',
-          progress: 78,
-          created_by: 'Marketing Head',
-          created_at: '2024-01-01',
-          milestones: [
-            { title: 'Digital Campaign Launch', target: 50, achieved: 62, status: 'completed' },
-            { title: 'Social Media Outreach', target: 100, achieved: 94, status: 'completed' },
-            { title: 'Referral Program', target: 200, achieved: 156, status: 'in_progress' }
-          ],
-          kpis: [
-            { name: 'Website Leads', current: 89, target: 120 },
-            { name: 'Social Media Leads', current: 41, target: 50 },
-            { name: 'Referral Leads', current: 26, target: 30 }
-          ]
+          priority: 'high',
+          assigned_to: ['Marketing Team', 'Sales Team'],
+          created_at: '2024-01-01T00:00:00Z'
         },
         {
           id: '3',
-          title: 'Individual Sales Performance - Rajesh',
-          description: 'Personal sales target for premium villa projects',
-          type: 'individual',
-          category: 'sales',
-          target_value: 1500000,
-          current_value: 1125000,
-          metric_unit: 'currency',
-          start_date: '2024-01-01',
-          end_date: '2024-03-31',
-          assigned_to: ['Rajesh Kumar'],
-          priority: 'medium',
-          status: 'active',
-          progress: 75,
-          created_by: 'Sales Manager',
-          created_at: '2024-01-01',
-          milestones: [
-            { title: 'First Month', target: 500000, achieved: 425000, status: 'completed' },
-            { title: 'Second Month', target: 1000000, achieved: 800000, status: 'completed' },
-            { title: 'Third Month', target: 1500000, achieved: 1125000, status: 'in_progress' }
-          ],
-          kpis: [
-            { name: 'Deals Closed', current: 15, target: 20 },
-            { name: 'Meetings Scheduled', current: 45, target: 60 },
-            { name: 'Follow-ups Completed', current: 89, target: 100 }
-          ]
-        },
-        {
-          id: '4',
-          title: 'Customer Satisfaction Score',
-          description: 'Maintain high customer satisfaction for completed projects',
+          title: 'Client Satisfaction Score',
+          description: 'Maintain high client satisfaction ratings',
           type: 'company',
-          category: 'service',
+          category: 'customer_service',
           target_value: 95,
           current_value: 92,
           metric_unit: 'percentage',
+          progress: 97,
           start_date: '2024-01-01',
           end_date: '2024-12-31',
-          assigned_to: ['1', '3'], // Sales and Operations
-          priority: 'high',
           status: 'active',
-          progress: 97,
-          created_by: 'CEO',
-          created_at: '2024-01-01',
-          milestones: [
-            { title: 'Q1 Survey', target: 90, achieved: 92, status: 'completed' },
-            { title: 'Q2 Survey', target: 93, achieved: 0, status: 'pending' },
-            { title: 'Q3 Survey', target: 94, achieved: 0, status: 'pending' }
-          ],
-          kpis: [
-            { name: 'Response Rate', current: 78, target: 85 },
-            { name: 'Net Promoter Score', current: 67, target: 70 },
-            { name: 'Repeat Customers', current: 34, target: 40 }
-          ]
+          priority: 'medium',
+          assigned_to: ['All Teams'],
+          created_at: '2024-01-01T00:00:00Z'
+        },
+        {
+          id: '4',
+          title: 'New Project Acquisitions',
+          description: 'Secure new landscaping and construction projects',
+          type: 'individual',
+          category: 'business_development',
+          target_value: 15,
+          current_value: 9,
+          metric_unit: 'number',
+          progress: 60,
+          start_date: '2024-01-01',
+          end_date: '2024-04-30',
+          status: 'active',
+          priority: 'high',
+          assigned_to: ['John Doe', 'Sarah Wilson'],
+          created_at: '2024-01-01T00:00:00Z'
         }
       ]);
 
+      setGoalTemplates([
+        {
+          id: '1',
+          name: 'Monthly Sales Revenue',
+          description: 'Standard monthly sales revenue target for green building projects',
+          category: 'sales',
+          target_type: 'currency',
+          default_duration: '1 month',
+          suggested_target: 400000
+        },
+        {
+          id: '2',
+          name: 'Lead Generation',
+          description: 'Monthly lead generation target for marketing campaigns',
+          category: 'marketing',
+          target_type: 'number',
+          default_duration: '1 month',
+          suggested_target: 50
+        },
+        {
+          id: '3',
+          name: 'Project Completion',
+          description: 'Quarterly project completion target',
+          category: 'operations',
+          target_type: 'number',
+          default_duration: '3 months',
+          suggested_target: 12
+        },
+        {
+          id: '4',
+          name: 'Customer Acquisition',
+          description: 'New customer acquisition goal',
+          category: 'business_development',
+          target_type: 'number',
+          default_duration: '1 month',
+          suggested_target: 8
+        },
+        {
+          id: '5',
+          name: 'Team Performance',
+          description: 'Overall team performance and productivity metrics',
+          category: 'hr',
+          target_type: 'percentage',
+          default_duration: '1 month',
+          suggested_target: 90
+        }
+      ]);
+
+      setTeams([
+        { id: '1', name: 'Sales Team', members: 8 },
+        { id: '2', name: 'Marketing Team', members: 5 },
+        { id: '3', name: 'Operations Team', members: 12 },
+        { id: '4', name: 'Business Development', members: 4 },
+        { id: '5', name: 'Customer Service', members: 6 }
+      ]);
+
     } catch (error) {
-      console.error('Goals initialization error:', error);
+      console.error('Error loading goals data:', error);
     } finally {
       setLoading(false);
     }
