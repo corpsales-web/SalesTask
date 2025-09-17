@@ -38,6 +38,9 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         if (videoRef.current) {
           const video = videoRef.current;
           
+          // Clear any existing source first
+          video.srcObject = null;
+          
           // Set up event handlers before setting srcObject
           video.onloadedmetadata = () => {
             console.log('✅ Video metadata loaded:', {
@@ -46,12 +49,14 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
               videoHeight: video.videoHeight
             });
             
+            // Force play for Safari
             video.play().then(() => {
               console.log('✅ Video playing successfully');
               setError(null);
             }).catch(err => {
               console.error('Video play failed:', err);
-              setError('📷 Failed to start video preview. Camera may still work for capture.');
+              // Don't set error here, video might still work
+              console.log('Continuing despite play error...');
             });
           };
           
@@ -68,8 +73,16 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
             console.log('✅ Video can start playing');
           };
           
+          // Safari-specific fixes
+          video.muted = true;
+          video.playsInline = true;
+          video.autoplay = true;
+          
           // Set the stream
           video.srcObject = result.stream;
+          
+          // Force load for Safari
+          video.load();
         }
         
         setCameraStream(result.stream);
