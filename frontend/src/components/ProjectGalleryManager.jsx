@@ -500,12 +500,21 @@ const ProjectGalleryManager = () => {
                                   image.category === 'progress' ? 'bg-blue-100 text-blue-700' :
                                   image.category === 'before' ? 'bg-gray-100 text-gray-700' :
                                   image.category === 'design' ? 'bg-purple-100 text-purple-700' :
+                                  image.category === 'solar' ? 'bg-yellow-100 text-yellow-700' :
+                                  image.category === 'interior' ? 'bg-indigo-100 text-indigo-700' :
                                   'bg-green-100 text-green-700'
                                 }`}>
                                   {image.category}
                                 </span>
-                                <span className="text-xs text-gray-500">
-                                  AI: {Math.round(image.confidence * 100)}%
+                                <div className="flex items-center space-x-1">
+                                  <span className="text-xs text-blue-600 font-medium">
+                                    🤖 AI: {Math.round(image.confidence * 100)}%
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="mt-2">
+                                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200">
+                                  {image.aiCategory.replace('_', ' ')}
                                 </span>
                               </div>
                               <div className="flex flex-wrap gap-1 mt-2">
