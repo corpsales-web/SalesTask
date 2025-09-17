@@ -4026,7 +4026,7 @@ async def aavana2_chat(request: ChatRequest):
         try:
             response = await asyncio.wait_for(
                 client.chat.completions.create(
-                    model="gpt-4o-mini",  # Cost-effective model
+                    model="gpt-5",  # Latest GPT-5 model
                     messages=messages,
                     max_tokens=1000,  # Limit for cost control
                     temperature=0.7,
