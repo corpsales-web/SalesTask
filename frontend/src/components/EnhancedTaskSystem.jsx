@@ -632,17 +632,13 @@ const EnhancedTaskSystem = () => {
           <p className="text-gray-600">Collaborative task management with AI automation</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => setShowVoiceModal(true)}>
-            <Mic className="h-4 w-4 mr-2" />
-            Voice Task
-          </Button>
           <Button variant="outline" onClick={() => setShowWorkflowModal(true)}>
             <Zap className="h-4 w-4 mr-2" />
             Workflow
           </Button>
           <Button onClick={() => setShowTaskModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            New Task
+            Create New Task
           </Button>
         </div>
       </div>
