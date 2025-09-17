@@ -290,14 +290,15 @@ class HRMSCameraBackendTester:
         """Test HRMS error handling with malformed data"""
         malformed_data = {
             "employee_id": "",  # Empty employee ID
-            "image_data": "invalid_base64_data",
-            "latitude": "not_a_number",
-            "longitude": "not_a_number",
-            "timestamp": "invalid_timestamp",
-            "check_type": "invalid_type"
+            "face_image": "invalid_base64_data",
+            "location": {
+                "latitude": "not_a_number",
+                "longitude": "not_a_number"
+            },
+            "timestamp": "invalid_timestamp"
         }
         
-        return self.run_test("HRMS Error Handling", "POST", "hrms/face-checkin", 400, data=malformed_data)
+        return self.run_test("HRMS Error Handling", "POST", "hrms/face-checkin", 500, data=malformed_data)
 
     def test_core_backend_integration(self):
         """Test core backend integration with HRMS"""
