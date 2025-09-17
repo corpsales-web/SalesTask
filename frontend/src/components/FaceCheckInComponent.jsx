@@ -86,90 +86,49 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
   }, [cameraStream]);
 
   const handleCapturePhoto = useCallback(() => {
-    console.log('🔍 Starting photo capture process...');
-    
-    if (!videoRef.current) {
-      setError('Video element not found');
+    if (!videoRef.current || !cameraStream) {
+      setError('Camera not ready');
       return;
     }
-    
-    if (!cameraStream) {
-      setError('Camera stream not available');
-      return;
-    }
-
-    const video = videoRef.current;
-    
-    // Check if video is ready immediately
-    console.log('🔍 Pre-capture video state:', {
-      readyState: video.readyState,
-      videoWidth: video.videoWidth,
-      videoHeight: video.videoHeight,
-      paused: video.paused
-    });
 
     try {
       setIsProcessing(true);
       setError(null);
       
-      // Function to attempt capture
-      const attemptCapture = () => {
-        const result = capturePhoto(video, 0.8);
-        
-        if (result.success) {
-          setCapturedImage(result.dataURL);
-          console.log('✅ Photo captured successfully:', result.dimensions);
-          
-          // Stop camera after successful capture
-          if (cameraStream) {
-            stopCameraStream(cameraStream);
-          }
-          setCameraStream(null);
-          setCameraActive(false);
-          setError(null);
-          
-        } else {
-          console.error('📸 Photo capture failed:', result.error);
-          setError(result.message || '📷 Failed to capture photo. Please try again.');
-        }
-        
-        setIsProcessing(false);
-      };
+      // Force capture using canvas directly from the stream
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
       
-      // If video isn't ready, wait for it
-      if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
-        console.log('⏳ Video not ready, waiting for loadeddata event...');
+      // Set canvas size
+      canvas.width = 640;
+      canvas.height = 480;
+      
+      // Draw from video (even if readyState is 0, this might work)
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Get image data
+      const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+      
+      if (dataURL && dataURL !== 'data:,') {
+        setCapturedImage(dataURL);
+        console.log('✅ Photo captured successfully');
         
-        const onVideoReady = () => {
-          console.log('✅ Video ready for capture:', {
-            readyState: video.readyState,
-            videoWidth: video.videoWidth,
-            videoHeight: video.videoHeight
-          });
-          video.removeEventListener('loadeddata', onVideoReady);
-          video.removeEventListener('canplay', onVideoReady);
-          attemptCapture();
-        };
-        
-        video.addEventListener('loadeddata', onVideoReady);
-        video.addEventListener('canplay', onVideoReady);
-        
-        // Fallback timeout
-        setTimeout(() => {
-          video.removeEventListener('loadeddata', onVideoReady);
-          video.removeEventListener('canplay', onVideoReady);
-          console.log('⏰ Timeout reached, attempting capture anyway...');
-          attemptCapture();
-        }, 3000);
-        
+        // Stop camera
+        if (cameraStream) {
+          stopCameraStream(cameraStream);
+        }
+        setCameraStream(null);
+        setCameraActive(false);
+        setError(null);
       } else {
-        // Video is ready, capture immediately
-        attemptCapture();
+        setError('📷 Failed to capture photo. Please try again.');
       }
       
     } catch (err) {
-      console.error('🚨 Unexpected capture error:', err);
-      setError('📷 Failed to capture photo. Please try again or use GPS Check-in.');
+      console.error('Capture error:', err);
+      setError('📷 Failed to capture photo. Please try again.');
+    } finally {
       setIsProcessing(false);
     }
   }, [cameraStream]);
