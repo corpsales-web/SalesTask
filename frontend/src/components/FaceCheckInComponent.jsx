@@ -354,8 +354,9 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
               autoPlay
               playsInline
               muted
+              controls={false}
               className="w-full"
-              style={{ transform: 'scaleX(-1)' }}
+              style={{ transform: 'scaleX(-1)', minHeight: '200px' }}
             />
           </div>
           <div className="flex space-x-2">
