@@ -34,24 +34,20 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       });
 
       if (result.success) {
-        // Simple, direct Safari approach
-        if (videoRef.current) {
-          const video = videoRef.current;
-          
-          // Direct assignment - no complex setup
-          video.srcObject = result.stream;
-          video.muted = true;
-          video.autoplay = true;
-          video.playsInline = true;
-          
-          // Simple play call
-          video.play().catch(() => {
-            // Ignore play errors, focus on stream display
-          });
-        }
-        
         setCameraStream(result.stream);
         setCameraActive(true);
+        
+        // Simple video setup after state is set
+        setTimeout(() => {
+          if (videoRef.current && result.stream) {
+            const video = videoRef.current;
+            video.srcObject = result.stream;
+            video.onloadedmetadata = () => {
+              video.play().catch(console.log);
+            };
+          }
+        }, 100);
+        
         console.log('✅ Camera stream obtained successfully');
         
       } else {
