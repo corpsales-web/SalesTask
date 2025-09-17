@@ -183,13 +183,14 @@ class HRMSCameraBackendTester:
         gps_checkin_data = {
             "employee_id": "EMP002",
             "employee_name": "Priya Sharma",
-            "latitude": 28.6139,  # Delhi coordinates
-            "longitude": 77.2090,
-            "accuracy": 8.2,
-            "altitude": 216.5,
+            "location": {
+                "latitude": 28.6139,  # Delhi coordinates
+                "longitude": 77.2090,
+                "accuracy": 8.2,
+                "altitude": 216.5,
+                "address": "Aavana Greens Office - Delhi"
+            },
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "check_type": "check_out",
-            "location_name": "Aavana Greens Office - Delhi",
             "device_info": {
                 "device_type": "mobile",
                 "browser": "Safari",
