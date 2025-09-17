@@ -59,7 +59,6 @@ const App = () => {
   const [selectedLead, setSelectedLead] = useState(null);
   const [showFileUploadModal, setShowFileUploadModal] = useState(false);
   const [showVoiceSTTModal, setShowVoiceSTTModal] = useState(false);
-  const [showFaceCheckInModal, setShowFaceCheckInModal] = useState(false);
   const [showLeadActionsPanel, setShowLeadActionsPanel] = useState(false);
   const [showAddLeadModal, setShowAddLeadModal] = useState(false);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
