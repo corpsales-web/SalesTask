@@ -68,9 +68,9 @@ class EnhancedAIService:
     """Enhanced AI service with multi-model support"""
     
     def __init__(self):
-        self.api_key = os.getenv('EMERGENT_LLM_KEY')
+        self.api_key = os.getenv('OPENAI_API_KEY') or os.getenv('EMERGENT_LLM_KEY')
         if not self.api_key:
-            raise ValueError("EMERGENT_LLM_KEY not found in environment variables")
+            raise ValueError("OpenAI API key not found in environment variables")
         
         # Default configurations for different use cases
         self.model_configs = {
