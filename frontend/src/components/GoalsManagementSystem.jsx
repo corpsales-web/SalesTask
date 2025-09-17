@@ -538,10 +538,157 @@ const GoalsManagementSystem = ({ isOpen, onClose }) => {
               </div>
             )}
             {!loading && activeView === 'analytics' && (
-              <div className="text-center py-12">
-                <PieChart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Advanced Analytics</h3>
-                <p className="text-gray-600">Detailed goal analytics and insights coming soon</p>
+              <div className="space-y-6">
+                {/* Overall Performance Metrics */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-2">
+                        <Target className="h-5 w-5 text-blue-600" />
+                        <h3 className="font-semibold">Total Goals</h3>
+                      </div>
+                      <p className="text-3xl font-bold mt-2">{goals.length}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {getGoalsByStatus('active').length} active • {getGoalsByStatus('completed').length} completed
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-2">
+                        <TrendingUp className="h-5 w-5 text-green-600" />
+                        <h3 className="font-semibold">Average Progress</h3>
+                      </div>
+                      <p className="text-3xl font-bold mt-2">{getAverageProgress()}%</p>
+                      <Progress value={getAverageProgress()} className="mt-2" />
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-2">
+                        <Award className="h-5 w-5 text-purple-600" />
+                        <h3 className="font-semibold">Achievement Rate</h3>
+                      </div>
+                      <p className="text-3xl font-bold mt-2">
+                        {goals.length > 0 ? Math.round((goals.filter(g => g.progress >= 100).length / goals.length) * 100) : 0}%
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {goals.filter(g => g.progress >= 100).length} of {goals.length} goals achieved
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Goals by Category */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <PieChart className="h-5 w-5" />
+                      <span>Goals by Category</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {Object.entries(getGoalsByCategory()).map(([category, categoryGoals]) => {
+                        const avgProgress = Math.round(
+                          categoryGoals.reduce((sum, goal) => sum + goal.progress, 0) / categoryGoals.length
+                        );
+                        const categoryColors = {
+                          sales: 'bg-blue-500',
+                          marketing: 'bg-green-500',
+                          customer_service: 'bg-purple-500',
+                          business_development: 'bg-orange-500',
+                          operations: 'bg-indigo-500',
+                          hr: 'bg-pink-500'
+                        };
+                        
+                        return (
+                          <div key={category} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-3 h-3 rounded-full ${categoryColors[category] || 'bg-gray-500'}`}></div>
+                              <span className="font-medium capitalize">{category.replace('_', ' ')}</span>
+                              <Badge variant="outline">{categoryGoals.length} goals</Badge>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-gray-600">{avgProgress}% avg</span>
+                              <Progress value={avgProgress} className="w-20" />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Priority Analysis */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <BarChart3 className="h-5 w-5" />
+                      <span>Priority Distribution</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {['high', 'medium', 'low'].map(priority => {
+                        const priorityGoals = goals.filter(g => g.priority === priority);
+                        const priorityColors = {
+                          high: 'bg-red-500',
+                          medium: 'bg-yellow-500',
+                          low: 'bg-green-500'
+                        };
+                        
+                        return (
+                          <div key={priority} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-3 h-3 rounded-full ${priorityColors[priority]}`}></div>
+                              <span className="font-medium capitalize">{priority} Priority</span>
+                              <Badge variant="outline">{priorityGoals.length} goals</Badge>
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {priorityGoals.length > 0 ? 
+                                Math.round(priorityGoals.reduce((sum, goal) => sum + goal.progress, 0) / priorityGoals.length) 
+                                : 0}% avg progress
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Top Performing Goals */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Star className="h-5 w-5" />
+                      <span>Top Performing Goals</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {goals
+                        .sort((a, b) => b.progress - a.progress)
+                        .slice(0, 3)
+                        .map(goal => (
+                          <div key={goal.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{goal.title}</h4>
+                              <p className="text-sm text-gray-600">{goal.category}</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center space-x-2">
+                                <Progress value={goal.progress} className="w-20" />
+                                <span className="text-sm font-semibold">{Math.round(goal.progress)}%</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>
