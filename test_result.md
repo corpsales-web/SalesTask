@@ -444,7 +444,7 @@ frontend:
   - task: "HRMS Face Check-in Error Fix"
     implemented: true
     working: true
-    file: "App.js"
+    file: "App.js, components/FaceCheckInComponent.jsx, utils/cameraUtils.js"
     stuck_count: 1
     priority: "high"
     needs_retesting: false
