@@ -640,6 +640,24 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
           </div>
         );
 
+      case 'send_gallery_images':
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-gray-600">Click the button below to open the gallery and select images/catalogues to send to this client.</p>
+              <button 
+                onClick={() => {
+                  setShowGalleryModal(true);
+                  setShowActionModal(false);
+                }}
+                className="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md"
+              >
+                🖼️ Open Gallery & Catalogues
+              </button>
+            </div>
+          </div>
+        );
+        
       case 'send_catalogue':
         return (
           <div className="space-y-4">
