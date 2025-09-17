@@ -48,8 +48,6 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
             
             video.play().then(() => {
               console.log('✅ Video playing successfully');
-              // Only set camera as active after video is actually playing
-              setCameraActive(true);
               setError(null);
             }).catch(err => {
               console.error('Video play failed:', err);
