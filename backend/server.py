@@ -3921,54 +3921,50 @@ class ChatResponse(BaseModel):
     timestamp: datetime
     actions: List[dict] = []
 
+# Optimized action generation (cached for speed)
+_ACTION_CACHE = {
+    'lead': [{"text": "View Leads", "action": "navigate", "target": "leads"}],
+    'task': [{"text": "Create Task", "action": "modal", "target": "add_task"}],
+    'hrms': [{"text": "HRMS Dashboard", "action": "navigate", "target": "hrms"}],
+    'marketing': [{"text": "Marketing Manager", "action": "navigate", "target": "marketing"}]
+}
+
 def generate_contextual_actions(user_input: str, ai_response: str) -> List[dict]:
-    """Generate contextual actions based on user input and AI response"""
-    actions = []
+    """Optimized action generation with caching"""
     input_lower = user_input.lower()
     
-    # Lead-related actions
-    if any(word in input_lower for word in ['lead', 'prospect', 'customer', 'client']):
-        actions.extend([
-            {"text": "View Leads", "action": "navigate", "target": "leads"},
-            {"text": "Add New Lead", "action": "modal", "target": "add_lead"}
-        ])
+    # Fast keyword matching
+    if 'lead' in input_lower or 'customer' in input_lower:
+        return _ACTION_CACHE['lead']
+    elif 'task' in input_lower or 'todo' in input_lower: 
+        return _ACTION_CACHE['task']
+    elif 'hrms' in input_lower or 'attendance' in input_lower:
+        return _ACTION_CACHE['hrms']
+    elif 'marketing' in input_lower or 'campaign' in input_lower:
+        return _ACTION_CACHE['marketing']
     
-    # Task-related actions  
-    if any(word in input_lower for word in ['task', 'todo', 'follow', 'reminder']):
-        actions.extend([
-            {"text": "Create Task", "action": "modal", "target": "add_task"},
-            {"text": "View Tasks", "action": "navigate", "target": "tasks"}
-        ])
-    
-    # HRMS-related actions
-    if any(word in input_lower for word in ['attendance', 'check-in', 'employee', 'hrms']):
-        actions.extend([
-            {"text": "HRMS Dashboard", "action": "navigate", "target": "hrms"},
-            {"text": "Face Check-in", "action": "modal", "target": "face_checkin"}
-        ])
-    
-    # Marketing-related actions
-    if any(word in input_lower for word in ['marketing', 'campaign', 'social', 'content']):
-        actions.extend([
-            {"text": "Marketing Manager", "action": "navigate", "target": "marketing"},
-            {"text": "Create Campaign", "action": "modal", "target": "create_campaign"}
-        ])
-    
-    # Training-related actions
-    if any(word in input_lower for word in ['help', 'train', 'learn', 'how to', 'tutorial']):
-        actions.extend([
-            {"text": "System Guide", "action": "info", "target": "guide"},
-            {"text": "Feature Tour", "action": "action", "target": "tour"}
-        ])
-    
-    # Analytics-related actions
-    if any(word in input_lower for word in ['report', 'analytics', 'data', 'insights']):
-        actions.extend([
-            {"text": "View Analytics", "action": "navigate", "target": "analytics"},
-            {"text": "Generate Report", "action": "action", "target": "generate_report"}
-        ])
-    
-    return actions[:4]  # Limit to 4 actions
+    return []  # No actions for faster response
+
+async def save_chat_messages_async(request: ChatRequest, ai_response: str, session_id: str):
+    """Save chat messages asynchronously without blocking response"""
+    try:
+        # Save user message
+        user_msg = ChatMessage(
+            role="user", 
+            content=request.message,
+            session_id=session_id
+        )
+        await db.chat_messages.insert_one(prepare_for_mongo(user_msg.dict()))
+        
+        # Save AI message  
+        ai_msg = ChatMessage(
+            role="assistant",
+            content=ai_response, 
+            session_id=session_id
+        )
+        await db.chat_messages.insert_one(prepare_for_mongo(ai_msg.dict()))
+    except Exception as e:
+        logger.error(f"Error saving chat messages: {e}")  # Log but don't block
 
 # Aavana 2.0 Chat Endpoints
 @api_router.post("/aavana2/chat", response_model=ChatResponse)
