@@ -4008,27 +4008,22 @@ async def aavana2_chat(request: ChatRequest):
         # Create user message
         user_message = UserMessage(text=request.message)
         
-        # Save user message to database
-        user_msg = ChatMessage(
-            role="user",
-            content=request.message,
-            session_id=request.session_id
-        )
-        await db.chat_messages.insert_one(prepare_for_mongo(user_msg.dict()))
-        
-        # Get AI response
+        # Get AI response (optimized - no database operations during processing)
         ai_response = await chat.send_message(user_message)
         
-        # Generate contextual actions based on response
+        # Generate contextual actions (optimized)
         actions = generate_contextual_actions(request.message, ai_response)
         
-        # Save AI response to database
+        # Create response message
         ai_msg = ChatMessage(
             role="assistant",
             content=ai_response,
             session_id=request.session_id
         )
-        await db.chat_messages.insert_one(prepare_for_mongo(ai_msg.dict()))
+        
+        # Save messages asynchronously (non-blocking)
+        import asyncio
+        asyncio.create_task(save_chat_messages_async(request, ai_response, request.session_id))
         
         return ChatResponse(
             message=ai_response,
