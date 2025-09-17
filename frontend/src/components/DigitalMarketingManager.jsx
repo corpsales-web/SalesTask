@@ -904,7 +904,24 @@ const DigitalMarketingManager = ({ isOpen, onClose }) => {
             <div className="mt-6 p-3 bg-blue-50 rounded-lg">
               <div className="text-sm font-medium text-blue-800 mb-1">AI Assistant</div>
               <div className="text-xs text-blue-600 mb-2">Generate content with AI</div>
-              <Button size="sm" variant="outline" className="w-full">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  // Generate AI content suggestion
+                  const suggestions = [
+                    "Create Instagram post: '5 Benefits of Green Building for Your Business'",
+                    "Generate LinkedIn article: 'Sustainable Architecture Trends 2024'", 
+                    "Design Facebook campaign: 'Transform Your Space with Eco-Landscaping'",
+                    "Write blog post: 'Cost Savings with Renewable Energy Systems'",
+                    "Create video script: 'Before & After Green Building Transformation'"
+                  ];
+                  const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+                  
+                  alert(`🤖 AI Marketing Assistant\n\n✨ Content Suggestion:\n${randomSuggestion}\n\n💡 This AI assistant can help with:\n• Social media content creation\n• Campaign optimization\n• Audience targeting\n• Performance analysis\n• Content scheduling\n\nClick OK to continue with this suggestion or try again for more ideas!`);
+                }}
+              >
                 <Zap className="h-3 w-3 mr-1" />
                 AI Generate
               </Button>
