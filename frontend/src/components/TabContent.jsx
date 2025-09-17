@@ -25,7 +25,10 @@ const TabContent = ({
   tasks,
   showLeadActionsPanel,
   selectedLead,
+  leadActionType,
   setShowLeadActionsPanel,
+  setSelectedLead,
+  setLeadActionType,
   onActionComplete
 }) => {
   const { activeTab, lastUpdated } = useTab();
