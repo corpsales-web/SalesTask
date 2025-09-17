@@ -58,8 +58,8 @@
 ##   test_priority: "high_first"
 ##
 ## agent_communication:
-##     -agent: "main"  # or "testing" or "user"
-##     -message: "Communication message between agents"
+##     -agent: "main"
+##     -message: "Starting comprehensive fix for Workflow Button and Digital Marketing Manager. User has paid for OpenAI API, need to implement comprehensive AI-powered marketing manager with reels, UGC content, AI influencers, multi-platform strategy capabilities. Also investigating workflow button functionality issues."
 
 # Protocol Guidelines for Main agent
 #
