@@ -3993,13 +3993,13 @@ async def aavana2_chat(request: ChatRequest):
             system_message=system_message
         )
         
-        # Set model based on request
-        if request.provider == "anthropic":
-            chat.with_model("anthropic", "claude-3-7-sonnet-20250219")
-        elif request.provider == "gemini":
-            chat.with_model("gemini", "gemini-2.0-flash")
-        else:  # Default to OpenAI
-            chat.with_model("openai", request.model)
+        # Optimized model selection for speed
+        if request.provider == "gemini":
+            chat.with_model("gemini", "gemini-2.0-flash-exp")  # Fastest model
+        elif request.provider == "anthropic":
+            chat.with_model("anthropic", "claude-3-haiku-20240307")  # Fastest Claude
+        else:  # Default to fastest OpenAI
+            chat.with_model("openai", "gpt-4o-mini")  # Much faster than gpt-4o
         
         # Create user message
         user_message = UserMessage(text=request.message)
