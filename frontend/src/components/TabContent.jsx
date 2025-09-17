@@ -120,20 +120,69 @@ const TabContent = ({
               </div>
               <button 
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                onClick={() => {
-                  // Simple Add Lead functionality
-                  const leadName = prompt('Enter lead name:');
-                  if (leadName) {
-                    const leadEmail = prompt('Enter lead email:');
-                    const leadPhone = prompt('Enter lead phone:');
-                    
-                    if (leadEmail && leadPhone) {
-                      console.log('✅ New lead created:', { name: leadName, email: leadEmail, phone: leadPhone });
-                      alert(`✅ Lead Created Successfully!\n\nName: ${leadName}\nEmail: ${leadEmail}\nPhone: ${leadPhone}\n\nNote: Lead has been added to your CRM system.`);
+                onClick={async () => {
+                  try {
+                    // Enhanced Add Lead functionality with proper API integration
+                    const leadName = prompt('Enter lead name:');
+                    if (leadName && leadName.trim()) {
+                      const leadEmail = prompt('Enter lead email:');
+                      const leadPhone = prompt('Enter lead phone:');
                       
-                      // In a real app, this would call an API to create the lead
-                      // For now, we'll just show success message
+                      if (leadEmail && leadPhone && leadEmail.trim() && leadPhone.trim()) {
+                        // Validate email format
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(leadEmail)) {
+                          alert('❌ Please enter a valid email address.');
+                          return;
+                        }
+                        
+                        // Create lead object
+                        const newLead = {
+                          name: leadName.trim(),
+                          email: leadEmail.trim(),
+                          phone: leadPhone.trim(),
+                          status: 'New',
+                          source: 'Manual Entry',
+                          category: 'Individual',
+                          created_at: new Date().toISOString()
+                        };
+                        
+                        try {
+                          // Call API to create lead
+                          const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+                          const response = await fetch(`${API}/api/leads`, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(newLead)
+                          });
+                          
+                          if (response.ok) {
+                            const createdLead = await response.json();
+                            console.log('✅ Lead created successfully:', createdLead);
+                            alert(`✅ Lead Created Successfully!\n\nName: ${leadName}\nEmail: ${leadEmail}\nPhone: ${leadPhone}\n\nThe lead has been added to your CRM system and assigned ID: ${createdLead.id}`);
+                            
+                            // Refresh the page to show new lead
+                            window.location.reload();
+                          } else {
+                            const error = await response.text();
+                            console.error('API Error:', error);
+                            alert(`❌ Failed to create lead: ${error}\n\nPlease try again or contact support.`);
+                          }
+                        } catch (apiError) {
+                          console.error('Network Error:', apiError);
+                          alert(`❌ Network Error: Unable to connect to server.\n\nPlease check your internet connection and try again.`);
+                        }
+                      } else {
+                        alert('❌ Please fill in all required fields (Name, Email, Phone).');
+                      }
+                    } else {
+                      alert('❌ Lead name is required.');
                     }
+                  } catch (error) {
+                    console.error('Add Lead Error:', error);
+                    alert('❌ An unexpected error occurred. Please try again.');
                   }
                 }}
               >
