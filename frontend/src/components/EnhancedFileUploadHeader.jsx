@@ -15,6 +15,7 @@ const EnhancedFileUploadHeader = ({ onFileUpload, maxFiles = 5, maxFileSize = 10
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
+  const [showCameraModal, setShowCameraModal] = useState(false);
 
   // File handling functions
   const handleFiles = (fileList) => {
