@@ -193,8 +193,35 @@ const TabContent = ({
               </div>
             </div>
             
-            {/* Enhanced HRMS System */}
-            <EnhancedHRMSSystem />
+            {/* Enhanced HRMS System with Face Check-in */}
+            <div className="space-y-6">
+              {/* Priority Face Check-in Section - Top Position */}
+              <Card className="bg-white shadow-lg border-2 border-blue-200">
+                <CardHeader className="bg-blue-50">
+                  <CardTitle className="flex items-center text-blue-800">
+                    <Camera className="h-5 w-5 mr-2" />
+                    Employee Check-in System
+                  </CardTitle>
+                  <CardDescription className="text-blue-600">
+                    Use face recognition or GPS for secure attendance tracking
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <FaceCheckInComponent 
+                    onCheckInComplete={(result) => {
+                      console.log('Check-in completed:', result);
+                      if (result.success) {
+                        // Handle successful check-in
+                        alert('✅ Check-in successful!');
+                      }
+                    }}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Enhanced HRMS System */}
+              <EnhancedHRMSSystem />
+            </div>
           </div>
         );
         
