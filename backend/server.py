@@ -3991,6 +3991,24 @@ async def aavana2_chat(request: ChatRequest):
         if not api_key:
             raise HTTPException(status_code=500, detail="LLM API key not configured")
         
+        # Check cache for instant responses to common queries
+        query_lower = request.message.lower().strip()
+        if query_lower in _RESPONSE_CACHE:
+            ai_response = _RESPONSE_CACHE[query_lower]
+            actions = generate_contextual_actions(request.message, ai_response)
+            
+            # Save to cache asynchronously  
+            import asyncio
+            asyncio.create_task(save_chat_messages_async(request, ai_response, request.session_id))
+            
+            return ChatResponse(
+                message=ai_response,
+                message_id=str(uuid.uuid4()),
+                session_id=request.session_id, 
+                timestamp=datetime.now(timezone.utc),
+                actions=actions
+            )
+        
         # Optimized system message for speed
         system_message = f"""You are Aavana 2.0, AI assistant for Aavana Greens CRM. Help with leads, HRMS, tasks, sales, and marketing. Be concise, helpful, and professional. Language: {request.language}"""
 
