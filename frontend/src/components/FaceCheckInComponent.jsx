@@ -38,51 +38,69 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         if (videoRef.current) {
           const video = videoRef.current;
           
-          // Clear any existing source first
+          // Safari-specific video setup approach
+          console.log('🔧 Setting up video for Safari...');
+          
+          // Reset video element completely
+          video.pause();
+          video.removeAttribute('src');
           video.srcObject = null;
           
-          // Set up event handlers before setting srcObject
-          video.onloadedmetadata = () => {
-            console.log('✅ Video metadata loaded:', {
-              readyState: video.readyState,
-              videoWidth: video.videoWidth,
-              videoHeight: video.videoHeight
-            });
-            
-            // Force play for Safari
-            video.play().then(() => {
-              console.log('✅ Video playing successfully');
-              setError(null);
-            }).catch(err => {
-              console.error('Video play failed:', err);
-              // Don't set error here, video might still work
-              console.log('Continuing despite play error...');
-            });
-          };
-          
-          video.onloadeddata = () => {
-            console.log('✅ Video data loaded - ready for capture');
-          };
-          
-          video.onerror = (err) => {
-            console.error('Video element error:', err);
-            setError('📷 Video display error. Please try again.');
-          };
-          
-          video.oncanplay = () => {
-            console.log('✅ Video can start playing');
-          };
-          
-          // Safari-specific fixes
+          // Set properties before assigning stream (Safari requirement)
           video.muted = true;
-          video.playsInline = true;
           video.autoplay = true;
+          video.playsInline = true;
+          video.controls = false;
           
-          // Set the stream
-          video.srcObject = result.stream;
-          
-          // Force load for Safari
-          video.load();
+          // Use a timeout to allow DOM to settle (Safari needs this)
+          setTimeout(() => {
+            console.log('🔧 Assigning stream to video element...');
+            video.srcObject = result.stream;
+            
+            // Multiple event handlers for different Safari versions
+            const handleMetadata = () => {
+              console.log('✅ Video metadata loaded:', {
+                readyState: video.readyState,
+                videoWidth: video.videoWidth,
+                videoHeight: video.videoHeight
+              });
+              
+              // Try to play immediately
+              video.play().catch(err => {
+                console.log('Play failed, but continuing:', err);
+              });
+            };
+            
+            const handleCanPlay = () => {
+              console.log('✅ Video can play');
+              video.play().catch(err => {
+                console.log('Play failed, but continuing:', err);
+              });
+            };
+            
+            const handleLoadedData = () => {
+              console.log('✅ Video data loaded');
+            };
+            
+            // Assign event handlers
+            video.addEventListener('loadedmetadata', handleMetadata);
+            video.addEventListener('canplay', handleCanPlay);
+            video.addEventListener('loadeddata', handleLoadedData);
+            
+            // Force load
+            video.load();
+            
+            // Fallback: try to play after a short delay regardless
+            setTimeout(() => {
+              if (video.paused) {
+                console.log('🔧 Fallback: Force playing video...');
+                video.play().catch(err => {
+                  console.log('Fallback play failed:', err);
+                });
+              }
+            }, 1000);
+            
+          }, 100);
         }
         
         setCameraStream(result.stream);
