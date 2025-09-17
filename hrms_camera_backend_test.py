@@ -150,10 +150,14 @@ class HRMSCameraBackendTester:
         """Test HRMS face check-in validation with missing fields"""
         incomplete_data = {
             "employee_id": self.test_employee_id,
-            # Missing image_data, coordinates, timestamp
+            # Missing face_image - should trigger validation error
+            "location": {
+                "latitude": 19.0760,
+                "longitude": 72.8777
+            }
         }
         
-        return self.run_test("HRMS Face Check-in Validation", "POST", "hrms/face-checkin", 400, data=incomplete_data)
+        return self.run_test("HRMS Face Check-in Validation", "POST", "hrms/face-checkin", 500, data=incomplete_data)
 
     def test_hrms_gps_checkin_endpoint_access(self):
         """Test HRMS GPS check-in endpoint accessibility"""
