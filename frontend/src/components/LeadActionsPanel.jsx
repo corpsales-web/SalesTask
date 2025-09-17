@@ -1106,6 +1106,13 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
           </div>
         </div>
       )}
+
+      {/* Client Gallery Manager Modal */}
+      <ClientGalleryManager 
+        isOpen={showGalleryModal}
+        onClose={() => setShowGalleryModal(false)}
+        selectedLead={leadData}
+      />
     </div>
   );
 };
