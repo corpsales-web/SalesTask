@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { Camera, Info, X } from 'lucide-react';
 import { initializeCamera, capturePhoto, stopCameraStream, checkCameraAvailability } from '../utils/cameraUtils';
+import ClientGalleryManager from './ClientGalleryManager';
 
 const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionType }) => {
   const [actions, setActions] = useState([]);
