@@ -73,6 +73,10 @@ const App = () => {
   const [showAavana2, setShowAavana2] = useState(false);
   const [aavana2Language, setAavana2Language] = useState('en');
   const [aavana2Messages, setAavana2Messages] = useState([]);
+  
+  // New Modal States
+  const [showGoalsModal, setShowGoalsModal] = useState(false);
+  const [showMarketingModal, setShowMarketingModal] = useState(false);
 
   // Form States
   const [newLead, setNewLead] = useState({
