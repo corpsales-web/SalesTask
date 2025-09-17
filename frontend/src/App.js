@@ -430,6 +430,24 @@ const App = () => {
             }}
           />
         )}
+
+        {/* Aavana 2.0 AI Assistant Modal */}
+        <Aavana2Assistant 
+          isOpen={showAavana2}
+          onClose={() => setShowAavana2(false)}
+        />
+
+        {/* Goals Management Modal */}
+        <GoalsManagementSystem 
+          isOpen={showGoalsModal}
+          onClose={() => setShowGoalsModal(false)}
+        />
+
+        {/* Digital Marketing Manager Modal */}
+        <DigitalMarketingManager 
+          isOpen={showMarketingModal}
+          onClose={() => setShowMarketingModal(false)}
+        />
       </div>
     </TabProvider>
   );
