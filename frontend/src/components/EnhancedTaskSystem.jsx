@@ -432,13 +432,14 @@ const EnhancedTaskSystem = () => {
   const renderTaskBoard = () => {
     const statuses = [
       { key: 'todo', title: 'To Do', color: 'bg-gray-100' },
+      { key: 'under_process', title: 'Under Process', color: 'bg-yellow-100' },
       { key: 'in_progress', title: 'In Progress', color: 'bg-blue-100' },
-      { key: 'review', title: 'Review', color: 'bg-yellow-100' },
+      { key: 'review', title: 'Review', color: 'bg-purple-100' },
       { key: 'completed', title: 'Completed', color: 'bg-green-100' }
     ];
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {statuses.map((status) => (
           <div key={status.key} className={`${status.color} p-4 rounded-lg`}>
             <div className="flex justify-between items-center mb-4">
@@ -473,6 +474,38 @@ const EnhancedTaskSystem = () => {
                         <p className="text-xs text-gray-500 mt-1">{task.progress}% complete</p>
                       </div>
                     )}
+                    
+                    {/* Task Status Update Buttons */}
+                    <div className="flex space-x-1 mb-3">
+                      {task.status !== 'under_process' && task.status !== 'completed' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-xs px-2 py-1 h-6"
+                          onClick={() => {
+                            updateTaskStatus(task.id, 'under_process');
+                            updateTaskProgress(task.id, 25);
+                          }}
+                        >
+                          Under Process
+                        </Button>
+                      )}
+                      {task.status !== 'completed' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-xs px-2 py-1 h-6 text-green-600 border-green-200 hover:bg-green-50"
+                          onClick={() => {
+                            updateTaskStatus(task.id, 'completed');
+                            updateTaskProgress(task.id, 100);
+                            // Send notification that task is completed
+                            sendNotification('system', `Task "${task.title}" has been marked as completed`);
+                          }}
+                        >
+                          Complete
+                        </Button>
+                      )}
+                    </div>
                     
                     <div className="flex justify-between items-center">
                       <div className="flex -space-x-2">
