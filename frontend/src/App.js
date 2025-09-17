@@ -389,7 +389,19 @@ const App = () => {
           </div>
         </main>
 
-        {/* Modals and other components would go here */}
+        {/* Face Check-In Modal */}
+        {showFaceCheckInModal && (
+          <FaceCheckInComponent 
+            onClose={() => setShowFaceCheckInModal(false)}
+            onCheckInComplete={(result) => {
+              console.log('Check-in completed:', result);
+              setShowFaceCheckInModal(false);
+              if (result.success) {
+                toast({ title: "Success", description: "Check-in completed successfully" });
+              }
+            }}
+          />
+        )}
       </div>
     </TabProvider>
   );
