@@ -334,10 +334,7 @@ const App = () => {
     const handleNavigateToTask = (event) => {
       const { taskId } = event.detail;
       console.log(`🔍 Navigating to task: ${taskId}`);
-      // Navigate to tasks tab
-      if (typeof setActiveTab === 'function') {
-        setActiveTab('tasks');
-      }
+      // Navigate to tasks tab - would need TabContext integration
       // You can add logic here to highlight specific task
     };
 
