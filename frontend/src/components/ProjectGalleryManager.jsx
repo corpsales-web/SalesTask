@@ -367,16 +367,19 @@ const ProjectGalleryManager = () => {
                     </select>
 
                     {/* View Mode Toggle */}
-                    <div className="flex items-center border border-gray-300 rounded-lg">
+                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                       <button
                         onClick={() => setViewMode('grid')}
-                        className={`p-2 ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'}`}
+                        className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                        title="Grid View"
                       >
                         <Grid className="h-4 w-4" />
                       </button>
+                      <div className="w-px bg-gray-300"></div>
                       <button
                         onClick={() => setViewMode('list')}
-                        className={`p-2 ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'}`}
+                        className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+                        title="List View"
                       >
                         <List className="h-4 w-4" />
                       </button>
