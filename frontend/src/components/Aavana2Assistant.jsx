@@ -320,26 +320,39 @@ const Aavana2Assistant = ({ isOpen, onClose }) => {
   };
 
   // Handle smart actions
-  const handleSmartAction = (action) => {
+  const handleSmartAction = (actionData) => {
+    const { action, target } = actionData;
+    
     switch (action) {
-      case 'navigate_leads':
-        // This would trigger navigation to leads tab
-        console.log('Navigate to leads');
+      case 'navigate':
+        // Close the assistant and trigger navigation
+        if (typeof window !== 'undefined' && window.parent) {
+          window.parent.postMessage({ type: 'NAVIGATE_TO_TAB', tab: target }, '*');
+        }
+        onClose(); // Close the assistant
         break;
-      case 'create_task':
-        // This would open task creation modal
-        console.log('Create task');
+        
+      case 'modal':
+        // Trigger modal opening
+        if (typeof window !== 'undefined' && window.parent) {
+          window.parent.postMessage({ type: 'OPEN_MODAL', modal: target }, '*');
+        }
         break;
-      case 'generate_report':
-        // This would generate a report
-        console.log('Generate report');
+        
+      case 'action':
+        // Trigger specific actions
+        if (typeof window !== 'undefined' && window.parent) {
+          window.parent.postMessage({ type: 'EXECUTE_ACTION', action: target }, '*');
+        }
         break;
-      case 'client_actions':
-        // This would show client action options
-        console.log('Client actions');
+        
+      case 'info':
+        // Show information
+        alert('ℹ️ System Guide\n\nAavana 2.0 can help you with:\n• Lead Management\n• HRMS & Attendance\n• Task Management\n• Sales Pipeline\n• Digital Marketing\n• Training & Support\n\nJust ask me anything!');
         break;
+        
       default:
-        console.log('Unknown action:', action);
+        console.log('Unknown action:', actionData);
     }
   };
 
