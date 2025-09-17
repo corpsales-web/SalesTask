@@ -4030,8 +4030,15 @@ async def aavana2_chat(request: ChatRequest):
         # Create user message
         user_message = UserMessage(text=request.message)
         
-        # Get AI response (optimized - no database operations during processing)
-        ai_response = await chat.send_message(user_message)
+        # Get AI response with timeout for speed
+        import asyncio
+        try:
+            ai_response = await asyncio.wait_for(
+                chat.send_message(user_message), 
+                timeout=8.0  # 8 second max timeout
+            )
+        except asyncio.TimeoutError:
+            ai_response = "I apologize for the delay. Could you please rephrase your question?"
         
         # Generate contextual actions (optimized)
         actions = generate_contextual_actions(request.message, ai_response)
