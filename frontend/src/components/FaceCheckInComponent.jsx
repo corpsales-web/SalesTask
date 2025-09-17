@@ -122,13 +122,23 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       return;
     }
 
+    const video = videoRef.current;
+    
+    // Check if video is ready immediately
+    console.log('🔍 Pre-capture video state:', {
+      readyState: video.readyState,
+      videoWidth: video.videoWidth,
+      videoHeight: video.videoHeight,
+      paused: video.paused
+    });
+
     try {
       setIsProcessing(true);
       setError(null);
       
-      // Wait a moment for video to be fully ready (Safari sometimes needs this)
-      setTimeout(() => {
-        const result = capturePhoto(videoRef.current, 0.8);
+      // Function to attempt capture
+      const attemptCapture = () => {
+        const result = capturePhoto(video, 0.8);
         
         if (result.success) {
           setCapturedImage(result.dataURL);
@@ -148,7 +158,38 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         }
         
         setIsProcessing(false);
-      }, 100); // Small delay for Safari
+      };
+      
+      // If video isn't ready, wait for it
+      if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+        console.log('⏳ Video not ready, waiting for loadeddata event...');
+        
+        const onVideoReady = () => {
+          console.log('✅ Video ready for capture:', {
+            readyState: video.readyState,
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight
+          });
+          video.removeEventListener('loadeddata', onVideoReady);
+          video.removeEventListener('canplay', onVideoReady);
+          attemptCapture();
+        };
+        
+        video.addEventListener('loadeddata', onVideoReady);
+        video.addEventListener('canplay', onVideoReady);
+        
+        // Fallback timeout
+        setTimeout(() => {
+          video.removeEventListener('loadeddata', onVideoReady);
+          video.removeEventListener('canplay', onVideoReady);
+          console.log('⏰ Timeout reached, attempting capture anyway...');
+          attemptCapture();
+        }, 3000);
+        
+      } else {
+        // Video is ready, capture immediately
+        attemptCapture();
+      }
       
     } catch (err) {
       console.error('🚨 Unexpected capture error:', err);
