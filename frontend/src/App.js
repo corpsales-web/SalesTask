@@ -345,7 +345,7 @@ const App = () => {
                     Voice
                   </button>
                   <button
-                    onClick={() => setShowCheckInModal(true)}
+                    onClick={() => setShowFaceCheckInModal(true)}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
                   >
                     <Camera className="h-4 w-4 mr-2" />
