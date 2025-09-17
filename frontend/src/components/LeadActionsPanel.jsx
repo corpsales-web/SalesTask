@@ -115,6 +115,16 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
       description: 'Capture photos with camera and send to lead'
     });
 
+    // Send Images from Gallery - always available
+    availableActions.push({
+      type: 'send_gallery_images',
+      label: '🖼️ Gallery',
+      icon: '🖼️',
+      color: 'purple',
+      enabled: true,
+      description: 'Send project images and catalogues from gallery'
+    });
+
     // Send Catalogue - always available
     availableActions.push({
       type: 'send_catalogue',
