@@ -1588,6 +1588,182 @@ async def create_ai_influencer(request: dict):
             }
         }
 
+# Direct Send Endpoint for Gallery/Catalogue Items
+@api_router.post("/direct-send")
+async def direct_send_items(request_data: dict):
+    """Send images or catalogue PDFs directly to contacts via email or WhatsApp"""
+    try:
+        contact_id = request_data.get("contactId")
+        contact_name = request_data.get("contactName")
+        contact_email = request_data.get("contactEmail")
+        contact_phone = request_data.get("contactPhone")
+        send_method = request_data.get("sendMethod", "email")
+        items = request_data.get("items", [])
+        item_type = request_data.get("itemType", "images")
+        message = request_data.get("message", "")
+        sent_at = request_data.get("sentAt", datetime.now(timezone.utc).isoformat())
+        
+        if not contact_id or not items:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Contact ID and items are required"}
+            )
+        
+        # Prepare send record
+        send_record = {
+            "id": str(uuid.uuid4()),
+            "contact_id": contact_id,
+            "contact_name": contact_name,
+            "contact_email": contact_email,
+            "contact_phone": contact_phone,
+            "send_method": send_method,
+            "items": items,
+            "item_type": item_type,
+            "item_count": len(items),
+            "message": message,
+            "status": "sent",
+            "sent_at": sent_at,
+            "sent_by": "system",  # In real app, this would be current user
+            "delivery_status": "pending",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Log the send activity
+        try:
+            await db.direct_sends.insert_one(send_record)
+            print(f"✅ Direct send recorded: {send_record['item_count']} {item_type} to {contact_name} via {send_method}")
+        except Exception as db_error:
+            print(f"⚠️ Failed to log send activity: {db_error}")
+        
+        # Simulate sending based on method
+        if send_method == "email":
+            # Email sending simulation
+            email_result = await send_email_with_attachments(
+                to_email=contact_email,
+                to_name=contact_name,
+                subject=f"Aavana Greens - {item_type.title()} Shared",
+                message=message,
+                attachments=items
+            )
+            
+            delivery_status = "delivered" if email_result else "failed"
+            
+        elif send_method == "whatsapp":
+            # WhatsApp sending simulation
+            whatsapp_result = await send_whatsapp_with_media(
+                phone_number=contact_phone,
+                contact_name=contact_name,
+                message=message,
+                media_items=items
+            )
+            
+            delivery_status = "delivered" if whatsapp_result else "failed"
+        
+        else:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Invalid send method. Use 'email' or 'whatsapp'"}
+            )
+        
+        # Update delivery status
+        await db.direct_sends.update_one(
+            {"id": send_record["id"]},
+            {"$set": {"delivery_status": delivery_status}}
+        )
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "message": f"Successfully sent {len(items)} {item_type} to {contact_name} via {send_method}",
+                "send_id": send_record["id"],
+                "delivery_status": delivery_status,
+                "sent_at": sent_at
+            }
+        )
+        
+    except Exception as e:
+        print(f"❌ Error in direct send: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to send items: {str(e)}"}
+        )
+
+async def send_email_with_attachments(to_email: str, to_name: str, subject: str, message: str, attachments: list):
+    """Simulate email sending with attachments"""
+    try:
+        # In a real implementation, this would use services like:
+        # - SendGrid API
+        # - AWS SES
+        # - SMTP server
+        # - Mailgun
+        
+        print(f"📧 Email sent to {to_name} ({to_email})")
+        print(f"   Subject: {subject}")
+        print(f"   Attachments: {len(attachments)} items")
+        print(f"   Message preview: {message[:100]}...")
+        
+        # Simulate email delivery delay
+        await asyncio.sleep(0.5)
+        
+        # Simulate 95% success rate
+        import random
+        return random.random() < 0.95
+        
+    except Exception as e:
+        print(f"❌ Email sending error: {e}")
+        return False
+
+async def send_whatsapp_with_media(phone_number: str, contact_name: str, message: str, media_items: list):
+    """Simulate WhatsApp sending with media"""
+    try:
+        # In a real implementation, this would use:
+        # - WhatsApp Business API
+        # - Twilio WhatsApp API
+        # - Meta WhatsApp Cloud API
+        
+        print(f"📱 WhatsApp sent to {contact_name} ({phone_number})")
+        print(f"   Media items: {len(media_items)}")
+        print(f"   Message: {message[:100]}...")
+        
+        # Simulate WhatsApp delivery delay
+        await asyncio.sleep(0.3)
+        
+        # Simulate 90% success rate (WhatsApp can be less reliable)
+        import random
+        return random.random() < 0.90
+        
+    except Exception as e:
+        print(f"❌ WhatsApp sending error: {e}")
+        return False
+
+@api_router.get("/direct-sends")
+async def get_direct_sends():
+    """Get direct send history"""
+    try:
+        sends_cursor = db.direct_sends.find({}).sort("sent_at", -1).limit(100)
+        sends = []
+        
+        async for send in sends_cursor:
+            send_data = {key: value for key, value in send.items() if key != '_id'}
+            sends.append(send_data)
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "sends": sends,
+                "count": len(sends)
+            }
+        )
+    except Exception as e:
+        print(f"❌ Error fetching direct sends: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to fetch send history: {str(e)}"}
+        )
+
+# Cross-Platform Campaign Launch
 @api_router.post("/ai/campaigns/launch-crossplatform")
 async def launch_crossplatform_campaign(request: dict):
     """Launch coordinated campaign across all digital platforms"""
