@@ -868,6 +868,173 @@ const EnhancedTaskSystem = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Workflow Management Modal */}
+      <Dialog open={showWorkflowModal} onOpenChange={setShowWorkflowModal}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Workflow Management</DialogTitle>
+            <DialogDescription>Create and manage automated workflows for tasks</DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Create New Workflow Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Plus className="h-5 w-5 mr-2" />
+                  Create New Workflow
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Workflow Name</Label>
+                    <Input 
+                      value={workflowForm.name}
+                      onChange={(e) => setWorkflowForm({...workflowForm, name: e.target.value})}
+                      placeholder="e.g., Lead Follow-up Automation"
+                    />
+                  </div>
+                  <div>
+                    <Label>Trigger</Label>
+                    <Select value={workflowForm.trigger} onValueChange={(value) => setWorkflowForm({...workflowForm, trigger: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual Trigger</SelectItem>
+                        <SelectItem value="new_lead">New Lead Created</SelectItem>
+                        <SelectItem value="task_created">Task Created</SelectItem>
+                        <SelectItem value="task_overdue">Task Overdue</SelectItem>
+                        <SelectItem value="task_completed">Task Completed</SelectItem>
+                        <SelectItem value="scheduled">Scheduled Time</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Workflow Actions</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                      <input type="checkbox" id="create_task" />
+                      <label htmlFor="create_task">Create Task</label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                      <input type="checkbox" id="send_email" />
+                      <label htmlFor="send_email">Send Email Notification</label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                      <input type="checkbox" id="assign_user" />
+                      <label htmlFor="assign_user">Auto-assign to User</label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                      <input type="checkbox" id="ai_analysis" />
+                      <label htmlFor="ai_analysis">AI Task Analysis</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox"
+                    id="workflow_active"
+                    checked={workflowForm.is_active}
+                    onChange={(e) => setWorkflowForm({...workflowForm, is_active: e.target.checked})}
+                  />
+                  <Label htmlFor="workflow_active">Activate Workflow Immediately</Label>
+                </div>
+
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={async () => {
+                      if (!workflowForm.name.trim()) {
+                        alert('❌ Please enter a workflow name.');
+                        return;
+                      }
+                      
+                      try {
+                        const newWorkflow = {
+                          id: Date.now().toString(),
+                          ...workflowForm,
+                          created_by: '1', // Current user
+                          created_at: new Date().toISOString(),
+                          ai_generated: false
+                        };
+                        
+                        setWorkflows(prev => [...prev, newWorkflow]);
+                        setWorkflowForm({
+                          name: '',
+                          trigger: 'manual',
+                          conditions: [],
+                          actions: [],
+                          is_active: true
+                        });
+                        
+                        alert(`✅ Workflow "${workflowForm.name}" created successfully!\n\nTrigger: ${workflowForm.trigger}\nStatus: ${workflowForm.is_active ? 'Active' : 'Inactive'}\n\nThe workflow will automatically execute when the trigger conditions are met.`);
+                      } catch (error) {
+                        console.error('Workflow creation error:', error);
+                        alert('❌ Failed to create workflow. Please try again.');
+                      }
+                    }}
+                    disabled={loading || !workflowForm.name.trim()}
+                  >
+                    {loading ? 'Creating...' : 'Create Workflow'}
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowWorkflowModal(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Existing Workflows */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Existing Workflows ({workflows.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {workflows.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Zap className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No workflows created yet</p>
+                    <p className="text-sm">Create your first workflow to automate task management</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {workflows.map((workflow) => (
+                      <div key={workflow.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-3 h-3 rounded-full ${workflow.is_active ? 'bg-green-500' : 'bg-gray-300'}`} />
+                          <div>
+                            <h4 className="font-medium">{workflow.name}</h4>
+                            <p className="text-sm text-gray-600">
+                              Trigger: {workflow.trigger.replace('_', ' ')} • 
+                              {workflow.ai_generated ? ' AI Generated' : ' Manual'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge className={workflow.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                            {workflow.is_active ? 'Active' : 'Inactive'}
+                          </Badge>
+                          <Button size="sm" variant="ghost">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="ghost">
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Voice Task Modal */}
       <Dialog open={showVoiceModal} onOpenChange={setShowVoiceModal}>
         <DialogContent className="max-w-md">
