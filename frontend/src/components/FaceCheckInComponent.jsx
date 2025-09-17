@@ -75,7 +75,7 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
         }
         
         setCameraStream(result.stream);
-        // Don't set cameraActive here - wait for video to be ready
+        setCameraActive(true); // Set active immediately so video element renders
         console.log('✅ Camera stream obtained successfully');
         
       } else {
