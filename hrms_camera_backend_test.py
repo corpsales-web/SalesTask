@@ -163,11 +163,17 @@ class HRMSCameraBackendTester:
         """Test HRMS GPS check-in endpoint accessibility"""
         gps_checkin_data = {
             "employee_id": self.test_employee_id,
-            "latitude": 19.0760,
-            "longitude": 72.8777,
-            "accuracy": 5.0,
+            "location": {
+                "latitude": 19.0760,
+                "longitude": 72.8777,
+                "accuracy": 5.0,
+                "address": "Mumbai Office"
+            },
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "check_type": "check_in"
+            "device_info": {
+                "device_type": "mobile",
+                "browser": "Safari"
+            }
         }
         
         return self.run_test("HRMS GPS Check-in Endpoint Access", "POST", "hrms/gps-checkin", 200, data=gps_checkin_data)
