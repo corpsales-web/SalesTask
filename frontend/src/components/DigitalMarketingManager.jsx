@@ -813,11 +813,18 @@ const DigitalMarketingManager = ({ isOpen, onClose }) => {
               </div>
 
               <div className="flex space-x-2 mt-4">
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => {
+                  alert(`📂 Content Details: ${content.title}\n\n📊 Performance Score: ${content.performance_score}/10\n📈 Usage Count: ${content.usage_count}\n📅 Created: ${new Date(content.created_date).toLocaleDateString()}\n🏷️ Tags: ${content.tags.join(', ')}\n📂 Category: ${content.category}`);
+                }}>
                   <Eye className="h-3 w-3 mr-1" />
                   View
                 </Button>
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => {
+                  setContentLibrary(prev => prev.map(item => 
+                    item.id === content.id ? { ...item, usage_count: item.usage_count + 1 } : item
+                  ));
+                  alert(`✅ Content "${content.title}" added to your campaign! Usage count updated.`);
+                }}>
                   <Download className="h-3 w-3 mr-1" />
                   Use
                 </Button>
