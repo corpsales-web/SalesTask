@@ -31,20 +31,46 @@ export const checkCameraAvailability = async () => {
  */
 export const initializeCamera = async (constraints = {}) => {
   try {
-    // Default constraints for reliable camera access
-    const defaultConstraints = {
-      video: {
-        width: { ideal: 640, max: 1280 },
-        height: { ideal: 480, max: 720 },
-        facingMode: 'user',
-        frameRate: { ideal: 30, max: 30 }
+    // Try multiple constraint strategies for maximum compatibility
+    const constraintStrategies = [
+      // Strategy 1: Basic video only
+      { video: true, audio: false },
+      
+      // Strategy 2: Specific constraints
+      {
+        video: {
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
+          facingMode: 'user'
+        },
+        audio: false
       },
-      audio: false
-    };
+      
+      // Strategy 3: Custom constraints
+      constraints.video ? constraints : { video: true, audio: false }
+    ];
 
-    const finalConstraints = { ...defaultConstraints, ...constraints };
-    
-    const stream = await navigator.mediaDevices.getUserMedia(finalConstraints);
+    let stream = null;
+    let lastError = null;
+
+    for (let i = 0; i < constraintStrategies.length; i++) {
+      try {
+        console.log(`Trying camera strategy ${i + 1}:`, constraintStrategies[i]);
+        stream = await navigator.mediaDevices.getUserMedia(constraintStrategies[i]);
+        console.log(`✅ Camera strategy ${i + 1} successful`);
+        break;
+      } catch (error) {
+        console.log(`❌ Camera strategy ${i + 1} failed:`, error.name);
+        lastError = error;
+        if (i < constraintStrategies.length - 1) {
+          console.log(`Trying next strategy...`);
+        }
+      }
+    }
+
+    if (!stream) {
+      throw lastError || new Error('All camera strategies failed');
+    }
     
     return {
       success: true,
