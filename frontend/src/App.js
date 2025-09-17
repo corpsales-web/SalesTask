@@ -457,6 +457,12 @@ const App = () => {
           isOpen={showMarketingModal}
           onClose={() => setShowMarketingModal(false)}
         />
+
+        {/* User Training Module Modal */}
+        <UserTrainingModule 
+          isOpen={showTrainingModal}
+          onClose={() => setShowTrainingModal(false)}
+        />
       </div>
     </TabProvider>
   );
