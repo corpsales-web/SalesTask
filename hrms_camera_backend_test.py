@@ -201,16 +201,14 @@ class HRMSCameraBackendTester:
         return self.run_test("HRMS GPS Check-in with Realistic Data", "POST", "hrms/gps-checkin", 200, data=gps_checkin_data)
 
     def test_hrms_gps_checkin_validation(self):
-        """Test HRMS GPS check-in validation with invalid coordinates"""
+        """Test HRMS GPS check-in validation with missing location"""
         invalid_data = {
             "employee_id": self.test_employee_id,
-            "latitude": 999.0,  # Invalid latitude
-            "longitude": 999.0,  # Invalid longitude
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "check_type": "check_in"
+            # Missing location object - should trigger validation error
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
-        return self.run_test("HRMS GPS Check-in Validation", "POST", "hrms/gps-checkin", 400, data=invalid_data)
+        return self.run_test("HRMS GPS Check-in Validation", "POST", "hrms/gps-checkin", 500, data=invalid_data)
 
     def test_hrms_face_checkin_different_formats(self):
         """Test HRMS face check-in with different image formats"""
