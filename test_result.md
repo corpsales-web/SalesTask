@@ -921,11 +921,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "502 Backend Error Resolution - Critical Endpoints Testing"
+    - "Lead Actions Panel - Client Gallery Integration"
+    - "Project Gallery Upload Functionality"
+    - "AI Image Classification System"
   stuck_tasks:
-    - ""
+    - "Lead Actions Panel - Client Gallery Integration"
   test_all: false
-  test_priority: "high_first"
+  test_priority: "critical_first"
 
 agent_communication:
   - agent: "main"
