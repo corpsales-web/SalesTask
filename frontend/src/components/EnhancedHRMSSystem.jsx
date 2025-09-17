@@ -8,7 +8,7 @@ import { Badge } from './ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Calendar, CalendarDays, Clock, User, UserCheck, FileText, TrendingUp, Award, AlertCircle, CheckCircle, XCircle, Filter, Download, Send, Eye, Edit, Trash2, Plus, Users, Target, BarChart3, PieChart, Activity } from 'lucide-react';
-import { DatePicker } from './ui/date-picker';
+// DatePicker component not available, using regular input
 import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
