@@ -128,6 +128,17 @@ How can I assist you today?`,
       }
 
       // Call backend API for AI response
+      console.log('🚀 Making Aavana 2.0 API call:', {
+        url: `${API}/api/aavana2/chat`,
+        payload: {
+          message: currentInput,
+          session_id: sessionId,
+          language: selectedLanguage,
+          model: 'gpt-4o',
+          provider: 'openai'
+        }
+      });
+      
       const response = await axios.post(`${API}/api/aavana2/chat`, {
         message: currentInput,
         session_id: sessionId,
@@ -135,6 +146,8 @@ How can I assist you today?`,
         model: 'gpt-4o',
         provider: 'openai'
       });
+      
+      console.log('✅ Aavana 2.0 API response received:', response.data);
 
       const assistantMessage = {
         id: response.data.message_id,
