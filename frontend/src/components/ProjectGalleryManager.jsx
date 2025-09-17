@@ -832,6 +832,5 @@ const dataURLtoBlob = (dataURL) => {
   }
   return new Blob([u8arr], { type: mime });
 };
-};
 
 export default ProjectGalleryManager;
