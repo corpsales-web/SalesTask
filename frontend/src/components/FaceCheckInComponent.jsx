@@ -34,70 +34,20 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
       });
 
       if (result.success) {
-        // Set up video element with Safari-specific approach
+        // Simple, direct Safari approach
         if (videoRef.current) {
           const video = videoRef.current;
           
-          console.log('🔧 Safari video setup - Method 2: Complete reset approach');
-          
-          // Complete reset
-          video.pause();
-          video.src = '';
-          video.srcObject = null;
-          
-          // Remove all event listeners
-          video.onloadedmetadata = null;
-          video.oncanplay = null;
-          video.onloadeddata = null;
-          video.onerror = null;
-          
-          // Set Safari-required attributes
-          video.setAttribute('autoplay', 'true');
-          video.setAttribute('muted', 'true');
-          video.setAttribute('playsinline', 'true');
+          // Direct assignment - no complex setup
+          video.srcObject = result.stream;
           video.muted = true;
           video.autoplay = true;
           video.playsInline = true;
           
-          // Create new event handlers
-          video.onloadedmetadata = function() {
-            console.log('✅ Metadata loaded - Video dimensions:', video.videoWidth, 'x', video.videoHeight);
-            console.log('✅ ReadyState:', video.readyState);
-            
-            if (video.videoWidth > 0 && video.videoHeight > 0) {
-              video.play().then(() => {
-                console.log('✅ Video playing successfully');
-                setError(null);
-              }).catch(err => {
-                console.log('⚠️ Auto-play failed:', err.message);
-                // This is common in Safari, video might still work
-              });
-            }
-          };
-          
-          // Direct stream assignment
-          try {
-            console.log('🔧 Directly assigning stream to video...');
-            video.srcObject = result.stream;
-            
-            // Immediate play attempt for Safari
-            setTimeout(() => {
-              if (video.readyState === 0) {
-                console.log('🔧 Video still not ready, forcing load...');
-                video.load();
-                
-                setTimeout(() => {
-                  if (video.paused && video.readyState > 0) {
-                    video.play().catch(e => console.log('Final play attempt failed:', e));
-                  }
-                }, 500);
-              }
-            }, 200);
-            
-          } catch (err) {
-            console.error('❌ Failed to assign stream:', err);
-            setError('📷 Failed to initialize video. Please try again.');
-          }
+          // Simple play call
+          video.play().catch(() => {
+            // Ignore play errors, focus on stream display
+          });
         }
         
         setCameraStream(result.stream);
