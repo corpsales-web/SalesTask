@@ -357,27 +357,28 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
 
       {cameraActive && (
         <div className="text-center">
-          <div className="mb-4 bg-black rounded-lg overflow-hidden relative">
+          <div className="mb-4 border rounded-lg overflow-hidden" style={{ backgroundColor: '#000', minHeight: '300px' }}>
             <video
               ref={videoRef}
-              autoPlay={true}
-              playsInline={true}
-              muted={true}
-              controls={false}
-              className="w-full"
+              autoPlay
+              playsInline
+              muted
               style={{ 
-                transform: 'scaleX(-1)', 
-                minHeight: '200px',
-                objectFit: 'cover'
+                width: '100%',
+                height: '300px',
+                objectFit: 'cover',
+                transform: 'scaleX(-1)',
+                display: 'block'
               }}
             />
           </div>
           <div className="flex space-x-2">
             <button
               onClick={handleCapturePhoto}
-              className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium"
+              disabled={isProcessing}
+              className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium disabled:opacity-50"
             >
-              📸 Capture
+              {isProcessing ? '📸 Capturing...' : '📸 Capture'}
             </button>
             <button
               onClick={stopCamera}
