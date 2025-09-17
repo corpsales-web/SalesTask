@@ -49,12 +49,13 @@
 ##
 ## test_plan:
 ##   current_focus:
-##     - "Task name 1"
-##     - "Task name 2"
+##     - "Workflow Button Functionality Fix"
+##     - "Comprehensive Digital Marketing Manager Enhancement"
+##     - "OpenAI API GPT-5 Integration Testing"
 ##   stuck_tasks:
-##     - "Task name with persistent issues"
+##     - "Digital Marketing Manager Buttons Non-functional"
 ##   test_all: false
-##   test_priority: "high_first"  # or "sequential" or "stuck_first"
+##   test_priority: "high_first"
 ##
 ## agent_communication:
 ##     -agent: "main"  # or "testing" or "user"
