@@ -18,6 +18,7 @@ const LeadActionsPanel = ({ leadId, leadData, onActionComplete, initialActionTyp
   const [capturedImages, setCapturedImages] = useState([]);
   const [isInitializingCamera, setIsInitializingCamera] = useState(false);
   const [cameraError, setCameraError] = useState(null);
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
   
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
