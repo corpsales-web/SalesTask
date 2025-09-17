@@ -317,6 +317,77 @@ const App = () => {
     );
   };
 
+  // Initialize notification manager and task monitoring
+  useEffect(() => {
+    // Initialize notification system
+    notificationManager.init();
+
+    // Listen for task completion from notifications
+    const handleTaskCompleteFromNotification = (event) => {
+      const { taskId } = event.detail;
+      console.log(`✅ Task ${taskId} completed from notification`);
+      // Here you would typically update task status in your state/API
+      alert(`✅ Task marked as complete: ${taskId}`);
+    };
+
+    // Listen for task navigation from notifications
+    const handleNavigateToTask = (event) => {
+      const { taskId } = event.detail;
+      console.log(`🔍 Navigating to task: ${taskId}`);
+      // Navigate to tasks tab
+      if (typeof setActiveTab === 'function') {
+        setActiveTab('tasks');
+      }
+      // You can add logic here to highlight specific task
+    };
+
+    // Add event listeners
+    window.addEventListener('taskCompleteFromNotification', handleTaskCompleteFromNotification);
+    window.addEventListener('navigateToTask', handleNavigateToTask);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('taskCompleteFromNotification', handleTaskCompleteFromNotification);
+      window.removeEventListener('navigateToTask', handleNavigateToTask);
+    };
+  }, []);
+
+  // Simulate task data for notifications (replace with real task data)
+  useEffect(() => {
+    // Mock task data - replace with actual task fetching
+    const mockTasks = [
+      {
+        id: '1',
+        title: 'Follow up with Mumbai client',
+        description: 'Call regarding balcony garden consultation',
+        priority: 'high',
+        status: 'in_progress',
+        due_date: '2024-01-20'
+      },
+      {
+        id: '2',
+        title: 'Prepare proposal for Delhi client',
+        description: 'Create detailed proposal for rooftop garden',
+        priority: 'medium',
+        status: 'todo',
+        due_date: '2024-01-25'
+      }
+    ];
+
+    // Make tasks available globally for notification manager
+    window.appTasks = mockTasks;
+
+    // Test catalogue notification (simulate catalogue upload)
+    setTimeout(() => {
+      notificationManager.sendCatalogueNotification({
+        id: 'cat-1',
+        name: 'Green Building Catalogue 2024',
+        uploadDate: new Date().toISOString()
+      });
+    }, 5000); // Send catalogue notification after 5 seconds
+
+  }, []);
+
   return (
     <TabProvider>
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
