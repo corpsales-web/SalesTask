@@ -78,6 +78,7 @@ const App = () => {
   // New Modal States
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const [showMarketingModal, setShowMarketingModal] = useState(false);
+  const [showTrainingModal, setShowTrainingModal] = useState(false);
 
   // Form States
   const [newLead, setNewLead] = useState({
