@@ -483,49 +483,74 @@ const EnhancedFileUploadHeader = ({ onFileUpload, maxFiles = 5, maxFileSize = 10
         </DialogContent>
       </Dialog>
 
-      {/* Camera Capture Modal */}
+      {/* Camera Capture Modal - Using Proper Camera Interface */}
       {showCameraModal && (
-        <Dialog open={showCameraModal} onOpenChange={setShowCameraModal}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>📸 Capture Photo</DialogTitle>
-              <DialogDescription>
-                Take a photo using your device camera
-              </DialogDescription>
-            </DialogHeader>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div className="p-4 border-b">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">📸 Take Photo</h3>
+                <button
+                  onClick={() => setShowCameraModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
             
-            <div className="space-y-4">
-              <div className="bg-gray-100 rounded-lg p-8 text-center">
+            <div className="p-6">
+              <div className="text-center">
                 <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Camera Access</h3>
-                <p className="text-gray-600 mb-4">
-                  For the best camera experience, please use the "Take Photo" button which will use your device's native camera interface.
-                </p>
+                <h4 className="text-lg font-semibold mb-2">Camera Options</h4>
+                <p className="text-gray-600 mb-6">Choose how you'd like to take a photo</p>
                 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <button
-                    onClick={() => cameraInputRef.current?.click()}
-                    className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2"
+                    onClick={() => {
+                      // Option 1: Use device camera capture
+                      cameraInputRef.current?.click();
+                      setShowCameraModal(false);
+                    }}
+                    className="w-full bg-blue-600 text-white px-6 py-4 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-3"
                   >
-                    <Camera className="h-5 w-5" />
-                    <span>Open Camera</span>
+                    <Camera className="h-6 w-6" />
+                    <div className="text-left">
+                      <div className="font-medium">Use Device Camera</div>
+                      <div className="text-sm opacity-90">Direct camera access with live preview</div>
+                    </div>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      // Option 2: File picker with camera preference
+                      fileInputRef.current?.click();
+                      setShowCameraModal(false);
+                    }}
+                    className="w-full bg-green-600 text-white px-6 py-4 rounded-lg hover:bg-green-700 flex items-center justify-center space-x-3"
+                  >
+                    <Folder className="h-6 w-6" />
+                    <div className="text-left">
+                      <div className="font-medium">Browse Photos</div>
+                      <div className="text-sm opacity-90">Select from gallery or take new photo</div>
+                    </div>
                   </button>
                   
                   <button
                     onClick={() => setShowCameraModal(false)}
-                    className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                    className="w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300"
                   >
                     Cancel
                   </button>
                 </div>
                 
-                <div className="mt-4 text-sm text-gray-500">
-                  <p>💡 Tip: Make sure to allow camera permissions when prompted</p>
+                <div className="mt-6 text-sm text-gray-500">
+                  <p>💡 Your browser will ask for camera permission when using camera options</p>
                 </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        </div>
       )}
     </>
   );
