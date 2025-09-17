@@ -368,13 +368,9 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
               style={{ 
                 transform: 'scaleX(-1)', 
                 minHeight: '200px',
-                backgroundColor: '#f0f0f0',
                 objectFit: 'cover'
               }}
             />
-            <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm pointer-events-none">
-              {cameraStream ? '📹 Camera Active' : '📷 Loading Camera...'}
-            </div>
           </div>
           <div className="flex space-x-2">
             <button
