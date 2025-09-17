@@ -381,6 +381,13 @@ const App = () => {
                     <TrendingUp className="h-4 w-4 mr-2" />
                     Marketing
                   </button>
+                  <button
+                    onClick={() => setShowTrainingModal(true)}
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center"
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Training
+                  </button>
                   <button className="relative bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200">
                     <Bell className="h-5 w-5" />
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
