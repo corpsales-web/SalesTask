@@ -109,30 +109,47 @@ const Aavana2Assistant = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      // Generate intelligent response based on user input
-      const assistantMessage = generateIntelligentResponse(currentInput);
-      
-      // Simulate processing delay for better UX
-      setTimeout(() => {
-        setMessages(prev => [...prev, assistantMessage]);
-        
-        // Auto-speak response if enabled
-        if (isSpeaking && speechSynthesis) {
-          speakMessage(assistantMessage.content);
-        }
-        
-        setIsLoading(false);
-      }, 1000);
+      // Generate session ID if not exists
+      let sessionId = localStorage.getItem('aavana2_session_id');
+      if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('aavana2_session_id', sessionId);
+      }
 
+      // Call backend API for AI response
+      const response = await axios.post(`${API}/api/aavana2/chat`, {
+        message: currentInput,
+        session_id: sessionId,
+        language: selectedLanguage,
+        model: 'gpt-4o',
+        provider: 'openai'
+      });
+
+      const assistantMessage = {
+        id: response.data.message_id,
+        type: 'assistant',
+        content: response.data.message,
+        timestamp: new Date(response.data.timestamp),
+        actions: response.data.actions || []
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+      
+      // Auto-speak response if enabled
+      if (isSpeaking && speechSynthesis) {
+        speakMessage(assistantMessage.content);
+      }
+      
     } catch (error) {
       console.error('AI response error:', error);
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'I apologize, but I\'m having trouble processing your request right now. Please try again.',
+        content: 'I apologize, but I\'m having trouble connecting to my AI services right now. Please try again in a moment.',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
     }
   };
