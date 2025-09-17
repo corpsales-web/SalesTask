@@ -882,17 +882,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Enhanced AI Endpoints Performance Optimization"
-    - "External URL Timeout Issues Resolution"
-    - "AI Processing Response Time Improvements"
-    - "Frontend JavaScript Runtime Errors in AI Components"
-    - "Modal Overlay Issues Blocking User Interactions"
+    - "502 Backend Error Resolution - Critical Endpoints Testing"
   stuck_tasks:
-    - "JavaScript Runtime Errors in New Admin Components"
-    - "Enhanced File Upload System"
-    - "Voice STT Component"
+    - ""
   test_all: false
-  test_priority: "ai_endpoints_and_performance"
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
