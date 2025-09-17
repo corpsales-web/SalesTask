@@ -47,6 +47,44 @@ const EnhancedFileUploadHeader = ({ onFileUpload, maxFiles = 5, maxFileSize = 10
       return;
     }
 
+    // Camera capture function
+    const handleCameraCapture = async () => {
+      try {
+        console.log('📸 Attempting to open camera capture modal...');
+        setShowCameraModal(true);
+      } catch (error) {
+        console.error('Camera capture error:', error);
+        alert('Camera not available. Please try using the file browser instead.');
+      }
+    };
+
+    // Handle camera photo captured
+    const handleCameraPhoto = (dataURL) => {
+      try {
+        // Convert dataURL to File object
+        const byteString = atob(dataURL.split(',')[1]);
+        const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        
+        const blob = new Blob([ab], { type: mimeString });
+        const file = new File([blob], `camera-photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        
+        // Process the file
+        handleFiles([file]);
+        setShowCameraModal(false);
+        
+        console.log('✅ Camera photo processed successfully');
+      } catch (error) {
+        console.error('Error processing camera photo:', error);
+        alert('Failed to process camera photo. Please try again.');
+      }
+    };
+
     // Generate previews for images
     validFiles.forEach(fileObj => {
       if (fileObj.type.startsWith('image/')) {
