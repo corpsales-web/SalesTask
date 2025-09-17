@@ -301,7 +301,7 @@ const EnhancedFileUploadHeader = ({ onFileUpload, maxFiles = 5, maxFileSize = 10
                   </Button>
                   
                   <Button
-                    onClick={() => cameraInputRef.current?.click()}
+                    onClick={handleCameraCapture}
                     variant="outline"
                   >
                     <Camera className="h-4 w-4 mr-2" />
