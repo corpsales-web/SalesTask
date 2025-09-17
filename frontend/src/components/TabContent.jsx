@@ -135,7 +135,15 @@ const TabContent = ({
                       <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
                         Email
                       </button>
-                      <button className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">
+                      <button 
+                        className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700"
+                        onClick={() => {
+                          console.log('🖼️ Images button clicked for lead:', lead.id);
+                          setSelectedLead(lead);
+                          setShowLeadActionsPanel(true);
+                          setLeadActionType('send_gallery_images');
+                        }}
+                      >
                         Images
                       </button>
                     </div>
