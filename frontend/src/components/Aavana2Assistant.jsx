@@ -442,8 +442,18 @@ How can I assist you today?`,
                 >
                   {isSpeaking ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => {
-                  const settingsInfo = `🔧 Aavana 2.0 Settings
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="z-50 relative"
+                  title="Aavana 2.0 Settings"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('🔧 Settings button clicked');
+                    
+                    const settingsInfo = `🔧 Aavana 2.0 Settings
 
 📱 Current Configuration:
 • Language: ${languages.find(l => l.code === selectedLanguage)?.name}
@@ -469,9 +479,12 @@ How can I assist you today?`,
 • I integrate with all your business data
 
 🔄 Updates: Now powered by advanced AI with real-time business intelligence!`;
-                  
-                  alert(settingsInfo);
-                }}>
+                    
+                    setTimeout(() => {
+                      alert(settingsInfo);
+                    }, 100);
+                  }}
+                >
                   <Settings className="h-4 w-4" />
                 </Button>
               </div>
