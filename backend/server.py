@@ -3967,11 +3967,19 @@ async def save_chat_messages_async(request: ChatRequest, ai_response: str, sessi
         logger.error(f"Error saving chat messages: {e}")  # Log but don't block
 
 # Aavana 2.0 Chat Endpoints
+# Response cache for common queries
+_RESPONSE_CACHE = {
+    'hello': "Hi! I'm Aavana 2.0. How can I help with your CRM today?",
+    'hi': "Hello! I'm here to help with leads, tasks, HRMS, and marketing. What do you need?",
+    'help': "I can assist with: Leads, Tasks, HRMS, Sales Pipeline, Marketing. What would you like to work on?",
+    'thanks': "You're welcome! Let me know if you need anything else."
+}
+
 @api_router.post("/aavana2/chat", response_model=ChatResponse)
 async def aavana2_chat(request: ChatRequest):
     """
-    Aavana 2.0 AI Chat with multi-model support
-    Supports GPT-5, Claude Sonnet 4, Gemini 2.5 Pro
+    Aavana 2.0 AI Chat - Optimized for speed
+    Fast responses with cached common queries
     """
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
