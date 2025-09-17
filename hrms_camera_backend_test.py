@@ -127,12 +127,16 @@ class HRMSCameraBackendTester:
         face_checkin_data = {
             "employee_id": "EMP001",
             "employee_name": "Rajesh Kumar",
-            "image_data": self.generate_mock_face_image(),
-            "latitude": 19.0760,  # Mumbai coordinates
-            "longitude": 72.8777,
-            "accuracy": 10.5,
+            "face_image": self.generate_mock_face_image(),
+            "location": {
+                "latitude": 19.0760,  # Mumbai coordinates
+                "longitude": 72.8777,
+                "accuracy": 10.5,
+                "address": "Aavana Greens Mumbai Office",
+                "lat": 19.0760,
+                "lng": 72.8777
+            },
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "check_type": "check_in",
             "device_info": {
                 "device_type": "mobile",
                 "browser": "Chrome",
