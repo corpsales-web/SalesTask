@@ -730,12 +730,41 @@ const EnhancedTaskSystem = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Task Title</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label>Task Title</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                    className={`${isRecording ? 'bg-red-50 text-red-600 border-red-200' : ''}`}
+                  >
+                    <Mic className={`h-4 w-4 mr-1 ${isRecording ? 'animate-pulse' : ''}`} />
+                    {isRecording ? 'Stop' : 'Voice'}
+                  </Button>
+                </div>
                 <Input 
                   value={taskForm.title}
                   onChange={(e) => setTaskForm({...taskForm, title: e.target.value})}
-                  placeholder="Enter task title..."
+                  placeholder="Enter task title or use voice input"
                 />
+                {transcription && (
+                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
+                    <div className="font-medium text-blue-800">Voice Input:</div>
+                    <div className="text-blue-700">{transcription}</div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        setTaskForm({...taskForm, title: transcription});
+                        setTranscription('');
+                      }}
+                    >
+                      Use This Text
+                    </Button>
+                  </div>
+                )}
               </div>
               <div>
                 <Label>Priority</Label>
