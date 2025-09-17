@@ -57,6 +57,7 @@ const App = () => {
   
   // UI States
   const [selectedLead, setSelectedLead] = useState(null);
+  const [leadActionType, setLeadActionType] = useState(null);
   const [showFileUploadModal, setShowFileUploadModal] = useState(false);
   const [showVoiceSTTModal, setShowVoiceSTTModal] = useState(false);
   const [showLeadActionsPanel, setShowLeadActionsPanel] = useState(false);
