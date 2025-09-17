@@ -96,38 +96,49 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
   }, [cameraStream]);
 
   const handleCapturePhoto = useCallback(() => {
-    if (!videoRef.current || !cameraStream) {
-      setError('Camera not ready for capture');
+    console.log('🔍 Starting photo capture process...');
+    
+    if (!videoRef.current) {
+      setError('Video element not found');
+      return;
+    }
+    
+    if (!cameraStream) {
+      setError('Camera stream not available');
       return;
     }
 
     try {
       setIsProcessing(true);
+      setError(null);
       
-      // Use the comprehensive capture utility
-      const result = capturePhoto(videoRef.current, 0.8);
-      
-      if (result.success) {
-        setCapturedImage(result.dataURL);
-        console.log('✅ Photo captured successfully:', result.dimensions);
+      // Wait a moment for video to be fully ready (Safari sometimes needs this)
+      setTimeout(() => {
+        const result = capturePhoto(videoRef.current, 0.8);
         
-        // Stop camera after successful capture
-        if (cameraStream) {
-          stopCameraStream(cameraStream);
+        if (result.success) {
+          setCapturedImage(result.dataURL);
+          console.log('✅ Photo captured successfully:', result.dimensions);
+          
+          // Stop camera after successful capture
+          if (cameraStream) {
+            stopCameraStream(cameraStream);
+          }
+          setCameraStream(null);
+          setCameraActive(false);
+          setError(null);
+          
+        } else {
+          console.error('📸 Photo capture failed:', result.error);
+          setError(result.message || '📷 Failed to capture photo. Please try again.');
         }
-        setCameraStream(null);
-        setCameraActive(false);
-        setError(null);
         
-      } else {
-        setError(result.message);
-        console.error('Photo capture failed:', result.error);
-      }
+        setIsProcessing(false);
+      }, 100); // Small delay for Safari
       
     } catch (err) {
-      console.error('Unexpected capture error:', err);
+      console.error('🚨 Unexpected capture error:', err);
       setError('📷 Failed to capture photo. Please try again or use GPS Check-in.');
-    } finally {
       setIsProcessing(false);
     }
   }, [cameraStream]);
