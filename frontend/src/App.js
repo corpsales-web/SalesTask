@@ -25,7 +25,7 @@ import CameraComponent from './components/CameraComponent';
 import EnhancedFileUploadHeader from './components/EnhancedFileUploadHeader';
 import Aavana2Assistant from './components/Aavana2Assistant';
 import GoalsManagementSystem from './components/GoalsManagementSystem';
-import DigitalMarketingManager from './components/DigitalMarketingManager';
+import ComprehensiveDigitalMarketingManager from './components/ComprehensiveDigitalMarketingManager';
 import FloatingChatbot from './components/FloatingChatbot';
 import axios from 'axios';
 import { useToast } from './hooks/use-toast';
