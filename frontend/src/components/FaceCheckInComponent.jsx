@@ -428,12 +428,17 @@ const FaceCheckInComponent = ({ onCheckInComplete }) => {
           <div className="mb-4 bg-black rounded-lg overflow-hidden">
             <video
               ref={videoRef}
-              autoPlay
-              playsInline
-              muted
+              autoPlay={true}
+              playsInline={true}
+              muted={true}
               controls={false}
+              webkit-playsinline="true"
               className="w-full"
-              style={{ transform: 'scaleX(-1)', minHeight: '200px' }}
+              style={{ 
+                transform: 'scaleX(-1)', 
+                minHeight: '200px',
+                backgroundColor: '#000'
+              }}
             />
           </div>
           <div className="flex space-x-2">
