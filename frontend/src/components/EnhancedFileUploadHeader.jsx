@@ -294,7 +294,14 @@ const EnhancedFileUploadHeader = ({ onFileUpload, maxFiles = 5, maxFileSize = 10
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
+              onChange={(e) => {
+                console.log("Camera input triggered, files:", e.target.files);
+                if (e.target.files && e.target.files.length > 0) {
+                  handleFiles(e.target.files);
+                } else {
+                  console.log("No files selected from camera");
+                }
+              }}
             />
 
             {/* File List */}
