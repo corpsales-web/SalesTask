@@ -700,6 +700,7 @@ const EnhancedTaskSystem = () => {
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="todo">To Do</SelectItem>
+                <SelectItem value="under_process">Under Process</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="review">Review</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
