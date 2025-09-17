@@ -430,7 +430,23 @@ const GoalsManagementSystem = ({ isOpen, onClose }) => {
                 }}>
                   <Eye className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" onClick={() => {
+                  setGoalForm({
+                    title: goal.title,
+                    description: goal.description,
+                    type: goal.type,
+                    category: goal.category,
+                    target_value: goal.target_value.toString(),
+                    current_value: goal.current_value,
+                    metric_unit: goal.metric_unit,
+                    start_date: goal.start_date,
+                    end_date: goal.end_date,
+                    assigned_to: goal.assigned_to,
+                    priority: goal.priority,
+                    status: goal.status
+                  });
+                  setShowCreateGoalModal(true);
+                }}>
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => deleteGoal(goal.id)}>
