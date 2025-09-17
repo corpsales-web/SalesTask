@@ -746,7 +746,13 @@ const EnhancedPipelineSystem = () => {
           <p className="text-gray-600">AI-powered sales pipeline with deal prediction and analytics</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => setShowAnalyticsModal(true)}>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setActiveView('analytics');
+              console.log('📊 Switching to analytics view');
+            }}
+          >
             <BarChart3 className="h-4 w-4 mr-2" />
             Analytics
           </Button>
