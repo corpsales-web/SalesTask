@@ -589,8 +589,249 @@ const ProjectGalleryManager = () => {
           )}
         </div>
       </div>
+
+      {/* Camera Modal */}
+      {uploadMode === 'camera' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold mb-4">Take Photo</h3>
+            <CameraCapture
+              onCapture={(imageData) => {
+                console.log('📸 Photo captured:', imageData);
+                // Convert captured image to file-like object for processing
+                const blob = dataURLtoBlob(imageData);
+                const file = new File([blob], `camera_photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                handleFileUpload([file]);
+                setUploadMode(null);
+              }}
+              onCancel={() => setUploadMode(null)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* File Upload Modal */}
+      {uploadMode === 'file' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold mb-4">Upload Files</h3>
+            <div 
+              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600 mb-4">
+                Drag and drop images here, or click to select files
+              </p>
+              <Button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                {isUploading ? 'Uploading...' : 'Select Files'}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  if (files.length > 0) {
+                    handleFileUpload(files);
+                  }
+                }}
+              />
+            </div>
+            <div className="flex justify-end space-x-2 mt-4">
+              <Button variant="outline" onClick={() => setUploadMode(null)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!selectedProject && (
+        <Card>
+          <CardContent className="text-center py-12">
+            <FolderPlus className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Project Selected</h3>
+            <p className="text-gray-600 mb-4">Select a project from the list or create a new one to start managing images</p>
+            <Button
+              onClick={() => {
+                const newProject = {
+                  id: Date.now().toString(),
+                  name: `New Project ${projects.length + 1}`,
+                  description: 'New project description',
+                  createdAt: new Date().toISOString().split('T')[0],
+                  imageCount: 0,
+                  status: 'planning',
+                  location: 'Location TBD',
+                  images: []
+                };
+                setProjects([...projects, newProject]);
+                setSelectedProject(newProject);
+              }}
+            >
+              <FolderPlus className="h-4 w-4 mr-2" />
+              Create New Project
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
+};
+
+// Camera Capture Component
+const CameraCapture = ({ onCapture, onCancel }) => {
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [stream, setStream] = useState(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+
+  useEffect(() => {
+    startCamera();
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'environment' // Use back camera on mobile
+        } 
+      });
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.onloadedmetadata = () => {
+          setCameraReady(true);
+        };
+      }
+      setStream(mediaStream);
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      alert('❌ Unable to access camera. Please check permissions and try again.');
+    }
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current || !cameraReady) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Draw video frame to canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert to data URL
+    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+    setPreviewImage(imageData);
+  };
+
+  const confirmCapture = () => {
+    if (previewImage) {
+      onCapture(previewImage);
+    }
+  };
+
+  const retakePhoto = () => {
+    setPreviewImage(null);
+  };
+
+  return (
+    <div className="space-y-4">
+      {!previewImage ? (
+        <>
+          <div className="relative">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-64 bg-black rounded-lg object-cover"
+            />
+            {!cameraReady && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                <div className="text-center">
+                  <Camera className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600">Starting camera...</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <canvas ref={canvasRef} className="hidden" />
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={capturePhoto}
+              disabled={!cameraReady}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              Capture Photo
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="space-y-4">
+            <h4 className="font-medium">Photo Preview</h4>
+            <img 
+              src={previewImage} 
+              alt="Captured photo" 
+              className="w-full h-64 object-cover rounded-lg border"
+            />
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={retakePhoto}>
+                Retake
+              </Button>
+              <Button 
+                onClick={confirmCapture}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Save Photo
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// Utility function to convert data URL to blob
+const dataURLtoBlob = (dataURL) => {
+  const arr = dataURL.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+};
 };
 
 export default ProjectGalleryManager;
