@@ -1747,9 +1747,10 @@ async def create_ai_reel_content(request: dict):
         client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         
         response = client.chat.completions.create(
-            model='gpt-5',
+            model='gpt-4o',
             messages=[{'role': 'user', 'content': reel_prompt}],
-            max_completion_tokens=2000
+            max_tokens=1500,
+            temperature=0.8
         )
         
         content_plan = response.choices[0].message.content
