@@ -1823,7 +1823,7 @@ async def create_ugc_campaign(request: dict):
         response = client.chat.completions.create(
             model='gpt-5',
             messages=[{'role': 'user', 'content': ugc_prompt}],
-            max_tokens=2000,
+            max_completion_tokens=2000,
             temperature=0.7
         )
         
