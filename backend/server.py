@@ -4912,8 +4912,7 @@ async def aavana2_chat(request: ChatRequest):
                 client.chat.completions.create(
                     model="gpt-5",  # Latest GPT-5 model
                     messages=messages,
-                    max_tokens=1000,  # Limit for cost control
-                    timeout=8.0
+                    max_completion_tokens=1000  # GPT-5 uses max_completion_tokens
                 ), 
                 timeout=10.0  # 10 second max timeout
             )
