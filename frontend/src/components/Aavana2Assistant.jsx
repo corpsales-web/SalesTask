@@ -143,7 +143,7 @@ How can I assist you today?`,
         message: currentInput,
         session_id: sessionId,
         language: selectedLanguage,
-        model: 'gpt-4o',
+        model: 'gpt-5',
         provider: 'openai'
       });
       
