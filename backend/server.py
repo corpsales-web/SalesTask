@@ -4913,7 +4913,6 @@ async def aavana2_chat(request: ChatRequest):
                     model="gpt-5",  # Latest GPT-5 model
                     messages=messages,
                     max_tokens=1000,  # Limit for cost control
-                    temperature=0.7,
                     timeout=8.0
                 ), 
                 timeout=10.0  # 10 second max timeout
