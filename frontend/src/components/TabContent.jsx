@@ -38,6 +38,12 @@ const TabContent = ({
   // State for optimized lead creation modal
   const [showOptimizedLeadModal, setShowOptimizedLeadModal] = useState(false);
   
+  // State for lead edit modal
+  const [showLeadEditModal, setShowLeadEditModal] = useState(false);
+  
+  // State for lead upload modal
+  const [showLeadUploadModal, setShowLeadUploadModal] = useState(false);
+  
   console.log(`🎯 TAB CONTENT RENDERING: ${activeTab} at ${new Date(lastUpdated).toLocaleTimeString()}`);
   
   // Memoize content to ensure it updates when activeTab changes
