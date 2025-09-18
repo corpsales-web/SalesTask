@@ -10,7 +10,7 @@ import asyncio
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 import uuid
 import json
 from datetime import datetime, timezone, timedelta
