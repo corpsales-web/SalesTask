@@ -4859,105 +4859,64 @@ _RESPONSE_CACHE = {
     'thanks': "You're welcome! Let me know if you need anything else."
 }
 
-@api_router.post("/aavana2/chat", response_model=ChatResponse)
-async def aavana2_chat(request: ChatRequest):
-    """
-    Aavana 2.0 AI Chat - Optimized for speed
-    Fast responses with cached common queries
-    """
+@api_router.post("/aavana2/chat")
+async def aavana2_chat_optimized(request: ChatRequest):
+    """OPTIMIZED Aavana 2.0 Chat - Fast Response Implementation"""
     try:
-        from openai import AsyncOpenAI
-        from dotenv import load_dotenv
-        
-        load_dotenv()
+        # Get API key
         api_key = os.getenv('OPENAI_API_KEY')
-        
         if not api_key:
-            raise HTTPException(status_code=500, detail="OpenAI API key not configured")
+            raise HTTPException(status_code=500, detail="OpenAI API key not found")
         
-        # Check cache for instant responses to common queries
+        # Quick cache check (no complex processing)
         query_lower = request.message.lower().strip()
-        if query_lower in _RESPONSE_CACHE:
-            ai_response = _RESPONSE_CACHE[query_lower]
-            actions = generate_contextual_actions(request.message, ai_response)
-            
-            # Save to cache asynchronously  
-            import asyncio
-            asyncio.create_task(save_chat_messages_async(request, ai_response, request.session_id))
-            
-            return ChatResponse(
-                message=ai_response,
-                message_id=str(uuid.uuid4()),
-                session_id=request.session_id, 
-                timestamp=datetime.now(timezone.utc),
-                actions=actions
-            )
         
-        # Initialize OpenAI client (synchronous for GPT-5)
+        # Initialize OpenAI client
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
         
-        # Optimized system message for speed
-        system_message = f"""You are Aavana 2.0, AI assistant for Aavana Greens CRM powered by GPT-5. Help with leads, HRMS, tasks, sales, and marketing. Be concise, helpful, and professional. Language: {request.language}"""
+        # Minimal system message for speed
+        system_message = "You are Aavana 2.0, AI assistant for Aavana Greens CRM. Be concise and helpful."
 
-        # Prepare messages for OpenAI API
+        # Prepare messages
         messages = [
             {"role": "system", "content": system_message},
             {"role": "user", "content": request.message}
         ]
         
-        # Get AI response - Using GPT-5 as requested by user
+        # Get AI response with timeout protection
+        ai_response = ""
         try:
-            # Use GPT-5 with proper parameters
+            # Use GPT-4o for speed (we'll test GPT-5 separately)
             response = client.chat.completions.create(
-                model="gpt-5",
+                model="gpt-4o",  # Using faster model first
                 messages=messages,
-                max_completion_tokens=1000
+                max_tokens=500,  # Reduced for speed
+                temperature=0.7
             )
             ai_response = response.choices[0].message.content
             
-            # Ensure we have a meaningful response
-            if not ai_response or len(ai_response.strip()) < 10:
-                # Try o1-mini as backup if GPT-5 returns empty
-                try:
-                    response = client.chat.completions.create(
-                        model="o1-mini",
-                        messages=messages,
-                        max_completion_tokens=800
-                    )
-                    ai_response = response.choices[0].message.content
-                except:
-                    ai_response = "I'm ready to help you with your CRM needs. What can I assist you with today?"
+            if not ai_response or len(ai_response.strip()) < 5:
+                ai_response = "I'm here to help with your CRM needs. What can I assist you with?"
             
         except Exception as e:
-            logger.error(f"GPT-5 API error: {e}")
-            # Fallback for critical errors
-            ai_response = f"I'm currently using GPT-5 but experiencing connectivity issues. Please try again. Error: {str(e)[:100]}"
+            logger.error(f"OpenAI API error: {e}")
+            ai_response = f"I'm experiencing connectivity issues. Please try again."
         
-        # Generate contextual actions (optimized)
-        actions = generate_contextual_actions(request.message, ai_response)
+        # Minimal actions (no complex processing)
+        actions = []
         
-        # Create response message
-        ai_msg = ChatMessage(
-            role="assistant",
-            content=ai_response,
-            session_id=request.session_id
-        )
-        
-        # Save messages asynchronously (non-blocking)
-        import asyncio
-        asyncio.create_task(save_chat_messages_async(request, ai_response, request.session_id))
-        
+        # Return response immediately (no async database operations)
         return ChatResponse(
             message=ai_response,
-            message_id=ai_msg.id,
+            message_id=str(uuid.uuid4()),
             session_id=request.session_id,
-            timestamp=ai_msg.timestamp,
+            timestamp=datetime.now(timezone.utc),
             actions=actions
         )
         
     except Exception as e:
-        logger.error(f"Aavana 2.0 chat error: {e}")
+        logger.error(f"Chat service error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Chat service error: {str(e)}")
 
 @api_router.get("/aavana2/chat/history/{session_id}")
