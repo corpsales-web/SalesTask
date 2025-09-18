@@ -420,6 +420,20 @@ const TabContent = ({
           }}
         />
       )}
+      
+      {/* Optimized Lead Creation Form Modal */}
+      <OptimizedLeadCreationForm 
+        isOpen={showOptimizedLeadModal}
+        onClose={() => setShowOptimizedLeadModal(false)}
+        onLeadCreated={(lead, deal) => {
+          console.log('✅ Lead created:', lead);
+          if (deal) {
+            console.log('🤝 Deal created:', deal);
+          }
+          // Refresh the page to show new lead/deal
+          window.location.reload();
+        }}
+      />
     </div>
   );
 };
