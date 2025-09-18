@@ -1147,11 +1147,11 @@ async def create_optimized_lead(lead_data: dict):
         # Prepare response
         created_lead = {**lead_doc}
         
-        # Success response
+        # Success response - ensure JSON serialization
         response_data = {
             "success": True,
             "message": "Lead created successfully" + (" and auto-converted to deal" if auto_converted_to_deal else ""),
-            "lead": created_lead,
+            "lead": make_json_safe(created_lead),
             "auto_converted_to_deal": auto_converted_to_deal,
             "qualification_summary": {
                 "score": qualification_score,
@@ -1162,7 +1162,7 @@ async def create_optimized_lead(lead_data: dict):
         }
         
         if auto_converted_to_deal and deal_data:
-            response_data["deal"] = {key: value for key, value in deal_data.items() if key != '_id'}
+            response_data["deal"] = make_json_safe({key: value for key, value in deal_data.items() if key != '_id'})
             response_data["deal_id"] = deal_data["id"]
         
         print(f"✅ Optimized lead created: {lead_doc['name']} (Score: {qualification_score}/100)")
