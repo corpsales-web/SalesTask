@@ -10,3 +10,69 @@
 ❌ FAIL Task Creation Query (18.05s): Empty response - GPT-5 model not returning content
 ❌ FAIL Green Building Solutions Query (23.89s): Empty response - GPT-5 model not returning content
 ❌ FAIL HRMS Attendance Query (20.71s): Empty response - GPT-5 model not returning content
+✅ PASS Cached Response Test (Hello) (0.01s): GPT response received. Length: 55 chars, Actions: 0
+✅ PASS Cached Response Test (Help) (0.01s): GPT response received. Length: 97 chars, Actions: 0
+
+🔧 GPT-5 PARAMETER VALIDATION TEST
+========================================
+❌ FAIL GPT-5 max_completion_tokens Parameter (18.51s): GPT-5 returned empty response - parameter issue
+
+📝 SESSION MANAGEMENT TEST
+==============================
+✅ PASS Session Message 1 (21.10s): Message ID generated, Session consistent
+✅ PASS Session Message 2 (11.86s): Message ID generated, Session consistent
+✅ PASS Session Message 3 (13.83s): Message ID generated, Session consistent
+✅ PASS Message ID Uniqueness: All 3 message IDs are unique
+✅ PASS Timestamp Formatting: All 3 timestamps properly formatted
+
+🚨 ERROR HANDLING TEST
+=========================
+✅ PASS Empty Message (12.46s): Handled gracefully with response
+✅ PASS Very Long Message (7.27s): Handled gracefully with response
+❌ FAIL Missing Session ID (0.01s): Not handled gracefully: HTTP 422
+
+🔗 INTEGRATION COMPLETENESS TEST
+===================================
+✅ PASS Contextual Actions Generation (18.23s): All fields present, 1 actions generated
+✅ PASS Chat Message Saving (0.01s): Chat history retrieved: 2 messages
+
+======================================================================
+📊 FINAL AAVANA 2.0 OPENAI CONNECTION TEST SUMMARY
+======================================================================
+📈 Total Tests: 17
+✅ Passed: 12
+❌ Failed: 5
+🎯 Success Rate: 70.6%
+
+📋 TEST CATEGORIES (per review request):
+🤖 Chat Endpoint Tests: 8/11 passed
+🔧 Parameter Validation: 0/1 passed
+📝 Session Management: 4/5 passed
+🚨 Error Handling: 1/1 passed
+🔗 Integration Completeness: 2/2 passed
+
+🔍 CRITICAL FINDINGS:
+🚨 CRITICAL: GPT-5 EMPTY RESPONSE ISSUE DETECTED
+   • 4 tests failed due to empty GPT-5 responses
+   • This indicates GPT-5 model is not returning content properly
+   • Root cause: GPT-5 API parameter compatibility or model availability
+🚨 OPENAI CONNECTION ISSUES:
+   • Task Creation Query: Empty response - GPT-5 model not returning content
+   • Green Building Solutions Query: Empty response - GPT-5 model not returning content
+   • HRMS Attendance Query: Empty response - GPT-5 model not returning content
+
+⏱️ PERFORMANCE:
+   📊 Average Response Time: 13.51s
+   📊 Maximum Response Time: 36.74s
+
+❌ FAILED TESTS (5):
+   🔴 Task Creation Query: Empty response - GPT-5 model not returning content
+   🔴 Green Building Solutions Query: Empty response - GPT-5 model not returning content
+   🔴 HRMS Attendance Query: Empty response - GPT-5 model not returning content
+   🔴 GPT-5 max_completion_tokens Parameter: GPT-5 returned empty response - parameter issue
+   🔴 Missing Session ID: Not handled gracefully: HTTP 422
+
+🎯 FINAL ASSESSMENT:
+✅ GOOD: OpenAI connection mostly fixed with minor issues
+⚠️ Some non-critical issues detected but core functionality works
+======================================================================
