@@ -1259,12 +1259,12 @@ async def analyze_lead_qualification(analysis_data: dict):
         5. Suggested follow-up actions
         """
         
-        # Use GPT-4o for analysis
+        # Use GPT-5 for analysis
         from openai import OpenAI
         client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         
         response = client.chat.completions.create(
-            model='gpt-4o',
+            model='gpt-5',
             messages=[{'role': 'user', 'content': analysis_prompt}],
             max_tokens=1000,
             temperature=0.3
