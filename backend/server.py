@@ -4908,13 +4908,11 @@ async def aavana2_chat(request: ChatRequest):
         # Get AI response with timeout for speed
         import asyncio
         try:
-            response = await asyncio.wait_for(
-                client.chat.completions.create(
-                    model="gpt-5",  # Latest GPT-5 model
-                    messages=messages,
-                    max_completion_tokens=1000  # GPT-5 uses max_completion_tokens
-                ), 
-                timeout=10.0  # 10 second max timeout
+            # Use synchronous client for GPT-5
+            response = client.chat.completions.create(
+                model="gpt-5",  # Latest GPT-5 model
+                messages=messages,
+                max_completion_tokens=1000  # GPT-5 uses max_completion_tokens
             )
             ai_response = response.choices[0].message.content
             
