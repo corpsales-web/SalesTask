@@ -124,7 +124,7 @@ class EnhancedAIService:
             
         except Exception as e:
             print(f"AI generation error: {str(e)}")
-            # Fallback to GPT-4o if the requested model fails
+            # Fallback to GPT-5 if the requested model fails
             if request.model != AIModel.GPT_4O:
                 fallback_request = AIRequest(
                     prompt=request.prompt,
