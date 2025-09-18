@@ -281,7 +281,7 @@ class Lead(BaseModel):
     source: Optional[str] = None  # Website, Google Ads, Facebook, Referral, etc.
     category: Optional[str] = None  # Residential, Commercial, Enterprise, etc.
     status: LeadStatus = LeadStatus.NEW
-    notes: Optional[str] = None
+    notes: Union[str, List[str], None] = None  # Support both string and list for compatibility
     tags: List[str] = []
     assigned_to: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
