@@ -1144,8 +1144,8 @@ async def create_optimized_lead(lead_data: dict):
                 print(f"⚠️ Deal creation failed, but lead created: {deal_error}")
                 # Continue with lead creation even if deal creation fails
         
-        # Prepare response
-        created_lead = {**lead_doc}
+        # Prepare response - ensure no MongoDB ObjectIds
+        created_lead = {key: value for key, value in lead_doc.items() if key != '_id'}
         
         # Success response - ensure JSON serialization
         response_data = {
@@ -1162,7 +1162,8 @@ async def create_optimized_lead(lead_data: dict):
         }
         
         if auto_converted_to_deal and deal_data:
-            response_data["deal"] = make_json_safe({key: value for key, value in deal_data.items() if key != '_id'})
+            clean_deal_data = {key: value for key, value in deal_data.items() if key != '_id'}
+            response_data["deal"] = make_json_safe(clean_deal_data)
             response_data["deal_id"] = deal_data["id"]
         
         print(f"✅ Optimized lead created: {lead_doc['name']} (Score: {qualification_score}/100)")
