@@ -1266,8 +1266,7 @@ async def analyze_lead_qualification(analysis_data: dict):
         response = client.chat.completions.create(
             model='gpt-5',
             messages=[{'role': 'user', 'content': analysis_prompt}],
-            max_completion_tokens=1000,
-            temperature=0.3
+            max_completion_tokens=1000
         )
         
         ai_response = response.choices[0].message.content
