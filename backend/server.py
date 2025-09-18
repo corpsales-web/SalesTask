@@ -1668,14 +1668,14 @@ async def generate_comprehensive_marketing_strategy(request: dict):
         Include specific actionable recommendations and implementation timelines.
         """
         
-        # Use GPT-5 for comprehensive strategy generation
+        # Use GPT-4o for comprehensive strategy generation (faster and reliable)
         from openai import OpenAI
         client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         
         response = client.chat.completions.create(
-            model='gpt-5',
+            model='gpt-4o',
             messages=[{'role': 'user', 'content': strategy_prompt}],
-            max_completion_tokens=3000
+            max_tokens=2000
         )
         
         strategy_content = response.choices[0].message.content
