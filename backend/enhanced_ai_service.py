@@ -35,7 +35,7 @@ class AIModel:
     """Available AI models"""
     # OpenAI Models
     GPT_5 = "gpt-5"
-    GPT_4O = "gpt-4o"
+    GPT_5 = "gpt-5"
     
     # Anthropic Models
     CLAUDE_4_SONNET = "claude-4-sonnet-20250514"
