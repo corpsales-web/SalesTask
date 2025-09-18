@@ -4801,7 +4801,7 @@ class ChatRequest(BaseModel):
     message: str
     session_id: str
     language: str = "en"
-    model: str = "gpt-4o"  # Default model
+    model: str = "gpt-5"  # Default model
     provider: str = "openai"  # Default provider
 
 class ChatResponse(BaseModel):
