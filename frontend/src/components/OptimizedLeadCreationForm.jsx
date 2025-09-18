@@ -402,10 +402,10 @@ ${createdLead.qualification_score < 70 ?
               <SelectValue placeholder="Approximate area" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="small">Small (< 500 sq ft)</SelectItem>
+              <SelectItem value="small">Small (&lt; 500 sq ft)</SelectItem>
               <SelectItem value="medium">Medium (500-2000 sq ft)</SelectItem>
               <SelectItem value="large">Large (2000-5000 sq ft)</SelectItem>
-              <SelectItem value="xl">Extra Large (> 5000 sq ft)</SelectItem>
+              <SelectItem value="xl">Extra Large (&gt; 5000 sq ft)</SelectItem>
             </SelectContent>
           </Select>
         </div>
