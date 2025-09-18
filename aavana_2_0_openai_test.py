@@ -674,11 +674,16 @@ class Aavana2OpenAITester:
             response_time = time.time() - start_time
             
             if response.status_code == 200:
-                data = response.json()
+                try:
+                    data = response.json()
+                    message = data.get('message', 'OK')
+                except:
+                    message = response.text[:50]
+                
                 self.log_test(
                     "Backend Health Check", 
                     True, 
-                    f"Backend responding: {data.get('message', 'OK')}",
+                    f"Backend responding: {message}",
                     response_time
                 )
                 return True
