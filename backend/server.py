@@ -2142,7 +2142,7 @@ async def launch_crossplatform_campaign(request: dict):
         response = client.chat.completions.create(
             model='gpt-5',
             messages=[{'role': 'user', 'content': launch_prompt}],
-            max_tokens=2500,
+            max_completion_tokens=2500,
             temperature=0.7
         )
         
