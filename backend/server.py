@@ -2140,7 +2140,7 @@ async def launch_crossplatform_campaign(request: dict):
         client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         
         response = client.chat.completions.create(
-            model='gpt-4o',
+            model='gpt-5',
             messages=[{'role': 'user', 'content': launch_prompt}],
             max_tokens=2500,
             temperature=0.7
