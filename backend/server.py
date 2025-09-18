@@ -1675,8 +1675,7 @@ async def generate_comprehensive_marketing_strategy(request: dict):
         response = client.chat.completions.create(
             model='gpt-5',
             messages=[{'role': 'user', 'content': strategy_prompt}],
-            max_completion_tokens=3000,
-            temperature=0.7
+            max_completion_tokens=3000
         )
         
         strategy_content = response.choices[0].message.content
