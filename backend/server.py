@@ -4906,23 +4906,33 @@ async def aavana2_chat(request: ChatRequest):
             {"role": "user", "content": request.message}
         ]
         
-        # Get AI response - Use GPT-4o for reliability and speed
+        # Get AI response - Using GPT-5 as requested by user
         try:
-            # Use GPT-4o which is faster and more reliable
+            # Use GPT-5 with proper parameters
             response = client.chat.completions.create(
-                model="gpt-4o",  # Using GPT-4o for better performance
+                model="gpt-5",
                 messages=messages,
-                max_tokens=1000,
-                temperature=0.7
+                max_completion_tokens=1000
             )
             ai_response = response.choices[0].message.content
             
-            if not ai_response or len(ai_response.strip()) < 5:
-                ai_response = "I'm ready to help you with your CRM needs. What can I assist you with today?"
+            # Ensure we have a meaningful response
+            if not ai_response or len(ai_response.strip()) < 10:
+                # Try o1-mini as backup if GPT-5 returns empty
+                try:
+                    response = client.chat.completions.create(
+                        model="o1-mini",
+                        messages=messages,
+                        max_completion_tokens=800
+                    )
+                    ai_response = response.choices[0].message.content
+                except:
+                    ai_response = "I'm ready to help you with your CRM needs. What can I assist you with today?"
             
         except Exception as e:
-            logger.error(f"OpenAI API error: {e}")
-            ai_response = "I'm having trouble connecting to OpenAI. Please try again."
+            logger.error(f"GPT-5 API error: {e}")
+            # Fallback for critical errors
+            ai_response = f"I'm currently using GPT-5 but experiencing connectivity issues. Please try again. Error: {str(e)[:100]}"
         
         # Generate contextual actions (optimized)
         actions = generate_contextual_actions(request.message, ai_response)
