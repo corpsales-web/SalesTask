@@ -459,7 +459,7 @@ How can I assist you today?`,
 • Language: ${languages.find(l => l.code === selectedLanguage)?.name}
 • Voice Output: ${isSpeaking ? 'Enabled' : 'Disabled'}
 • AI Models: Multi-Model Support
-  - OpenAI GPT-4o (Primary)
+  - OpenAI GPT-5 (Primary)
   - Claude Sonnet 4 (Available)
   - Gemini 2.0 Flash (Available)
 
