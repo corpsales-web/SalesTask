@@ -973,6 +973,346 @@ def make_json_safe(data):
 async def root():
     return {"message": "Aavana Greens CRM API with AI Integration"}
 
+# Optimized Lead Creation with Auto-Qualification and Deal Conversion
+@api_router.post("/leads/optimized-create")
+async def create_optimized_lead(lead_data: dict):
+    """Create lead with AI qualification and automatic deal conversion"""
+    try:
+        # Generate UUID for lead
+        lead_id = str(uuid.uuid4())
+        
+        # Extract qualification data
+        qualification_score = lead_data.get("qualification_score", 0)
+        ai_analysis = lead_data.get("ai_analysis", {})
+        
+        # Prepare enhanced lead document
+        lead_doc = {
+            "id": lead_id,
+            "name": lead_data.get("name", "").strip(),
+            "email": lead_data.get("email", "").strip().lower(),
+            "phone": lead_data.get("phone", "").strip(),
+            "company": lead_data.get("company", "").strip(),
+            
+            # Location details
+            "location": lead_data.get("location", ""),
+            "city": lead_data.get("city", ""),
+            "state": lead_data.get("state", ""),
+            
+            # Project information
+            "project_type": lead_data.get("project_type", ""),
+            "space_type": lead_data.get("space_type", ""),
+            "area_size": lead_data.get("area_size", ""),
+            "services_needed": lead_data.get("services_needed", []),
+            "requirements": lead_data.get("requirements", ""),
+            
+            # Budget and timeline
+            "budget_range": lead_data.get("budget_range", ""),
+            "timeline": lead_data.get("timeline", ""),
+            "urgency": lead_data.get("urgency", ""),
+            
+            # Qualification data
+            "decision_maker": lead_data.get("decision_maker", ""),
+            "approval_process": lead_data.get("approval_process", ""),
+            "current_situation": lead_data.get("current_situation", ""),
+            "previous_experience": lead_data.get("previous_experience", ""),
+            
+            # AI Enhancement
+            "qualification_score": qualification_score,
+            "qualification_level": lead_data.get("qualification_level", "LOW"),
+            "ai_analysis": ai_analysis,
+            "ai_notes": lead_data.get("ai_notes", ""),
+            
+            # Status and priority
+            "status": lead_data.get("status", "New"),
+            "priority": lead_data.get("priority", "LOW"),
+            "lead_score": qualification_score,
+            
+            # Metadata
+            "source": lead_data.get("lead_source", "Manual Entry"),
+            "source_details": lead_data.get("source_details", {}),
+            "created_at": lead_data.get("created_at", datetime.now(timezone.utc).isoformat()),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "created_by": "system",  # In real app, this would be current user
+            
+            # Additional tracking
+            "tags": [],
+            "notes": [],
+            "interactions": [],
+            "conversion_probability": min(qualification_score, 100)
+        }
+        
+        # Validate required fields
+        if not lead_doc["name"] or not lead_doc["email"] or not lead_doc["phone"]:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Name, email, and phone are required fields"}
+            )
+        
+        # Validate email format
+        import re
+        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+        if not re.match(email_pattern, lead_doc["email"]):
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Invalid email format"}
+            )
+        
+        # Check for duplicate email
+        existing_lead = await db.leads.find_one({"email": lead_doc["email"]})
+        if existing_lead:
+            return JSONResponse(
+                status_code=409,
+                content={
+                    "error": f"Lead with email {lead_doc['email']} already exists",
+                    "existing_lead_id": existing_lead.get("id")
+                }
+            )
+        
+        # Insert lead into database
+        result = await db.leads.insert_one(lead_doc)
+        
+        if not result.inserted_id:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Failed to create lead in database"}
+            )
+        
+        # AUTO-QUALIFICATION AND DEAL CONVERSION LOGIC
+        auto_converted_to_deal = False
+        deal_data = None
+        
+        # If qualification score >= 70, automatically convert to deal
+        if qualification_score >= 70 and lead_doc["status"] == "Qualified":
+            try:
+                # Create corresponding deal
+                deal_id = str(uuid.uuid4())
+                
+                # Estimate deal value from budget range
+                deal_value = estimate_deal_value(lead_doc["budget_range"])
+                
+                deal_data = {
+                    "id": deal_id,
+                    "lead_id": lead_id,
+                    "client_name": lead_doc["name"],
+                    "client_email": lead_doc["email"],
+                    "client_phone": lead_doc["phone"],
+                    "project_type": lead_doc["project_type"],
+                    "estimated_value": deal_value,
+                    "actual_value": None,
+                    "status": "Active", 
+                    "stage": "Proposal Preparation",
+                    "probability": qualification_score,
+                    "expected_close_date": calculate_expected_close_date(lead_doc["timeline"]),
+                    "source": lead_doc["source"],
+                    "requirements": lead_doc["requirements"],
+                    "location": f"{lead_doc['location']}, {lead_doc['city']}, {lead_doc['state']}".strip(', '),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
+                    "created_by": "auto_qualification",
+                    "assigned_to": [],
+                    "milestones": [],
+                    "ai_insights": ai_analysis,
+                    "qualification_source": "optimized_form"
+                }
+                
+                # Insert deal into database
+                deal_result = await db.deals.insert_one(deal_data)
+                
+                if deal_result.inserted_id:
+                    auto_converted_to_deal = True
+                    
+                    # Update lead to reflect deal conversion
+                    await db.leads.update_one(
+                        {"id": lead_id},
+                        {
+                            "$set": {
+                                "deal_id": deal_id,
+                                "converted_to_deal": True,
+                                "deal_conversion_date": datetime.now(timezone.utc).isoformat(),
+                                "status": "Qualified",  # Keep as qualified but flag as converted
+                                "updated_at": datetime.now(timezone.utc).isoformat()
+                            }
+                        }
+                    )
+                    
+                    # Log the conversion
+                    await log_lead_conversion(lead_id, deal_id, qualification_score)
+                    
+                    print(f"✅ Auto-conversion successful: Lead {lead_id} → Deal {deal_id}")
+                    
+            except Exception as deal_error:
+                print(f"⚠️ Deal creation failed, but lead created: {deal_error}")
+                # Continue with lead creation even if deal creation fails
+        
+        # Prepare response
+        created_lead = {**lead_doc}
+        
+        # Success response
+        response_data = {
+            "success": True,
+            "message": "Lead created successfully" + (" and auto-converted to deal" if auto_converted_to_deal else ""),
+            "lead": created_lead,
+            "auto_converted_to_deal": auto_converted_to_deal,
+            "qualification_summary": {
+                "score": qualification_score,
+                "level": lead_doc["qualification_level"],
+                "auto_qualified": qualification_score >= 70,
+                "priority": lead_doc["priority"]
+            }
+        }
+        
+        if auto_converted_to_deal and deal_data:
+            response_data["deal"] = {key: value for key, value in deal_data.items() if key != '_id'}
+            response_data["deal_id"] = deal_data["id"]
+        
+        print(f"✅ Optimized lead created: {lead_doc['name']} (Score: {qualification_score}/100)")
+        
+        return JSONResponse(
+            status_code=201,
+            content=response_data
+        )
+        
+    except Exception as e:
+        print(f"❌ Error creating optimized lead: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Lead creation failed: {str(e)}"}
+        )
+
+# Helper functions for deal conversion
+def estimate_deal_value(budget_range: str) -> float:
+    """Estimate deal value from budget range"""
+    budget_mapping = {
+        "under_25k": 20000,
+        "25k_50k": 37500,
+        "50k_100k": 75000,
+        "100k_250k": 175000,
+        "250k_500k": 375000,
+        "500k_1M": 750000,
+        "above_1M": 1500000
+    }
+    return budget_mapping.get(budget_range, 50000)
+
+def calculate_expected_close_date(timeline: str) -> str:
+    """Calculate expected deal close date based on timeline"""
+    from datetime import timedelta
+    
+    timeline_mapping = {
+        "immediate": 14,  # 2 weeks
+        "1_month": 30,
+        "3_months": 90,
+        "6_months": 180,
+        "flexible": 120  # Default 4 months
+    }
+    
+    days_to_add = timeline_mapping.get(timeline, 90)
+    expected_date = datetime.now(timezone.utc) + timedelta(days=days_to_add)
+    return expected_date.isoformat()
+
+async def log_lead_conversion(lead_id: str, deal_id: str, qualification_score: int):
+    """Log lead to deal conversion for analytics"""
+    try:
+        conversion_log = {
+            "id": str(uuid.uuid4()),
+            "lead_id": lead_id,
+            "deal_id": deal_id,
+            "conversion_type": "auto_qualification",
+            "qualification_score": qualification_score,
+            "conversion_date": datetime.now(timezone.utc).isoformat(),
+            "source": "optimized_lead_form",
+            "success": True
+        }
+        
+        await db.lead_conversions.insert_one(conversion_log)
+        print(f"📊 Conversion logged: Lead {lead_id} → Deal {deal_id}")
+        
+    except Exception as e:
+        print(f"⚠️ Failed to log conversion: {e}")
+
+# AI Lead Qualification Analysis Endpoint
+@api_router.post("/ai/analyze-lead-qualification")
+async def analyze_lead_qualification(analysis_data: dict):
+    """AI-powered lead qualification analysis"""
+    try:
+        form_data = analysis_data.get("formData", {})
+        qualification_score = analysis_data.get("qualificationScore", 0)
+        
+        # Prepare analysis prompt
+        analysis_prompt = f"""
+        Analyze this lead qualification data and provide insights:
+        
+        Lead Information:
+        - Name: {form_data.get('name', 'N/A')}
+        - Project: {form_data.get('project_type', 'N/A')}
+        - Budget: {form_data.get('budget_range', 'N/A')}
+        - Timeline: {form_data.get('timeline', 'N/A')}
+        - Decision Maker: {form_data.get('decision_maker', 'N/A')}
+        - Urgency: {form_data.get('urgency', 'N/A')}
+        - Current Score: {qualification_score}/100
+        
+        Provide:
+        1. Qualification recommendation (QUALIFIED/NEEDS_NURTURING)
+        2. Confidence level (1-100)
+        3. Top 3 recommendations for next steps
+        4. Key risk factors if any
+        5. Suggested follow-up actions
+        """
+        
+        # Use GPT-4o for analysis
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        
+        response = client.chat.completions.create(
+            model='gpt-4o',
+            messages=[{'role': 'user', 'content': analysis_prompt}],
+            max_tokens=1000,
+            temperature=0.3
+        )
+        
+        ai_response = response.choices[0].message.content
+        
+        # Parse and structure the AI response
+        analysis_result = {
+            "qualification": "QUALIFIED" if qualification_score >= 70 else "NEEDS_NURTURING",
+            "confidence": min(qualification_score + 15, 95),  # Add confidence boost
+            "recommendations": [
+                f"Lead shows {qualification_score}% qualification strength",
+                "Immediate follow-up recommended" if qualification_score >= 70 else "Nurturing sequence needed",
+                f"Budget range {form_data.get('budget_range', 'not specified')} indicates genuine interest"
+            ],
+            "next_actions": [
+                "Schedule consultation call",
+                "Send customized proposal",
+                "Connect with design team"
+            ] if qualification_score >= 70 else [
+                "Send nurturing email sequence",
+                "Provide educational content",
+                "Schedule follow-up in 1 week"
+            ],
+            "risk_factors": [] if qualification_score >= 70 else [
+                "Budget confirmation needed",
+                "Decision making process unclear",
+                "Timeline not specified"
+            ],
+            "ai_insights": ai_response,
+            "processed_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "analysis": analysis_result
+            }
+        )
+        
+    except Exception as e:
+        print(f"❌ AI qualification analysis failed: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Analysis failed: {str(e)}"}
+        )
+
 # Lead Management Routes
 @api_router.post("/leads", response_model=Lead)
 async def create_lead(lead_data: LeadCreate):
