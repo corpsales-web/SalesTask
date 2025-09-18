@@ -140,8 +140,7 @@ def test_openai_direct():
         response = client.chat.completions.create(
             model='gpt-5',
             messages=[{'role': 'user', 'content': 'Test connection - respond with "OpenAI GPT-5 working"'}],
-            max_completion_tokens=50,
-            temperature=0.1
+            max_completion_tokens=50
         )
         response_time = time.time() - start_time
         
