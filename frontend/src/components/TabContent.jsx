@@ -123,74 +123,11 @@ const TabContent = ({
                 <p className="text-gray-600">Manage your leads and prospects</p>
               </div>
               <button 
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                onClick={async () => {
-                  try {
-                    // Enhanced Add Lead functionality with proper API integration
-                    const leadName = prompt('Enter lead name:');
-                    if (leadName && leadName.trim()) {
-                      const leadEmail = prompt('Enter lead email:');
-                      const leadPhone = prompt('Enter lead phone:');
-                      
-                      if (leadEmail && leadPhone && leadEmail.trim() && leadPhone.trim()) {
-                        // Validate email format
-                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        if (!emailRegex.test(leadEmail)) {
-                          alert('❌ Please enter a valid email address.');
-                          return;
-                        }
-                        
-                        // Create lead object
-                        const newLead = {
-                          name: leadName.trim(),
-                          email: leadEmail.trim(),
-                          phone: leadPhone.trim(),
-                          status: 'New',
-                          source: 'Manual Entry',
-                          category: 'Individual',
-                          created_at: new Date().toISOString()
-                        };
-                        
-                        try {
-                          // Call API to create lead
-                          const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-                          const response = await fetch(`${API}/api/leads`, {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(newLead)
-                          });
-                          
-                          if (response.ok) {
-                            const createdLead = await response.json();
-                            console.log('✅ Lead created successfully:', createdLead);
-                            alert(`✅ Lead Created Successfully!\n\nName: ${leadName}\nEmail: ${leadEmail}\nPhone: ${leadPhone}\n\nThe lead has been added to your CRM system and assigned ID: ${createdLead.id}`);
-                            
-                            // Refresh the page to show new lead
-                            window.location.reload();
-                          } else {
-                            const error = await response.text();
-                            console.error('API Error:', error);
-                            alert(`❌ Failed to create lead: ${error}\n\nPlease try again or contact support.`);
-                          }
-                        } catch (apiError) {
-                          console.error('Network Error:', apiError);
-                          alert(`❌ Network Error: Unable to connect to server.\n\nPlease check your internet connection and try again.`);
-                        }
-                      } else {
-                        alert('❌ Please fill in all required fields (Name, Email, Phone).');
-                      }
-                    } else {
-                      alert('❌ Lead name is required.');
-                    }
-                  } catch (error) {
-                    console.error('Add Lead Error:', error);
-                    alert('❌ An unexpected error occurred. Please try again.');
-                  }
-                }}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                onClick={() => setShowOptimizedLeadModal(true)}
               >
-                Add Lead
+                <span className="mr-2">➕</span>
+                Add Lead (AI-Optimized)
               </button>
             </div>
             
