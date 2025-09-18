@@ -7,3 +7,6 @@
 🤖 AAVANA 2.0 CHAT ENDPOINT COMPREHENSIVE TEST
 =======================================================
 ✅ PASS Lead Management Query (36.74s): GPT response received. Length: 769 chars, Actions: 1
+❌ FAIL Task Creation Query (18.05s): Empty response - GPT-5 model not returning content
+❌ FAIL Green Building Solutions Query (23.89s): Empty response - GPT-5 model not returning content
+❌ FAIL HRMS Attendance Query (20.71s): Empty response - GPT-5 model not returning content
