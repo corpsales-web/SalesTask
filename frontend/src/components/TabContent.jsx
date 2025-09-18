@@ -140,12 +140,44 @@ const TabContent = ({
                       <p className="text-gray-600">{lead.email}</p>
                       <p className="text-sm text-gray-500">{lead.phone}</p>
                     </div>
-                    <div className="flex space-x-2">
-                      <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
-                        Call
+                    <div className="flex flex-wrap gap-2">
+                      <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 flex items-center">
+                        📞 Call
                       </button>
-                      <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
-                        Email
+                      <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex items-center">
+                        📧 Email
+                      </button>
+                      <button 
+                        className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 flex items-center"
+                        onClick={() => {
+                          // Open WhatsApp chat for this lead
+                          const phoneNumber = lead.phone?.replace(/[^\d]/g, '');
+                          const message = `Hello ${lead.name}, this is regarding your inquiry with Aavana Greens. How can we assist you further?`;
+                          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                          window.open(whatsappUrl, '_blank');
+                        }}
+                      >
+                        💬 WhatsApp
+                      </button>
+                      <button 
+                        className="bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700 flex items-center"
+                        onClick={() => {
+                          console.log('✏️ Edit button clicked for lead:', lead.id);
+                          setSelectedLead(lead);
+                          setShowLeadEditModal(true);
+                        }}
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button 
+                        className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 flex items-center"
+                        onClick={() => {
+                          console.log('📤 Upload button clicked for lead:', lead.id);
+                          setSelectedLead(lead);
+                          setShowLeadUploadModal(true);
+                        }}
+                      >
+                        📤 Upload
                       </button>
                       <button 
                         className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700"
