@@ -4898,7 +4898,7 @@ async def aavana2_chat(request: ChatRequest):
         client = OpenAI(api_key=api_key)
         
         # Optimized system message for speed
-        system_message = f"""You are Aavana 2.0, AI assistant for Aavana Greens CRM powered by GPT-4o. Help with leads, HRMS, tasks, sales, and marketing. Be concise, helpful, and professional. Language: {request.language}"""
+        system_message = f"""You are Aavana 2.0, AI assistant for Aavana Greens CRM powered by GPT-5. Help with leads, HRMS, tasks, sales, and marketing. Be concise, helpful, and professional. Language: {request.language}"""
 
         # Prepare messages for OpenAI API
         messages = [
