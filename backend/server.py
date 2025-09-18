@@ -1889,8 +1889,7 @@ async def create_ai_influencer(request: dict):
         response = client.chat.completions.create(
             model='gpt-5',
             messages=[{'role': 'user', 'content': influencer_prompt}],
-            max_completion_tokens=2000,
-            temperature=0.8
+            max_completion_tokens=2000
         )
         
         influencer_profile = response.choices[0].message.content
