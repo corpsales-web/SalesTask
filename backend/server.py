@@ -1821,7 +1821,7 @@ async def create_ugc_campaign(request: dict):
         client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         
         response = client.chat.completions.create(
-            model='gpt-4o',
+            model='gpt-5',
             messages=[{'role': 'user', 'content': ugc_prompt}],
             max_tokens=2000,
             temperature=0.7
