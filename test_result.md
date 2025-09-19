@@ -101,3 +101,49 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Conduct an exhaustive search for remaining API keys/secrets and remove them so the repo can be saved to GitHub"
+backend:
+  - task: "Secret scanning (backend)"
+    implemented: true
+    working: true
+    file: "/app/backend"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Ran multi-pattern ripgrep scans excluding node_modules/.git; no keys or tokens found in backend."
+frontend:
+  - task: "Remove analytics key (PostHog)"
+    implemented: true
+    working: true
+    file: "/app/frontend/public/index.html"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported secrets still present blocking GitHub save."
+      - working: true
+        agent: "main"
+        comment: "Removed PostHog init snippet containing phc_* key; re-scanned repo; no remaining secrets found outside node_modules/.git."
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Verify frontend loads without analytics snippet"
+    - "Verify GET {REACT_APP_BACKEND_URL}/api/ returns Hello World"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "PostHog snippet removed; please validate UI loads and backend root endpoint works. Confirm repo is now clean for GitHub save."
