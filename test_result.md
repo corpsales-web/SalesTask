@@ -119,6 +119,20 @@
 ##         -working: true
 ##         -agent: "testing"
 ##         -comment: "TESTED: All CRM temp-restore endpoints working perfectly! ✅ GET /api/health returns {status: ok, service: temp-restore, stt_ready: false}, ✅ POST /api/stt/chunk returns stt_ready: false (no credentials), ✅ WS /api/stt/stream connects and returns error message 'STT not configured (no Google credentials present)'. All 3 tests passed (100% success rate). Server running on internal 0.0.0.0:8001 via supervisor and accessible via ingress with /api prefix."
+##   - task: "CRM Backend Core Endpoints (Leads & Tasks CRUD)"
+##     implemented: true
+##     working: true
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Added complete CRM core endpoints: Leads CRUD (POST, GET, PUT, DELETE /api/leads) and Tasks CRUD (POST, GET, PUT, DELETE /api/tasks). All endpoints use UUID for IDs, ISO timestamps, MongoDB via MONGO_URL, proper pagination, and exclude _id from responses. Fixed MONGO_URL configuration and added dotenv loading."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "TESTED: All CRM core endpoints working perfectly! ✅ Health endpoint (200, {status: ok, service: crm-backend, time: ISO}), ✅ Leads CRUD (POST with minimal {name} → success + UUID + status 'New', GET list with pagination without _id, PUT status/notes updates, DELETE with verification), ✅ Tasks CRUD (POST with minimal {title} → success + UUID + status 'Open', GET list with pagination without _id, PUT status updates, DELETE with verification). All 11 tests passed (100% success rate). Fixed MONGO_URL database name issue and added dotenv loading to server.py. CRM backend fully functional for core operations."
 ##   - task: "DMM Backend with GPT-5 beta AI orchestration"
 ##     implemented: true
 ##     working: true
