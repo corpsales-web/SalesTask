@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-## user_problem_statement: DMM APP COMPLETION & DEPLOYMENT - Build and deploy isolated Digital Marketing Manager app with GPT-5 beta AI orchestration
+## user_problem_statement: DMM APP COMPLETION & DEPLOYMENT - Build and deploy isolated Digital Marketing Manager app with GPT-5 beta AI orchestration; CRM BACKEND RESTORE - Restore stable FastAPI server for CRM and re-enable core endpoints
 
 ## backend:
 ##   - task: "DMM Backend with GPT-5 beta AI orchestration"
