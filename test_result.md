@@ -105,6 +105,17 @@
 ## user_problem_statement: DMM APP COMPLETION & DEPLOYMENT - Build and deploy isolated Digital Marketing Manager app with GPT-5 beta AI orchestration; CRM BACKEND RESTORE - Restore stable FastAPI server for CRM and re-enable core endpoints
 
 ## backend:
+##   - task: "CRM Backend Temp Restore Up (health + STT stubs)"
+##     implemented: true
+##     working: true
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: true
+##         -agent: "main"
+##         -comment: "Replaced corrupted CRM backend/server.py with stable Temp Restore server (health, STT stubs). All routes under /api; CORS broad for now. Next: layer core CRM endpoints."
 ##   - task: "DMM Backend with GPT-5 beta AI orchestration"
 ##     implemented: true
 ##     working: true
