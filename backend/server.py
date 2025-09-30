@@ -10,6 +10,10 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
 # ----------------------
 # App & CORS
 # ----------------------
