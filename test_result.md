@@ -229,8 +229,8 @@
 ##     -agent: "testing"
 ##     -message: "FRONTEND UI TESTING COMPLETED SUCCESSFULLY: Executed comprehensive automated test suite covering all 4 requested scenarios. ✅ All tests PASSED: 1) Initial load verification (no Marketing buttons/modals), 2) Tasks tab functionality (Task Delegation working, no React errors, task creation successful), 3) Ops smoke test (Tasks Round-Trip with all expected logs), 4) AI tab Marketing removal (Digital Marketing Manager heading not present). Minor 404 errors in AI tab for workflow/routing endpoints are expected as those features are not yet implemented. CRM frontend is fully functional and ready for production use."
 
-##   test_sequence: 5
-##   run_ui: false
+##   test_sequence: 6
+##   run_ui: true
 
 ## frontend:
 ##   - task: "Remove Marketing from CRM UI and fix Tasks invalid element error"
