@@ -10,19 +10,22 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
-# Load environment variables from .env file
-from dotenv import load_dotenv
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
 
 # ----------------------
 # App & CORS
 # ----------------------
 app = FastAPI(title="Aavana CRM API")
 
-CORS_ORIGINS = os.environ.get("CRM_CORS_ORIGINS", "*").split(",")
+CORS_ORIGINS = os.environ.get("CRM_CORS_ORIGINS", "*")
+CORS_LIST = [o.strip().rstrip('/') for o in CORS_ORIGINS.split(',') if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
+    allow_origins=CORS_LIST if CORS_LIST else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -212,9 +215,45 @@ async def update_task(task_id: str, body: TaskUpdate, db=Depends(get_db)):
     doc = await db["tasks"].find_one({"id": task_id}, {"_id": 0})
     return {"success": True, "task": doc}
 
+@app.put("/api/tasks/{task_id}/status")
+async def update_task_status(task_id: str, body: Dict[str, Any], db=Depends(get_db)):
+    status_val = (body or {}).get("status")
+    if not status_val:
+        raise HTTPException(status_code=400, detail="status is required")
+    res = await db["tasks"].update_one({"id": task_id}, {"$set": {"status": status_val, "updated_at": now_iso()}})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    doc = await db["tasks"].find_one({"id": task_id}, {"_id": 0})
+    return {"success": True, "task": doc}
+
 @app.delete("/api/tasks/{task_id}")
 async def delete_task(task_id: str, db=Depends(get_db)):
     res = await db["tasks"].delete_one({"id": task_id})
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"success": True}
+
+# ----------------------
+# Dashboard Stats
+# ----------------------
+@app.get("/api/dashboard/stats")
+async def dashboard_stats(db=Depends(get_db)):
+    total_leads = await db["leads"].count_documents({})
+    active_leads = await db["leads"].count_documents({"status": {"$nin": ["Closed", "Lost", "Archived"]}})
+    pending_tasks = await db["tasks"].count_documents({"status": {"$in": ["Open", "Pending", "In Progress"]}})
+
+    # Optional conversion rate: percentage of leads with status Won over total (avoid div0)
+    won_leads = await db["leads"].count_documents({"status": "Won"})
+    conversion_rate = int(round((won_leads / total_leads) * 100)) if total_leads else 0
+
+    # Optional totalRevenue: sum of numeric field 'budget' on leads if present
+    total_revenue = 0
+    # We avoid heavy aggregation for MVP; can be added later.
+
+    return {
+        "totalLeads": total_leads,
+        "activeLeads": active_leads,
+        "conversion_rate": conversion_rate,
+        "totalRevenue": total_revenue,
+        "pendingTasks": pending_tasks,
+    }
