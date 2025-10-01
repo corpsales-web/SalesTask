@@ -133,6 +133,9 @@
 ##         -working: true
 ##         -agent: "testing"
 ##         -comment: "TESTED: All CRM core endpoints working perfectly! ✅ Health endpoint (200, {status: ok, service: crm-backend, time: ISO}), ✅ Leads CRUD (POST with minimal {name} → success + UUID + status 'New', GET list with pagination without _id, PUT status/notes updates, DELETE with verification), ✅ Tasks CRUD (POST with minimal {title} → success + UUID + status 'Open', GET list with pagination without _id, PUT status updates, DELETE with verification). All 11 tests passed (100% success rate). Fixed MONGO_URL database name issue and added dotenv loading to server.py. CRM backend fully functional for core operations."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "RE-TESTED: Comprehensive automated test suite executed for frontend compatibility verification. ✅ All 12 CRM backend tests passed (100% success rate): Health endpoint with correct schema, Leads CRUD with minimal {name} requirement, Tasks CRUD with minimal {title} requirement including dedicated PUT /api/tasks/{id}/status endpoint. MongoDB UUID string IDs (no ObjectId), ISO timestamps, proper pagination schemas {items, page, limit, total}, no _id field leakage. CRM backend fully compatible with current frontend after fixes."
 ##   - task: "DMM Backend with GPT-5 beta AI orchestration"
 ##     implemented: true
 ##     working: true
