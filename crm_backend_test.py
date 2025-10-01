@@ -1,21 +1,32 @@
 #!/usr/bin/env python3
 """
-CRM Backend Temp-Restore Server Test Suite
-Tests the temp-restore server endpoints as requested in review
+CRM Backend Test Suite
+Tests CRM Tasks and Leads endpoints to ensure compatibility with frontend after fixes
 """
 
 import requests
 import json
 import time
-import websocket
-import threading
+import uuid
+import os
+from datetime import datetime, timezone
 from typing import Dict, Any, List
 
-# Configuration - Use external URL from frontend/.env
-BASE_URL = "https://aavana-crm-dmm.preview.emergentagent.com"
+# Get backend URL from frontend .env file
+def get_backend_url():
+    try:
+        with open('/app/frontend/.env', 'r') as f:
+            for line in f:
+                if line.startswith('REACT_APP_BACKEND_URL='):
+                    return line.split('=', 1)[1].strip()
+    except Exception:
+        pass
+    return "https://aavana-crm-dmm.preview.emergentagent.com"
+
+BASE_URL = get_backend_url()
 API_BASE = f"{BASE_URL}/api"
 
-class CRMTempRestoreTester:
+class CRMBackendTester:
     def __init__(self):
         self.session = requests.Session()
         self.test_results = []
