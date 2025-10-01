@@ -30,6 +30,8 @@ class CRMBackendTester:
     def __init__(self):
         self.session = requests.Session()
         self.test_results = []
+        self.created_leads = []  # Track created leads for cleanup
+        self.created_tasks = []  # Track created tasks for cleanup
         
     def log_test(self, test_name: str, success: bool, details: str = "", response_data: Any = None):
         """Log test results"""
@@ -47,38 +49,33 @@ class CRMBackendTester:
             print(f"   Response: {json.dumps(response_data, indent=2)}")
     
     def test_health_endpoint(self):
-        """Test GET /api/health - expect {status: ok, service: temp-restore, stt_ready: bool}"""
+        """Test GET /api/health - expect 200, JSON with status: ok, service: crm-backend, time ISO"""
         try:
             response = self.session.get(f"{API_BASE}/health", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                
-                # Check required fields
-                required_fields = ["status", "service", "stt_ready"]
+                required_fields = ["status", "service", "time"]
                 missing_fields = [field for field in required_fields if field not in data]
                 
                 if not missing_fields:
-                    # Verify field values
-                    status_ok = data.get("status") == "ok"
-                    service_correct = data.get("service") == "temp-restore"
-                    stt_ready_bool = isinstance(data.get("stt_ready"), bool)
-                    
-                    if status_ok and service_correct and stt_ready_bool:
-                        self.log_test("Health Endpoint", True, 
-                                    f"Health check passed - stt_ready: {data['stt_ready']}")
-                        return True
+                    if (data.get("status") == "ok" and 
+                        data.get("service") == "crm-backend" and
+                        data.get("time")):  # Check time is present and ISO format
+                        try:
+                            # Validate ISO format
+                            datetime.fromisoformat(data["time"].replace('Z', '+00:00'))
+                            self.log_test("Health Check", True, "CRM backend healthy with correct schema")
+                            return True
+                        except ValueError:
+                            self.log_test("Health Check", False, "Invalid ISO time format", data)
                     else:
-                        issues = []
-                        if not status_ok: issues.append(f"status: {data.get('status')} (expected 'ok')")
-                        if not service_correct: issues.append(f"service: {data.get('service')} (expected 'temp-restore')")
-                        if not stt_ready_bool: issues.append(f"stt_ready: {data.get('stt_ready')} (expected boolean)")
-                        self.log_test("Health Endpoint", False, f"Field validation failed: {', '.join(issues)}", data)
+                        self.log_test("Health Check", False, "Invalid field values", data)
                 else:
-                    self.log_test("Health Endpoint", False, f"Missing required fields: {missing_fields}", data)
+                    self.log_test("Health Check", False, f"Missing fields: {missing_fields}", data)
             else:
-                self.log_test("Health Endpoint", False, f"HTTP {response.status_code}", response.text)
+                self.log_test("Health Check", False, f"HTTP {response.status_code}", response.text)
         except Exception as e:
-            self.log_test("Health Endpoint", False, f"Connection error: {str(e)}")
+            self.log_test("Health Check", False, f"Connection error: {str(e)}")
         return False
     
     def test_stt_chunk_endpoint(self):
