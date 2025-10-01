@@ -12,7 +12,7 @@ import threading
 from typing import Dict, Any, List
 
 # Configuration - Use external URL from frontend/.env
-BASE_URL = "https://campaign-central-6.preview.emergentagent.com"
+BASE_URL = "https://aavana-crm-dmm.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 class CRMTempRestoreTester:
