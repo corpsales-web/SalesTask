@@ -571,7 +571,7 @@ class CRMBackendTester:
     def print_summary(self):
         """Print test summary"""
         print("\n" + "=" * 60)
-        print("📊 CRM TEMP-RESTORE TEST SUMMARY")
+        print("📊 CRM BACKEND TEST SUMMARY")
         print("=" * 60)
         
         passed = sum(1 for result in self.test_results if result["success"])
@@ -580,7 +580,7 @@ class CRMBackendTester:
         print(f"Total Tests: {total}")
         print(f"Passed: {passed}")
         print(f"Failed: {total - passed}")
-        print(f"Success Rate: {(passed/total)*100:.1f}%" if total > 0 else "No tests run")
+        print(f"Success Rate: {(passed/total)*100:.1f}%")
         
         # Show failed tests
         failed_tests = [result for result in self.test_results if not result["success"]]
@@ -589,25 +589,43 @@ class CRMBackendTester:
             for test in failed_tests:
                 print(f"  • {test['test']}: {test['details']}")
         
-        # Show passed tests
-        passed_tests = [result for result in self.test_results if result["success"]]
-        if passed_tests:
-            print("\n✅ PASSED TESTS:")
-            for test in passed_tests:
-                print(f"  • {test['test']}: {test['details']}")
+        # Show created items
+        total_created = len(self.created_leads) + len(self.created_tasks)
+        if total_created > 0:
+            print(f"\n📝 Created {total_created} test items in database ({len(self.created_leads)} leads, {len(self.created_tasks)} tasks)")
+    
+    def get_overall_success(self):
+        """Get overall test success status"""
+        if not self.test_results:
+            return False
+        
+        # Critical tests that must pass for CRM functionality
+        critical_tests = [
+            "Health Check",
+            "Leads Create",
+            "Leads List", 
+            "Tasks Create",
+            "Tasks List"
+        ]
+        
+        critical_passed = all(
+            any(result["test"] == test and result["success"] for result in self.test_results)
+            for test in critical_tests
+        )
+        
+        return critical_passed
 
 def main():
     """Main test execution"""
-    tester = CRMTempRestoreTester()
+    tester = CRMBackendTester()
     success = tester.run_all_tests()
     
     if success:
-        print("\n✅ CRM Backend temp-restore tests PASSED!")
-        return True
+        print("\n✅ CRM Backend tests completed successfully!")
+        exit(0)
     else:
-        print("\n❌ CRM Backend temp-restore tests FAILED!")
-        return False
+        print("\n❌ CRM Backend tests had critical failures!")
+        exit(1)
 
 if __name__ == "__main__":
-    success = main()
-    exit(0 if success else 1)
+    main()
