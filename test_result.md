@@ -218,8 +218,7 @@
 ##         -comment: "Removed DigitalMarketingDashboard imports and usage from CRM TabContent and header. Replaced broken TaskDelegationPanel (undefined default export) with a minimal, stable implementation. This addresses 'Element type is invalid' under TabContent->tasks."
 
 ## test_plan:
-##   current_focus:
-##     - "CRM Backend Core Endpoints (Leads & Tasks CRUD)"
+##   current_focus: []
 ##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"
