@@ -201,6 +201,32 @@
 ## metadata:
 ##   created_by: "main_agent"
 ##   version: "1.3"
+## frontend:
+##   - task: "CRM Frontend - Tasks tab stable (no invalid element), Task Delegation works, Marketing UI removed"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/App.js, /app/frontend/src/components/TabContent.jsx, /app/frontend/src/components/TaskDelegationPanel.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Prepared for UI testing: verify no Marketing button/modal in header, no DigitalMarketingDashboard in AI tab, Tasks tab renders without React error and Task Delegation panel can create a task (log shows Created task: <id>). Also validate /ops/smoke Tasks Round-Trip works."
+
+## test_plan:
+##   current_focus:
+##     - "CRM Frontend - Tasks tab stable (no invalid element)"
+##     - "CRM Frontend - Marketing UI removed from header and AI tab"
+##     - "/ops/smoke end-to-end Tasks flow"
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Please run frontend automated tests on https://aavana-crm-dmm.preview.emergentagent.com. Steps: 1) Load home; ensure no header button labeled 'Marketing'. 2) Click 'Tasks' tab; assert no error text 'Element type is invalid'; assert heading 'Task Delegation' visible; fill 'Quick task title' with 'E2E Task' and submit; check log contains 'Created task:'. 3) Open /ops/smoke; click 'Tasks Round-Trip' and validate logs show create/list/update/delete success. 4) Click 'AI' tab; assert that 'Digital Marketing Manager' heading is NOT present."
+
 ##   test_sequence: 5
 ##   run_ui: false
 
