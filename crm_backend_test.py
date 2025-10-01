@@ -78,97 +78,216 @@ class CRMBackendTester:
             self.log_test("Health Check", False, f"Connection error: {str(e)}")
         return False
     
-    def test_stt_chunk_endpoint(self):
-        """Test POST /api/stt/chunk - expect stt_ready false (no creds)"""
+    def test_leads_create(self):
+        """Test POST /api/leads with minimal {name}"""
         try:
-            # Test with empty body
-            response = self.session.post(f"{API_BASE}/stt/chunk", json={}, timeout=10)
+            lead_data = {
+                "name": "John Smith",
+                "email": "john.smith@example.com",
+                "phone": "+1-555-0123",
+                "source": "Website"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/leads",
+                json=lead_data,
+                timeout=10
+            )
             
             if response.status_code == 200:
                 data = response.json()
-                
-                # Check for stt_ready field
-                if "stt_ready" in data:
-                    stt_ready = data.get("stt_ready")
-                    if stt_ready is False:
-                        self.log_test("STT Chunk Endpoint", True, 
-                                    "STT chunk correctly returns stt_ready: false (no credentials)")
-                        return True
+                if data.get("success") and "lead" in data:
+                    lead = data["lead"]
+                    # Verify required fields
+                    required_fields = ["id", "name", "status", "created_at", "updated_at"]
+                    missing_fields = [field for field in required_fields if field not in lead]
+                    
+                    if not missing_fields:
+                        # Verify UUID format for id
+                        try:
+                            uuid.UUID(lead["id"])
+                            uuid_valid = True
+                        except ValueError:
+                            uuid_valid = False
+                        
+                        # Verify default status
+                        status_correct = lead.get("status") == "New"
+                        
+                        # Verify ISO timestamps
+                        try:
+                            datetime.fromisoformat(lead["created_at"].replace('Z', '+00:00'))
+                            datetime.fromisoformat(lead["updated_at"].replace('Z', '+00:00'))
+                            timestamps_valid = True
+                        except ValueError:
+                            timestamps_valid = False
+                        
+                        # Verify no _id field
+                        no_mongo_id = "_id" not in lead
+                        
+                        if uuid_valid and status_correct and timestamps_valid and no_mongo_id:
+                            self.created_leads.append(lead["id"])
+                            self.log_test("Leads Create", True, 
+                                        f"Created lead with ID: {lead['id']}, status: {lead['status']}")
+                            return True
+                        else:
+                            issues = []
+                            if not uuid_valid: issues.append("invalid UUID")
+                            if not status_correct: issues.append("wrong status")
+                            if not timestamps_valid: issues.append("invalid timestamps")
+                            if not no_mongo_id: issues.append("contains _id")
+                            self.log_test("Leads Create", False, 
+                                        f"Validation issues: {', '.join(issues)}", data)
                     else:
-                        self.log_test("STT Chunk Endpoint", False, 
-                                    f"Expected stt_ready: false, got: {stt_ready}", data)
+                        self.log_test("Leads Create", False, 
+                                    f"Missing fields: {missing_fields}", data)
                 else:
-                    self.log_test("STT Chunk Endpoint", False, "Missing stt_ready field", data)
+                    self.log_test("Leads Create", False, "Invalid response format", data)
             else:
-                self.log_test("STT Chunk Endpoint", False, f"HTTP {response.status_code}", response.text)
+                self.log_test("Leads Create", False, 
+                            f"HTTP {response.status_code}", response.text)
         except Exception as e:
-            self.log_test("STT Chunk Endpoint", False, f"Error: {str(e)}")
+            self.log_test("Leads Create", False, f"Error: {str(e)}")
         return False
     
-    def test_stt_websocket_stream(self):
-        """Test WS /api/stt/stream - expect connection and error message when STT not configured"""
+    def test_leads_create_minimal(self):
+        """Test POST /api/leads with minimal {name} only"""
         try:
-            # Convert HTTP URL to WebSocket URL
-            ws_url = API_BASE.replace("https://", "wss://").replace("http://", "ws://") + "/stt/stream"
+            lead_data = {"name": "Jane Doe"}
             
-            messages_received = []
-            connection_successful = False
-            error_received = False
-            
-            def on_message(ws, message):
-                nonlocal messages_received, error_received
-                try:
-                    data = json.loads(message)
-                    messages_received.append(data)
-                    if data.get("type") == "error" and "STT not configured" in data.get("message", ""):
-                        error_received = True
-                except json.JSONDecodeError:
-                    messages_received.append({"raw": message})
-            
-            def on_open(ws):
-                nonlocal connection_successful
-                connection_successful = True
-            
-            def on_error(ws, error):
-                print(f"WebSocket error: {error}")
-            
-            def on_close(ws, close_status_code, close_msg):
-                pass
-            
-            # Create WebSocket connection
-            ws = websocket.WebSocketApp(
-                ws_url,
-                on_open=on_open,
-                on_message=on_message,
-                on_error=on_error,
-                on_close=on_close
+            response = self.session.post(
+                f"{API_BASE}/leads",
+                json=lead_data,
+                timeout=10
             )
             
-            # Run WebSocket in a separate thread with timeout
-            ws_thread = threading.Thread(target=ws.run_forever)
-            ws_thread.daemon = True
-            ws_thread.start()
-            
-            # Wait for connection and messages
-            time.sleep(3)
-            ws.close()
-            
-            if connection_successful:
-                if error_received:
-                    self.log_test("STT WebSocket Stream", True, 
-                                "WebSocket connected and received STT not configured error message")
-                    return True
-                elif messages_received:
-                    self.log_test("STT WebSocket Stream", False, 
-                                f"Connected but didn't receive expected error message. Got: {messages_received}")
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and "lead" in data:
+                    lead = data["lead"]
+                    if (lead.get("name") == "Jane Doe" and 
+                        lead.get("status") == "New" and
+                        "id" in lead):
+                        self.created_leads.append(lead["id"])
+                        self.log_test("Leads Create (Minimal)", True, 
+                                    f"Created lead with minimal data, ID: {lead['id']}")
+                        return True
+                    else:
+                        self.log_test("Leads Create (Minimal)", False, "Invalid lead data", data)
                 else:
-                    self.log_test("STT WebSocket Stream", False, 
-                                "Connected but no messages received")
+                    self.log_test("Leads Create (Minimal)", False, "Invalid response format", data)
             else:
-                self.log_test("STT WebSocket Stream", False, "Failed to establish WebSocket connection")
-                
+                self.log_test("Leads Create (Minimal)", False, 
+                            f"HTTP {response.status_code}", response.text)
         except Exception as e:
-            self.log_test("STT WebSocket Stream", False, f"WebSocket error: {str(e)}")
+            self.log_test("Leads Create (Minimal)", False, f"Error: {str(e)}")
+        return False
+    
+    def test_leads_list(self):
+        """Test GET /api/leads list returns {items, page, limit, total}"""
+        try:
+            response = self.session.get(f"{API_BASE}/leads", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["items", "page", "limit", "total"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    # Verify items is a list
+                    if isinstance(data["items"], list):
+                        # Verify no _id fields in items
+                        has_mongo_id = any("_id" in item for item in data["items"] if isinstance(item, dict))
+                        if not has_mongo_id:
+                            self.log_test("Leads List", True, 
+                                        f"Retrieved {len(data['items'])} leads, page {data['page']}, total {data['total']}")
+                            return True
+                        else:
+                            self.log_test("Leads List", False, "Items contain _id fields", data)
+                    else:
+                        self.log_test("Leads List", False, "Items is not a list", data)
+                else:
+                    self.log_test("Leads List", False, f"Missing fields: {missing_fields}", data)
+            else:
+                self.log_test("Leads List", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Leads List", False, f"Error: {str(e)}")
+        return False
+    
+    def test_leads_update(self):
+        """Test PUT /api/leads/{id} updates fields"""
+        if not self.created_leads:
+            self.log_test("Leads Update", False, "No leads available to update")
+            return False
+        
+        try:
+            lead_id = self.created_leads[0]
+            update_data = {
+                "status": "Qualified",
+                "notes": "Updated via automated test"
+            }
+            
+            response = self.session.put(
+                f"{API_BASE}/leads/{lead_id}",
+                json=update_data,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and "lead" in data:
+                    lead = data["lead"]
+                    if (lead.get("status") == "Qualified" and 
+                        lead.get("notes") == "Updated via automated test" and
+                        "updated_at" in lead):
+                        self.log_test("Leads Update", True, 
+                                    f"Updated lead {lead_id} status and notes")
+                        return True
+                    else:
+                        self.log_test("Leads Update", False, "Fields not updated correctly", data)
+                else:
+                    self.log_test("Leads Update", False, "Invalid response format", data)
+            else:
+                self.log_test("Leads Update", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Leads Update", False, f"Error: {str(e)}")
+        return False
+    
+    def test_leads_delete(self):
+        """Test DELETE /api/leads/{id}"""
+        if not self.created_leads:
+            self.log_test("Leads Delete", False, "No leads available to delete")
+            return False
+        
+        try:
+            lead_id = self.created_leads[-1]  # Delete the last created lead
+            
+            response = self.session.delete(f"{API_BASE}/leads/{lead_id}", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    # Verify lead is actually deleted
+                    verify_response = self.session.get(f"{API_BASE}/leads", timeout=10)
+                    if verify_response.status_code == 200:
+                        verify_data = verify_response.json()
+                        deleted_lead_exists = any(
+                            item.get("id") == lead_id 
+                            for item in verify_data.get("items", [])
+                        )
+                        if not deleted_lead_exists:
+                            self.created_leads.remove(lead_id)
+                            self.log_test("Leads Delete", True, f"Successfully deleted lead {lead_id}")
+                            return True
+                        else:
+                            self.log_test("Leads Delete", False, "Lead still exists after deletion")
+                    else:
+                        self.log_test("Leads Delete", False, "Could not verify deletion")
+                else:
+                    self.log_test("Leads Delete", False, "Invalid response format", data)
+            else:
+                self.log_test("Leads Delete", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Leads Delete", False, f"Error: {str(e)}")
         return False
     
     def run_all_tests(self):
