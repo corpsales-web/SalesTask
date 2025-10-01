@@ -201,6 +201,19 @@
 ##   test_sequence: 5
 ##   run_ui: false
 
+## frontend:
+##   - task: "Remove Marketing from CRM UI and fix Tasks invalid element error"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/TabContent.jsx, /app/frontend/src/App.js, /app/frontend/src/components/TaskDelegationPanel.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Removed DigitalMarketingDashboard imports and usage from CRM TabContent and header. Replaced broken TaskDelegationPanel (undefined default export) with a minimal, stable implementation. This addresses 'Element type is invalid' under TabContent->tasks."
+
 ## test_plan:
 ##   current_focus:
 ##     - "CRM Backend Core Endpoints (Leads & Tasks CRUD)"
