@@ -290,30 +290,283 @@ class CRMBackendTester:
             self.log_test("Leads Delete", False, f"Error: {str(e)}")
         return False
     
+    def test_tasks_create(self):
+        """Test POST /api/tasks with minimal {title}"""
+        try:
+            task_data = {
+                "title": "Follow up with lead",
+                "description": "Call the lead to discuss requirements",
+                "assignee": "Sales Team",
+                "due_date": "2024-12-31T23:59:59Z"
+            }
+            
+            response = self.session.post(
+                f"{API_BASE}/tasks",
+                json=task_data,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and "task" in data:
+                    task = data["task"]
+                    # Verify required fields
+                    required_fields = ["id", "title", "status", "created_at", "updated_at"]
+                    missing_fields = [field for field in required_fields if field not in task]
+                    
+                    if not missing_fields:
+                        # Verify UUID format for id
+                        try:
+                            uuid.UUID(task["id"])
+                            uuid_valid = True
+                        except ValueError:
+                            uuid_valid = False
+                        
+                        # Verify default status
+                        status_correct = task.get("status") == "Open"
+                        
+                        # Verify ISO timestamps
+                        try:
+                            datetime.fromisoformat(task["created_at"].replace('Z', '+00:00'))
+                            datetime.fromisoformat(task["updated_at"].replace('Z', '+00:00'))
+                            timestamps_valid = True
+                        except ValueError:
+                            timestamps_valid = False
+                        
+                        # Verify no _id field
+                        no_mongo_id = "_id" not in task
+                        
+                        if uuid_valid and status_correct and timestamps_valid and no_mongo_id:
+                            self.created_tasks.append(task["id"])
+                            self.log_test("Tasks Create", True, 
+                                        f"Created task with ID: {task['id']}, status: {task['status']}")
+                            return True
+                        else:
+                            issues = []
+                            if not uuid_valid: issues.append("invalid UUID")
+                            if not status_correct: issues.append("wrong status")
+                            if not timestamps_valid: issues.append("invalid timestamps")
+                            if not no_mongo_id: issues.append("contains _id")
+                            self.log_test("Tasks Create", False, 
+                                        f"Validation issues: {', '.join(issues)}", data)
+                    else:
+                        self.log_test("Tasks Create", False, 
+                                    f"Missing fields: {missing_fields}", data)
+                else:
+                    self.log_test("Tasks Create", False, "Invalid response format", data)
+            else:
+                self.log_test("Tasks Create", False, 
+                            f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Tasks Create", False, f"Error: {str(e)}")
+        return False
+    
+    def test_tasks_create_minimal(self):
+        """Test POST /api/tasks with minimal {title} only"""
+        try:
+            task_data = {"title": "Review proposal"}
+            
+            response = self.session.post(
+                f"{API_BASE}/tasks",
+                json=task_data,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and "task" in data:
+                    task = data["task"]
+                    if (task.get("title") == "Review proposal" and 
+                        task.get("status") == "Open" and
+                        "id" in task):
+                        self.created_tasks.append(task["id"])
+                        self.log_test("Tasks Create (Minimal)", True, 
+                                    f"Created task with minimal data, ID: {task['id']}")
+                        return True
+                    else:
+                        self.log_test("Tasks Create (Minimal)", False, "Invalid task data", data)
+                else:
+                    self.log_test("Tasks Create (Minimal)", False, "Invalid response format", data)
+            else:
+                self.log_test("Tasks Create (Minimal)", False, 
+                            f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Tasks Create (Minimal)", False, f"Error: {str(e)}")
+        return False
+    
+    def test_tasks_list(self):
+        """Test GET /api/tasks list returns {items, page, limit, total}"""
+        try:
+            response = self.session.get(f"{API_BASE}/tasks", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["items", "page", "limit", "total"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    # Verify items is a list
+                    if isinstance(data["items"], list):
+                        # Verify no _id fields in items
+                        has_mongo_id = any("_id" in item for item in data["items"] if isinstance(item, dict))
+                        if not has_mongo_id:
+                            self.log_test("Tasks List", True, 
+                                        f"Retrieved {len(data['items'])} tasks, page {data['page']}, total {data['total']}")
+                            return True
+                        else:
+                            self.log_test("Tasks List", False, "Items contain _id fields", data)
+                    else:
+                        self.log_test("Tasks List", False, "Items is not a list", data)
+                else:
+                    self.log_test("Tasks List", False, f"Missing fields: {missing_fields}", data)
+            else:
+                self.log_test("Tasks List", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Tasks List", False, f"Error: {str(e)}")
+        return False
+    
+    def test_tasks_update(self):
+        """Test PUT /api/tasks/{id} with {status: 'In Progress'}"""
+        if not self.created_tasks:
+            self.log_test("Tasks Update", False, "No tasks available to update")
+            return False
+        
+        try:
+            task_id = self.created_tasks[0]
+            update_data = {"status": "In Progress"}
+            
+            response = self.session.put(
+                f"{API_BASE}/tasks/{task_id}",
+                json=update_data,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and "task" in data:
+                    task = data["task"]
+                    if (task.get("status") == "In Progress" and
+                        "updated_at" in task):
+                        self.log_test("Tasks Update", True, 
+                                    f"Updated task {task_id} status to 'In Progress'")
+                        return True
+                    else:
+                        self.log_test("Tasks Update", False, "Status not updated correctly", data)
+                else:
+                    self.log_test("Tasks Update", False, "Invalid response format", data)
+            else:
+                self.log_test("Tasks Update", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Tasks Update", False, f"Error: {str(e)}")
+        return False
+    
+    def test_tasks_update_status_endpoint(self):
+        """Test PUT /api/tasks/{id}/status with {status: 'Completed'}"""
+        if not self.created_tasks:
+            self.log_test("Tasks Update Status", False, "No tasks available to update")
+            return False
+        
+        try:
+            task_id = self.created_tasks[0]
+            update_data = {"status": "Completed"}
+            
+            response = self.session.put(
+                f"{API_BASE}/tasks/{task_id}/status",
+                json=update_data,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and "task" in data:
+                    task = data["task"]
+                    if (task.get("status") == "Completed" and
+                        "updated_at" in task):
+                        self.log_test("Tasks Update Status", True, 
+                                    f"Updated task {task_id} status to 'Completed' via /status endpoint")
+                        return True
+                    else:
+                        self.log_test("Tasks Update Status", False, "Status not updated correctly", data)
+                else:
+                    self.log_test("Tasks Update Status", False, "Invalid response format", data)
+            else:
+                self.log_test("Tasks Update Status", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Tasks Update Status", False, f"Error: {str(e)}")
+        return False
+    
+    def test_tasks_delete(self):
+        """Test DELETE /api/tasks/{id}"""
+        if not self.created_tasks:
+            self.log_test("Tasks Delete", False, "No tasks available to delete")
+            return False
+        
+        try:
+            task_id = self.created_tasks[-1]  # Delete the last created task
+            
+            response = self.session.delete(f"{API_BASE}/tasks/{task_id}", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    # Verify task is actually deleted
+                    verify_response = self.session.get(f"{API_BASE}/tasks", timeout=10)
+                    if verify_response.status_code == 200:
+                        verify_data = verify_response.json()
+                        deleted_task_exists = any(
+                            item.get("id") == task_id 
+                            for item in verify_data.get("items", [])
+                        )
+                        if not deleted_task_exists:
+                            self.created_tasks.remove(task_id)
+                            self.log_test("Tasks Delete", True, f"Successfully deleted task {task_id}")
+                            return True
+                        else:
+                            self.log_test("Tasks Delete", False, "Task still exists after deletion")
+                    else:
+                        self.log_test("Tasks Delete", False, "Could not verify deletion")
+                else:
+                    self.log_test("Tasks Delete", False, "Invalid response format", data)
+            else:
+                self.log_test("Tasks Delete", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Tasks Delete", False, f"Error: {str(e)}")
+        return False
+    
     def run_all_tests(self):
-        """Run all temp-restore server tests"""
-        print("🚀 Starting CRM Backend Temp-Restore Test Suite")
+        """Run all CRM backend tests in sequence"""
+        print("🚀 Starting CRM Backend Test Suite")
         print("=" * 60)
-        print(f"Testing server at: {BASE_URL}")
+        print(f"🔗 Testing backend at: {BASE_URL}")
         print("=" * 60)
         
         # Test 1: Health endpoint
         print("\n1️⃣ Testing Health Endpoint...")
-        health_success = self.test_health_endpoint()
+        if not self.test_health_endpoint():
+            print("❌ Health check failed - aborting tests")
+            return False
         
-        # Test 2: STT chunk endpoint
-        print("\n2️⃣ Testing STT Chunk Endpoint...")
-        chunk_success = self.test_stt_chunk_endpoint()
+        # Test 2: Leads CRUD
+        print("\n2️⃣ Testing Leads CRUD...")
+        self.test_leads_create()
+        self.test_leads_create_minimal()
+        self.test_leads_list()
+        self.test_leads_update()
+        self.test_leads_delete()
         
-        # Test 3: STT WebSocket stream
-        print("\n3️⃣ Testing STT WebSocket Stream...")
-        ws_success = self.test_stt_websocket_stream()
+        # Test 3: Tasks CRUD
+        print("\n3️⃣ Testing Tasks CRUD...")
+        self.test_tasks_create()
+        self.test_tasks_create_minimal()
+        self.test_tasks_list()
+        self.test_tasks_update()
+        self.test_tasks_update_status_endpoint()
+        self.test_tasks_delete()
         
         # Summary
         self.print_summary()
         
-        # All three tests must pass for overall success
-        return health_success and chunk_success and ws_success
+        return self.get_overall_success()
     
     def print_summary(self):
         """Print test summary"""
