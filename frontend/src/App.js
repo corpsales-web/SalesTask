@@ -20,14 +20,12 @@ import RoleManagementPanel from './components/RoleManagementPanel';
 import NotificationSystem from './components/NotificationSystem';
 import FaceCheckInComponent from './components/FaceCheckInComponent';
 import BulkExcelUploadComponent from './components/BulkExcelUploadComponent';
-import DigitalMarketingDashboard from './components/DigitalMarketingDashboard';
 import LeadRoutingPanel from './components/LeadRoutingPanel';
 import WorkflowAuthoringPanel from './components/WorkflowAuthoringPanel';
 import CameraComponent from './components/CameraComponent';
 import EnhancedFileUploadHeader from './components/EnhancedFileUploadHeader';
 import Aavana2Assistant from './components/Aavana2Assistant';
 import GoalsManagementSystem from './components/GoalsManagementSystem';
-import ComprehensiveDigitalMarketingManager from './components/ComprehensiveDigitalMarketingManager';
 import notificationManager from './utils/notificationManager';
 import FloatingChatbot from './components/FloatingChatbot';
 import axios from 'axios';
@@ -64,7 +62,6 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [aiInsights, setAiInsights] = useState([]);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
-  const [showMarketingModal, setShowMarketingModal] = useState(false);
   const [showNotificationPanel, setShowNotificationPanel] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
@@ -209,10 +206,6 @@ const App = () => {
                     <Target className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                     <span className="hidden sm:inline">Goals</span>
                   </button>
-                  <button onClick={() => setShowMarketingModal(true)} className="bg-orange-600 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg hover:bg-orange-700 flex items-center text-xs sm:text-sm">
-                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">Marketing</span>
-                  </button>
                   <button onClick={() => setShowNotificationPanel(!showNotificationPanel)} className="relative bg-gray-100 text-gray-700 p-1 sm:p-2 rounded-lg hover:bg-gray-200">
                     <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                     {getUnreadNotificationCount() > 0 && (
@@ -252,7 +245,6 @@ const App = () => {
 
         <FloatingChatbot />
         <GoalsManagementSystem isOpen={showGoalsModal} onClose={() => setShowGoalsModal(false)} />
-        <ComprehensiveDigitalMarketingManager isOpen={showMarketingModal} onClose={() => setShowMarketingModal(false)} />
       </div>
     </TabProvider>
   );

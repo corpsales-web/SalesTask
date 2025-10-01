@@ -9,7 +9,6 @@ import RoleManagementPanel from './RoleManagementPanel';
 import FileUploadComponent from './FileUploadComponent';
 import WorkflowAuthoringPanel from './WorkflowAuthoringPanel';
 import LeadRoutingPanel from './LeadRoutingPanel';
-import DigitalMarketingDashboard from './DigitalMarketingDashboard';
 import BulkExcelUploadComponent from './BulkExcelUploadComponent';
 import NotificationSystem from './NotificationSystem';
 import CameraComponent from './CameraComponent';
@@ -419,8 +418,7 @@ const TabContent = ({
             {/* Lead Routing Panel */}
             <LeadRoutingPanel />
             
-            {/* Digital Marketing Dashboard */}
-            <DigitalMarketingDashboard />
+            {/* Removed Digital Marketing Dashboard from CRM */}
             
             {/* Voice STT Component */}
             <VoiceSTTComponent />
