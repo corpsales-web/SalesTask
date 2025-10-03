@@ -444,6 +444,21 @@ const TabContent = ({
           </div>
         );
         
+      case 'inbox':
+        return (
+          <div className="space-y-6">
+            <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+              <div className="flex items-center">
+                <span className="text-emerald-600 text-lg mr-2">💬</span>
+                <div>
+                  <h3 className="font-semibold text-emerald-800">WhatsApp Inbox</h3>
+                  <p className="text-emerald-600 text-sm">View inbound WhatsApp messages and reply instantly</p>
+                </div>
+              </div>
+            </div>
+            <WhatsAppInbox />
+          </div>
+        );
       case 'admin':
         return (
           <div className="space-y-6">
