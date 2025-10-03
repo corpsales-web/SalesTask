@@ -189,6 +189,18 @@ export default function WhatsAppInbox() {
                     <button className="ghost" onClick={()=>markRead(contact)}>Mark Read</button>
                   </div>
                 </div>
+                {/* Expandable last 3 messages preview */}
+                <div className="mt-2">
+                  <button className="text-xs underline" onClick={async ()=>{
+                    try {
+                      const res = await axios.get(`${API}/api/whatsapp/contact_messages`, { params: { contact } })
+                      const items = Array.isArray(res.data.items) ? res.data.items : []
+                      const lines = items.map(m=>`${m.direction==='inbound'?'From':'You'} • ${new Date(m.timestamp).toLocaleString()}\n${m.text || '['+m.type+']'}`).join('\n\n')
+                      alert(lines || 'No recent messages')
+                    } catch { /* ignore */ }
+                  }}>Show last 3 messages</button>
+                </div>
+
                 <div className="mt-2 flex gap-2 items-center">
                   <input
                     value={activeContact === contact ? sendText : ''}
