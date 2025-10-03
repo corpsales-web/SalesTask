@@ -48,6 +48,7 @@ const EnhancedLeadEditModal = ({ isOpen, onClose, leadData, onLeadUpdated }) => 
         email: leadData.email || '',
         phone: leadData.phone || '',
         company: leadData.company || '',
+        owner_mobile: leadData.owner_mobile || '',
         location: leadData.location || '',
         city: leadData.city || '',
         state: leadData.state || '',
