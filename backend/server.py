@@ -12,6 +12,7 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 import hmac
 import hashlib
 import httpx
+import re
 
 try:
     from dotenv import load_dotenv
@@ -85,7 +86,6 @@ def normalize_phone_india(raw: Optional[str]) -> Optional[str]:
     return "+" + digits if not str(raw).startswith("+") else str(raw)
 
 async def find_lead_by_phone(db: AsyncIOMotorDatabase, phone_norm: str) -> Optional[Dict[str, Any]]:
-    # Iterate leads and compare normalized phones (MVP)
     cursor = db["leads"].find({}, {"_id": 0})
     leads = await cursor.to_list(length=None)
     for ld in leads:
@@ -160,10 +160,8 @@ class TaskUpdate(BaseModel):
 @app.post("/api/leads")
 async def create_lead(body: LeadCreate, db=Depends(get_db)):
     doc = body.dict(exclude_none=True)
-    # Normalize phones
     if doc.get("phone"):
         doc["phone"] = normalize_phone_india(doc.get("phone"))
-    # Owner mobile default + normalize
     if doc.get("owner_mobile"):
         doc["owner_mobile"] = normalize_phone_india(doc.get("owner_mobile"))
     else:
@@ -202,12 +200,27 @@ async def list_leads(
     total = await db["leads"].count_documents(q)
     return {"items": items, "page": page, "limit": limit, "total": total}
 
+@app.get("/api/leads/search")
+async def search_leads(q: str = Query(..., min_length=1), limit: int = Query(10, ge=1, le=50), db=Depends(get_db)):
+    # Normalize possible phone and search by name/email contains (case-insensitive)
+    phone_norm = normalize_phone_india(q)
+    regex = {"$regex": re.escape(q), "$options": "i"}
+    query = {"$or": [
+        {"name": regex},
+        {"email": regex},
+        {"phone": phone_norm} if phone_norm else {"_skip": True}
+    ]}
+    # Remove dummy
+    query["$or"] = [c for c in query["$or"] if "_skip" not in c]
+    cursor = db["leads"].find(query, {"_id": 0}).limit(limit)
+    items = await cursor.to_list(length=limit)
+    return {"items": items}
+
 @app.put("/api/leads/{lead_id}")
 async def update_lead(lead_id: str, body: LeadUpdate, db=Depends(get_db)):
     updates = body.dict(exclude_none=True)
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
-    # Normalize if present
     if updates.get("phone"):
         updates["phone"] = normalize_phone_india(updates.get("phone"))
     if updates.get("owner_mobile"):
@@ -325,11 +338,9 @@ WA_WEBHOOK_SECRET = os.environ.get("WHATSAPP_WEBHOOK_SECRET", "")
 
 def _hmac_valid(body: bytes, signature_header: Optional[str]) -> bool:
     if not WA_WEBHOOK_SECRET:
-        # If no secret configured, skip signature verification (staging)
         return True
     if not signature_header:
         return False
-    # Accept forms like 'sha256=...' or raw hex
     try:
         provided = signature_header
         if provided.lower().startswith("sha256="):
@@ -409,7 +420,6 @@ async def whatsapp_webhook_receive(request: Request, db=Depends(get_db)):
 
                     # Upsert conversation
                     conv_key = {"contact": from_norm}
-                    existing = await db["whatsapp_conversations"].find_one(conv_key)
                     owner_mobile = None
                     if linked_lead and linked_lead.get("owner_mobile"):
                         owner_mobile = normalize_phone_india(linked_lead.get("owner_mobile"))
@@ -429,7 +439,6 @@ async def whatsapp_webhook_receive(request: Request, db=Depends(get_db)):
                     }
                     await db["whatsapp_conversations"].update_one(conv_key, conv_update, upsert=True)
     except Exception:
-        # Do not fail webhook on normalization issues
         pass
 
     return {"success": True}
@@ -464,7 +473,6 @@ async def whatsapp_conversations(limit: int = Query(50, ge=1, le=200), db=Depend
         if it.get("lead_id"):
             lead = await db["leads"].find_one({"id": it["lead_id"]}, {"_id": 0, "name": 1})
             lead_name = lead.get("name") if lead else None
-        # SLA age seconds
         try:
             last_dt = datetime.fromisoformat(it.get("last_message_at")).astimezone(timezone.utc)
         except Exception:
@@ -496,13 +504,22 @@ async def whatsapp_conversation_link_lead(contact: str, body: Dict[str, Any], db
         {"$set": {"lead_id": lead_id, "owner_mobile": owner_mobile}},
         upsert=True
     )
+    # also backfill existing messages for this contact with lead_id
+    await db["whatsapp_messages"].update_many({"from": contact_norm}, {"$set": {"lead_id": lead_id}})
     return {"success": True}
 
 
 @app.get("/api/whatsapp/lead_timeline/{lead_id}")
 async def whatsapp_lead_timeline(lead_id: str, limit: int = Query(10, ge=1, le=100), db=Depends(get_db)):
-    # find messages linked by lead_id
     cursor = db["whatsapp_messages"].find({"lead_id": lead_id}, {"_id": 0}).sort("timestamp", -1).limit(limit)
+    msgs = await cursor.to_list(length=limit)
+    return {"items": msgs}
+
+
+@app.get("/api/whatsapp/contact_messages")
+async def whatsapp_contact_messages(contact: str, limit: int = Query(3, ge=1, le=50), db=Depends(get_db)):
+    contact_norm = normalize_phone_india(contact)
+    cursor = db["whatsapp_messages"].find({"from": contact_norm}, {"_id": 0}).sort("timestamp", -1).limit(limit)
     msgs = await cursor.to_list(length=limit)
     return {"items": msgs}
 
@@ -510,7 +527,6 @@ async def whatsapp_lead_timeline(lead_id: str, limit: int = Query(10, ge=1, le=1
 @app.get("/api/whatsapp/session_status")
 async def whatsapp_session_status(contact: str, db=Depends(get_db)):
     contact_norm = normalize_phone_india(contact)
-    # last inbound message from this contact within 24h
     last = await db["whatsapp_messages"].find_one({"from": contact_norm, "direction": "inbound"}, sort=[("timestamp", -1)])
     if not last:
         return {"within_24h": False, "last_inbound": None}
@@ -528,7 +544,6 @@ async def whatsapp_send(body: WhatsAppSendRequest, db=Depends(get_db)):
         raise HTTPException(status_code=400, detail="'to' is required")
     to_norm = normalize_phone_india(body.to)
 
-    # If API key missing → stub mode: store and return mocked success
     if not D360_API_KEY:
         rec = {
             "id": str(uuid.uuid4()),
@@ -539,11 +554,9 @@ async def whatsapp_send(body: WhatsAppSendRequest, db=Depends(get_db)):
             "provider": "360dialog",
         }
         await db["whatsapp_outbox"].insert_one(rec)
-        # reduce unread Count of conversation since we responded and update preview
         await db["whatsapp_conversations"].update_one({"contact": to_norm}, {"$set": {"unread_count": 0, "last_message_at": now_iso(), "last_message_text": body.text or "", "last_message_dir": "out"}}, upsert=True)
         return {"success": True, "mode": "stub", "message": "No API key configured. Stored locally.", "id": rec["id"]}
 
-    # Real send via 360dialog
     payload: Dict[str, Any] = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
@@ -552,10 +565,7 @@ async def whatsapp_send(body: WhatsAppSendRequest, db=Depends(get_db)):
         "text": {"body": body.text or ""},
     }
 
-    headers = {
-        "D360-API-KEY": D360_API_KEY,
-        "Content-Type": "application/json",
-    }
+    headers = {"D360-API-KEY": D360_API_KEY, "Content-Type": "application/json"}
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(f"{D360_BASE_URL}/messages", headers=headers, json=payload)
@@ -592,10 +602,7 @@ async def whatsapp_send_template(body: WhatsAppSendTemplateRequest, db=Depends(g
         await db["whatsapp_outbox"].insert_one(rec)
         return {"success": True, "mode": "stub", "id": rec["id"], "message": "Template send stored (stub)."}
 
-    headers = {
-        "D360-API-KEY": D360_API_KEY,
-        "Content-Type": "application/json",
-    }
+    headers = {"D360-API-KEY": D360_API_KEY, "Content-Type": "application/json"}
     payload = {
         "messaging_product": "whatsapp",
         "to": to_norm,
