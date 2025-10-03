@@ -13,6 +13,7 @@ function Badge({ children, color }) {
 
 export default function WhatsAppInbox() {
   const { toast } = useToast();
+  const { setActiveTab } = useTab();
   const [items, setItems] = useState([]); // conversations
   const [loading, setLoading] = useState(false);
   const [leadModalOpen, setLeadModalOpen] = useState(false)
