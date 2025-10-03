@@ -146,7 +146,13 @@ export default function WhatsAppInbox() {
           {(!items || items.length===0) && (
             <div className="text-sm text-gray-600">No conversations yet. Post a sample inbound to /api/whatsapp/webhook or wait for live messages.</div>
           )}
-          {(items||[]).map((it)=>{
+          {(items||[]).filter(it=>{
+            if (filter==='unread') return (it.unread_count||0)>0
+            if (filter==='late') return (it.age_sec||0)>=1800
+            if (filter==='due') return (it.age_sec||0)>=300 && (it.age_sec||0)<1800
+            if (filter==='owner') return ownerFilter ? (it.owner_mobile||'').includes(ownerFilter) : true
+            return true
+          }).map((it)=>{
             const contact = it.contact
             return (
               <div key={contact} className="border rounded-lg p-3">
