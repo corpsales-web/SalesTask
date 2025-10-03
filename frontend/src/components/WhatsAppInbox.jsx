@@ -240,22 +240,54 @@ export default function WhatsAppInbox() {
 
       {linkingContact && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded shadow w-full max-w-sm">
+          <div className="bg-white p-4 rounded shadow w-full max-w-md">
             <div className="font-semibold mb-2">Link conversation to a Lead</div>
             <div className="text-xs text-gray-600 mb-2">Contact: {linkingContact}</div>
+
+            <div className="mb-2">
+              <input
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Search lead by name, email or phone"
+                value={searchQuery}
+                onChange={async (e)=>{
+                  const q = e.target.value; setSearchQuery(q)
+                  if (!q.trim()) { setSearchResults([]); return }
+                  try {
+                    setSearching(true)
+                    const res = await axios.get(`${API}/api/leads/search`, { params: { q } })
+                    setSearchResults(Array.isArray(res.data.items) ? res.data.items : [])
+                  } catch { setSearchResults([]) } finally { setSearching(false) }
+                }}
+              />
+              <div className="max-h-40 overflow-auto border rounded mt-1">
+                {searching && <div className="text-xs p-2">Searching...</div>}
+                {!searching && searchResults.length===0 && <div className="text-xs p-2 text-gray-500">No results</div>}
+                {searchResults.map(ld=>(
+                  <div key={ld.id} className="p-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center" onClick={()=>{ setLinkLeadId(ld.id) }}>
+                    <div>
+                      <div className="text-sm font-medium">{ld.name}</div>
+                      <div className="text-xs text-gray-600">{ld.email || ''} • {ld.phone || ''}</div>
+                    </div>
+                    <div className="text-xs">{ld.id}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <input
               className="border rounded px-2 py-1 w-full mb-3"
-              placeholder="Enter Lead ID"
+              placeholder="Or paste Lead ID"
               value={linkLeadId}
               onChange={(e)=>setLinkLeadId(e.target.value)}
             />
+
             <div className="flex gap-2 justify-end">
-              <button className="ghost" onClick={()=>{ setLinkingContact(''); setLinkLeadId('') }}>Cancel</button>
+              <button className="ghost" onClick={()=>{ setLinkingContact(''); setLinkLeadId(''); setSearchQuery(''); setSearchResults([]) }}>Cancel</button>
               <button className="primary" onClick={async ()=>{
                 try {
                   await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(linkingContact)}/link_lead`, { lead_id: linkLeadId })
                   toast({ title: 'Linked to Lead' })
-                  setLinkingContact(''); setLinkLeadId('');
+                  setLinkingContact(''); setLinkLeadId(''); setSearchQuery(''); setSearchResults([])
                   await load()
                 } catch(e) { toast({ title: 'Failed to link', description: e.message, variant: 'destructive' }) }
               }}>Link</button>
