@@ -21,6 +21,7 @@ import LeadUploadModal from './LeadUploadModal';
 import OptimizedLeadCreationForm from './OptimizedLeadCreationForm';
 import CatalogueManager from './CatalogueManager';
 import TrainingModule from './TrainingModule';
+import WhatsAppInbox from './WhatsAppInbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Camera } from 'lucide-react';
 
