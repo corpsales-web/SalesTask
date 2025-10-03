@@ -130,7 +130,7 @@ const EnhancedLeadEditModal = ({ isOpen, onClose, leadData, onLeadUpdated }) => 
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Full Name *</nLabel>
+                  <Label>Full Name *</Label>
                   <Input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className={errors.name ? 'border-red-500' : ''} />
                   {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
                 </div>
