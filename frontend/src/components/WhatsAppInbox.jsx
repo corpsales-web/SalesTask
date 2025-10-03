@@ -202,8 +202,13 @@ export default function WhatsAppInbox() {
                             await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: newLead.id })
                             await load()
                             toast({ title: 'Lead Created & Linked' })
-                            // optional: open optimized AI form
+                            // Auto-open AI Add Lead modal after convert
                             setActiveTab('leads')
+                            setTimeout(()=>{
+                              const evt = new Event('open_ai_add_lead')
+                              window.dispatchEvent(evt)
+                            }, 300)
+
                           } catch(e) { toast({ title: 'Lead creation failed', description: e.message, variant: 'destructive' }) }
                         }}>Convert to Lead</button>
                         <button className="ghost" onClick={async ()=>{
