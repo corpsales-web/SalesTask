@@ -102,6 +102,16 @@ export default function WhatsAppInbox() {
       <div className="panel-title flex items-center justify-between">
         <div>WhatsApp Inbox</div>
         <div className="flex gap-2 items-center">
+          <select className="border rounded px-2 py-1 text-sm" value={filter} onChange={(e)=>setFilter(e.target.value)}>
+            <option value="all">All</option>
+            <option value="unread">Unread</option>
+            <option value="late">Late (30m+)</option>
+            <option value="due">Due soon (5m+)</option>
+            <option value="owner">Owner</option>
+          </select>
+          {filter==='owner' && (
+            <input className="border rounded px-2 py-1 text-sm" placeholder="Owner mobile e.g. +919999139938" value={ownerFilter} onChange={(e)=>setOwnerFilter(e.target.value)} />
+          )}
           <button className="ghost" onClick={async ()=>{
             try {
               const ts = Math.floor(Date.now()/1000)
