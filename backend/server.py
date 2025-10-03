@@ -164,13 +164,6 @@ async def create_lead(body: LeadCreate, db=Depends(get_db)):
     if doc.get("phone"):
         doc["phone"] = normalize_phone_india(doc.get("phone"))
     # Owner mobile default + normalize
-@app.get("/api/leads/{lead_id}")
-async def get_lead(lead_id: str, db=Depends(get_db)):
-    doc = await db["leads"].find_one({"id": lead_id}, {"_id": 0})
-    if not doc:
-        raise HTTPException(status_code=404, detail="Lead not found")
-    return {"success": True, "lead": doc}
-
     if doc.get("owner_mobile"):
         doc["owner_mobile"] = normalize_phone_india(doc.get("owner_mobile"))
     else:
@@ -181,6 +174,13 @@ async def get_lead(lead_id: str, db=Depends(get_db)):
     doc["updated_at"] = now_iso()
     await db["leads"].insert_one(doc)
     doc.pop("_id", None)
+    return {"success": True, "lead": doc}
+
+@app.get("/api/leads/{lead_id}")
+async def get_lead(lead_id: str, db=Depends(get_db)):
+    doc = await db["leads"].find_one({"id": lead_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Lead not found")
     return {"success": True, "lead": doc}
 
 @app.get("/api/leads")
