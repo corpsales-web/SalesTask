@@ -150,6 +150,14 @@ const EnhancedLeadEditModal = ({ isOpen, onClose, leadData, onLeadUpdated }) => 
                   <Label>Company</Label>
                   <Input value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} />
                 </div>
+                <div>
+                  <Label>Owner Mobile</Label>
+                  <Input
+                    value={formData.owner_mobile || ''}
+                    onChange={(e) => setFormData({...formData, owner_mobile: e.target.value})}
+                    placeholder="e.g., +919999139938"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
