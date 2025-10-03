@@ -90,6 +90,10 @@ export default function WhatsAppInbox() {
     if (sec >= 300) return <Badge color='yellow'>Due soon (5m+)</Badge>
     return null
   }
+  const ageChip = (sec) => {
+    const m = Math.floor(sec/60)
+    return <span className="text-xs text-gray-500 border rounded px-1 py-0.5">{m}m</span>
+  }
 
   return (
     <div className="panel">
