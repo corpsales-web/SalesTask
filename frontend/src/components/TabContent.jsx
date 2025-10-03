@@ -64,6 +64,19 @@ const TabContent = ({
   const [showLeadUploadModal, setShowLeadUploadModal] = useState(false);
   
   console.log(`🎯 TAB CONTENT RENDERING: ${activeTab} at ${new Date(lastUpdated).toLocaleTimeString()}`);
+  // Auto-open AI Add Lead after conversion from Inbox
+  useEffect(()=>{
+    if (activeTab === 'leads') {
+      try {
+        const flag = localStorage.getItem('OPEN_AI_ADD_LEAD')
+        if (flag === '1') {
+          setShowOptimizedLeadModal(true)
+          localStorage.removeItem('OPEN_AI_ADD_LEAD')
+        }
+      } catch (e) {}
+    }
+  }, [activeTab])
+
   
   // Memoize content to ensure it updates when activeTab changes
   const content = useMemo(() => {
