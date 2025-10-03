@@ -2,7 +2,7 @@ import os
 import json
 import uuid
 from datetime import datetime, timezone, timedelta
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 
 from fastapi import FastAPI, WebSocket, HTTPException, Depends, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
