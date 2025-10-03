@@ -157,13 +157,16 @@ export default function WhatsAppInbox() {
                       <button className="ghost" onClick={()=>openLead(it.lead_id)}>View Lead</button>
                     )}
                     {!it.lead_id && (
-                      <button className="ghost" onClick={async ()=>{
-                        try {
-                          const res = await axios.post(`${API}/api/leads`, { name: 'WhatsApp Contact', phone: contact, source: 'WhatsApp' })
-                          await load()
-                          toast({ title: 'Lead Created' })
-                        } catch(e) { toast({ title: 'Lead creation failed', description: e.message, variant: 'destructive' }) }
-                      }}>Convert to Lead</button>
+                      <>
+                        <button className="ghost" onClick={async ()=>{
+                          try {
+                            await axios.post(`${API}/api/leads`, { name: 'WhatsApp Contact', phone: contact, source: 'WhatsApp' })
+                            await load()
+                            toast({ title: 'Lead Created' })
+                          } catch(e) { toast({ title: 'Lead creation failed', description: e.message, variant: 'destructive' }) }
+                        }}>Convert to Lead</button>
+                        <button className="ghost" onClick={()=>{ setLinkingContact(contact); setLinkLeadId('') }}>Link to Lead</button>
+                      </>
                     )}
                     <button className="ghost" onClick={()=>markRead(contact)}>Mark Read</button>
                   </div>
