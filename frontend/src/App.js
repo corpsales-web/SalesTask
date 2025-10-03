@@ -181,13 +181,13 @@ const App = () => {
                 dashboardStats={dashboardStats}
                 leads={leads}
                 tasks={tasks}
-                showLeadActionsPanel={false}
-                selectedLead={null}
-                leadActionType={null}
-                setShowLeadActionsPanel={() => {}}
-                setSelectedLead={() => {}}
-                setLeadActionType={() => {}}
-                onActionComplete={() => {}}
+                showLeadActionsPanel={showLeadActionsPanel}
+                selectedLead={selectedLead}
+                leadActionType={leadActionType}
+                setShowLeadActionsPanel={setShowLeadActionsPanel}
+                setSelectedLead={setSelectedLead}
+                setLeadActionType={setLeadActionType}
+                onActionComplete={handleActionComplete}
               />
             )}
           </div>
