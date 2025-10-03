@@ -208,11 +208,14 @@
 ##     file: "/app/backend/server.py"
 ##     stuck_count: 0
 ##     priority: "high"
-##     needs_retesting: true
+##     needs_retesting: false
 ##     status_history:
 ##         -working: "NA"
 ##         -agent: "main"
 ##         -comment: "Added /api/whatsapp/webhook (GET verify + POST receive with HMAC), /api/whatsapp/messages, /api/whatsapp/send. Real provider call uses headers D360-API-KEY to {WHATSAPP_BASE_URL}/messages; stub mode when key missing. Data stored into collections whatsapp_events/whatsapp_outbox/whatsapp_sent."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "TESTED: All WhatsApp endpoints working perfectly in stub mode! ✅ Webhook verification (GET /api/whatsapp/webhook → 403 when no WHATSAPP_VERIFY_TOKEN set, correct hub.mode validation), ✅ Webhook receive (POST /api/whatsapp/webhook → {success: true} with/without signature when no WHATSAPP_WEBHOOK_SECRET, proper JSON validation), ✅ Messages list (GET /api/whatsapp/messages → array of stored webhook docs without _id, limit parameter working), ✅ Send text (POST /api/whatsapp/send → {success: true, mode: stub, id: UUID} when no D360_API_KEY, proper validation for 'to' field). 9/10 tests passed (90% success rate). Minor: API returns 422 instead of 400 for missing fields (correct Pydantic behavior). All core WhatsApp functionality operational in keyless stub mode."
 
 ## frontend:
 ##   - task: "Add Inbox tab and wire WhatsAppInbox to backend"
