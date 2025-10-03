@@ -96,6 +96,32 @@ export default function WhatsAppInbox() {
       <div className="panel-title flex items-center justify-between">
         <div>WhatsApp Inbox</div>
         <div className="flex gap-2 items-center">
+          <button className="ghost" onClick={async ()=>{
+            try {
+              const ts = Math.floor(Date.now()/1000)
+              const payload = {
+                object: 'whatsapp_business_account',
+                entry: [{
+                  id: 'demo_waba',
+                  changes: [{
+                    value: {
+                      messaging_product: 'whatsapp',
+                      metadata: { display_phone_number: '+911234567890' },
+                      messages: [{
+                        from: '919876543210',
+                        id: `wamid.DEMO.${ts}`,
+                        timestamp: ts.toString(),
+                        type: 'text',
+                        text: { body: 'Hello from demo inbound 👋' }
+                      }]
+                    }
+                  }]
+                }]
+              }
+              await axios.post(`${API}/api/whatsapp/webhook`, payload)
+              await load()
+            } catch (e) { /* ignore */ }
+          }}>Add Sample</button>
           <button className="ghost" onClick={load}>{loading? 'Loading...' : 'Refresh'}</button>
         </div>
       </div>
