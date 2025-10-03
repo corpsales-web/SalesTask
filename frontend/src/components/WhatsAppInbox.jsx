@@ -20,6 +20,8 @@ export default function WhatsAppInbox() {
   const [sessionOk, setSessionOk] = useState(true)
   const [activeContact, setActiveContact] = useState('')
   const [templateName, setTemplateName] = useState('hello_world')
+  const [linkingContact, setLinkingContact] = useState('')
+  const [linkLeadId, setLinkLeadId] = useState('')
 
   const load = async () => {
     try {
