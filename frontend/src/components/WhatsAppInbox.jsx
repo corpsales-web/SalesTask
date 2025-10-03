@@ -144,6 +144,7 @@ export default function WhatsAppInbox() {
                       <span>{contact}</span>
                       {it.lead_name && <span className="text-gray-600">• {it.lead_name}</span>}
                       {ageBadge(it.age_sec)}
+                      <span className="ml-1">{ageChip(it.age_sec)}</span>
                       {it.unread_count > 0 && <Badge color='yellow'>{it.unread_count} unread</Badge>}
                     </div>
                     <div className="text-xs text-gray-500">Owner: {it.owner_mobile || 'Unassigned'} • Last: {new Date(it.last_message_at).toLocaleString()}</div>
