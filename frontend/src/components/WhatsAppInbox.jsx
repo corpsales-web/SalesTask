@@ -22,6 +22,11 @@ export default function WhatsAppInbox() {
   const [templateName, setTemplateName] = useState('hello_world')
   const [linkingContact, setLinkingContact] = useState('')
   const [linkLeadId, setLinkLeadId] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [searching, setSearching] = useState(false)
+  const [expandedContact, setExpandedContact] = useState('')
+  const [previewMap, setPreviewMap] = useState({})
   const [filter, setFilter] = useState('all')
   const [ownerFilter, setOwnerFilter] = useState('')
 
