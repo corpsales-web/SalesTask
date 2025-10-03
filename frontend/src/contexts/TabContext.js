@@ -145,6 +145,12 @@ export const TAB_CONFIG = {
     label: 'Admin',
     icon: '⚙️',
     description: 'System administration'
+  },
+  inbox: {
+    id: 'inbox',
+    label: 'Inbox',
+    icon: '💬',
+    description: 'WhatsApp Inbox'
   }
 };
 
