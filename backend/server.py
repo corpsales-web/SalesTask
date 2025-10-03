@@ -60,6 +60,43 @@ async def get_db() -> AsyncIOMotorDatabase:
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+DEFAULT_COUNTRY_CODE = "+91"
+DEFAULT_OWNER_MOBILE = "+919999139938"  # Manager
+
+
+def normalize_phone_india(raw: Optional[str]) -> Optional[str]:
+    if not raw:
+        return None
+    digits = "".join(ch for ch in str(raw) if ch.isdigit())
+    if not digits:
+        return None
+    # If starts with country 91 and total 12, keep
+    if digits.startswith("91"):
+        if len(digits) == 12:
+            return "+" + digits
+        # Sometimes comes as 91 + 10 digits or just 91 + extra
+        if len(digits) > 12:
+            digits = digits[:12]
+            return "+" + digits
+        if len(digits) == 11:  # rare cases missing a digit
+            return "+" + digits
+    # If exactly 10, assume India
+    if len(digits) == 10:
+        return DEFAULT_COUNTRY_CODE + digits
+    # Fallback: prefix '+' if missing
+    return "+" + digits if not raw.startswith("+") else raw
+
+async def find_lead_by_phone(db: AsyncIOMotorDatabase, phone_norm: str) -> Optional[Dict[str, Any]]:
+    # Iterate leads and compare normalized phones (MVP)
+    cursor = db["leads"].find({}, {"_id": 0})
+    leads = await cursor.to_list(length=None)
+    for ld in leads:
+        p = ld.get("phone")
+        if p:
+            if normalize_phone_india(p) == phone_norm:
+                return ld
+    return None
+
 # ----------------------
 # Health (always on)
 # ----------------------
@@ -93,6 +130,7 @@ class LeadCreate(BaseModel):
     status: Optional[str] = Field(default="New")
     source: Optional[str] = None
     notes: Optional[str] = None
+    owner_mobile: Optional[str] = None
 
 class LeadUpdate(BaseModel):
     name: Optional[str] = None
@@ -101,6 +139,7 @@ class LeadUpdate(BaseModel):
     status: Optional[str] = None
     source: Optional[str] = None
     notes: Optional[str] = None
+    owner_mobile: Optional[str] = None
 
 class TaskCreate(BaseModel):
     title: str
@@ -307,14 +346,72 @@ async def whatsapp_webhook_receive(request: Request, db=Depends(get_db)):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid JSON")
 
-    doc = {
+    # Store raw event
+    event_doc = {
         "id": str(uuid.uuid4()),
         "received_at": now_iso(),
         "raw": payload,
         "source": "360dialog",
         "type": payload.get("object", "event")
     }
-    await db["whatsapp_events"].insert_one(doc)
+    await db["whatsapp_events"].insert_one(event_doc)
+
+    # Normalize and store messages + upsert conversation
+    try:
+        entries = payload.get("entry", [])
+        for entry in entries:
+            changes = entry.get("changes", [])
+            for ch in changes:
+                val = ch.get("value", {})
+                msgs = val.get("messages", [])
+                meta = val.get("metadata", {})
+                for m in msgs:
+                    from_raw = m.get("from")
+                    from_norm = normalize_phone_india(from_raw)
+                    ts = m.get("timestamp")
+                    ts_dt = datetime.fromtimestamp(int(ts), tz=timezone.utc) if ts else datetime.now(timezone.utc)
+                    mtype = m.get("type", "text")
+                    text = (m.get("text") or {}).get("body") if mtype == "text" else None
+
+                    # Link to lead if possible
+                    linked_lead = await find_lead_by_phone(db, from_norm) if from_norm else None
+                    lead_id = linked_lead.get("id") if linked_lead else None
+
+                    # Store normalized message
+                    msg_doc = {
+                        "id": str(uuid.uuid4()),
+                        "direction": "inbound",
+                        "from": from_norm,
+                        "to": meta.get("display_phone_number"),
+                        "type": mtype,
+                        "text": text,
+                        "timestamp": ts_dt.isoformat(),
+                        "lead_id": lead_id,
+                    }
+                    await db["whatsapp_messages"].insert_one(msg_doc)
+
+                    # Upsert conversation
+                    conv_key = {"contact": from_norm}
+                    existing = await db["whatsapp_conversations"].find_one(conv_key)
+                    owner_mobile = None
+                    if linked_lead and linked_lead.get("owner_mobile"):
+                        owner_mobile = normalize_phone_india(linked_lead.get("owner_mobile"))
+                    if not owner_mobile:
+                        owner_mobile = DEFAULT_OWNER_MOBILE
+
+                    conv_update = {
+                        "$set": {
+                            "contact": from_norm,
+                            "lead_id": lead_id,
+                            "owner_mobile": owner_mobile,
+                            "last_message_at": ts_dt.isoformat(),
+                        },
+                        "$inc": {"unread_count": 1}
+                    }
+                    await db["whatsapp_conversations"].update_one(conv_key, conv_update, upsert=True)
+    except Exception:
+        # Do not fail webhook on normalization issues
+        pass
 
     return {"success": True}
 
@@ -322,7 +419,12 @@ async def whatsapp_webhook_receive(request: Request, db=Depends(get_db)):
 class WhatsAppSendRequest(BaseModel):
     to: str
     text: Optional[str] = None
-    # Optional future additions: template dict, media, etc.
+
+class WhatsAppSendTemplateRequest(BaseModel):
+    to: str
+    template_name: str
+    language_code: Optional[str] = "en"
+    components: Optional[List[Dict[str, Any]]] = None
 
 
 @app.get("/api/whatsapp/messages")
@@ -332,29 +434,85 @@ async def whatsapp_messages(limit: int = Query(20, ge=1, le=100), db=Depends(get
     return items
 
 
+@app.get("/api/whatsapp/conversations")
+async def whatsapp_conversations(limit: int = Query(50, ge=1, le=200), db=Depends(get_db)):
+    cursor = db["whatsapp_conversations"].find({}, {"_id": 0}).sort("last_message_at", -1).limit(limit)
+    items = await cursor.to_list(length=limit)
+    # enrich with lead name if available
+    result = []
+    for it in items:
+        lead_name = None
+        if it.get("lead_id"):
+            lead = await db["leads"].find_one({"id": it["lead_id"]}, {"_id": 0, "name": 1})
+            lead_name = lead.get("name") if lead else None
+        # SLA age seconds
+        try:
+            last_dt = datetime.fromisoformat(it.get("last_message_at")).astimezone(timezone.utc)
+        except Exception:
+            last_dt = datetime.now(timezone.utc)
+        age_sec = int((datetime.now(timezone.utc) - last_dt).total_seconds())
+        it["lead_name"] = lead_name
+        it["age_sec"] = age_sec
+        result.append(it)
+    return result
+
+
+@app.post("/api/whatsapp/conversations/{contact}/read")
+async def whatsapp_conversation_read(contact: str, db=Depends(get_db)):
+    contact_norm = normalize_phone_india(contact)
+    await db["whatsapp_conversations"].update_one({"contact": contact_norm}, {"$set": {"unread_count": 0, "last_read_at": now_iso()}})
+    return {"success": True}
+
+
+@app.get("/api/whatsapp/lead_timeline/{lead_id}")
+async def whatsapp_lead_timeline(lead_id: str, limit: int = Query(10, ge=1, le=100), db=Depends(get_db)):
+    # find messages linked by lead_id
+    cursor = db["whatsapp_messages"].find({"lead_id": lead_id}, {"_id": 0}).sort("timestamp", -1).limit(limit)
+    msgs = await cursor.to_list(length=limit)
+    return {"items": msgs}
+
+
+@app.get("/api/whatsapp/session_status")
+async def whatsapp_session_status(contact: str, db=Depends(get_db)):
+    contact_norm = normalize_phone_india(contact)
+    # last inbound message from this contact within 24h
+    last = await db["whatsapp_messages"].find_one({"from": contact_norm, "direction": "inbound"}, sort=[("timestamp", -1)])
+    if not last:
+        return {"within_24h": False, "last_inbound": None}
+    try:
+        last_dt = datetime.fromisoformat(last.get("timestamp")).astimezone(timezone.utc)
+    except Exception:
+        last_dt = datetime.now(timezone.utc) - timedelta(days=2)
+    within = (datetime.now(timezone.utc) - last_dt) < timedelta(hours=24)
+    return {"within_24h": within, "last_inbound": last.get("timestamp")}
+
+
 @app.post("/api/whatsapp/send")
 async def whatsapp_send(body: WhatsAppSendRequest, db=Depends(get_db)):
     if not body.to:
         raise HTTPException(status_code=400, detail="'to' is required")
+    to_norm = normalize_phone_india(body.to)
 
     # If API key missing → stub mode: store and return mocked success
     if not D360_API_KEY:
         rec = {
             "id": str(uuid.uuid4()),
             "queued_at": now_iso(),
-            "to": body.to,
+            "to": to_norm,
             "text": body.text or "",
             "mode": "stub",
             "provider": "360dialog",
         }
         await db["whatsapp_outbox"].insert_one(rec)
+        # reduce unread Count of conversation since we responded
+        await db["whatsapp_conversations"].update_one({"contact": to_norm}, {"$set": {"unread_count": 0}})
         return {"success": True, "mode": "stub", "message": "No API key configured. Stored locally.", "id": rec["id"]}
 
     # Real send via 360dialog
     payload: Dict[str, Any] = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
-        "to": body.to,
+        "to": to_norm,
         "type": "text",
         "text": {"body": body.text or ""},
     }
@@ -373,11 +531,56 @@ async def whatsapp_send(body: WhatsAppSendRequest, db=Depends(get_db)):
     stored = {
         "id": str(uuid.uuid4()),
         "sent_at": now_iso(),
-        "to": body.to,
+        "to": to_norm,
         "payload": payload,
         "provider_response": data,
         "provider": "360dialog",
     }
     await db["whatsapp_sent"].insert_one(stored)
+    await db["whatsapp_conversations"].update_one({"contact": to_norm}, {"$set": {"unread_count": 0}})
 
+    return {"success": True, "provider": "360dialog", "data": data}
+
+
+@app.post("/api/whatsapp/send_template")
+async def whatsapp_send_template(body: WhatsAppSendTemplateRequest, db=Depends(get_db)):
+    to_norm = normalize_phone_india(body.to)
+    if not D360_API_KEY:
+        rec = {
+            "id": str(uuid.uuid4()),
+            "queued_at": now_iso(),
+            "to": to_norm,
+            "template": body.template_name,
+            "mode": "stub",
+            "provider": "360dialog",
+        }
+        await db["whatsapp_outbox"].insert_one(rec)
+        return {"success": True, "mode": "stub", "id": rec["id"], "message": "Template send stored (stub)."}
+
+    headers = {
+        "D360-API-KEY": D360_API_KEY,
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to_norm,
+        "type": "template",
+        "template": {
+            "name": body.template_name,
+            "language": {"code": body.language_code or "en"},
+            **({"components": body.components} if body.components else {})
+        }
+    }
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(f"{D360_BASE_URL}/messages", headers=headers, json=payload)
+        if resp.status_code >= 400:
+            raise HTTPException(status_code=resp.status_code, detail=f"Provider error: {resp.text}")
+        data = resp.json()
+    await db["whatsapp_sent"].insert_one({
+        "id": str(uuid.uuid4()),
+        "sent_at": now_iso(),
+        "to": to_norm,
+        "payload": payload,
+        "provider_response": data,
+    })
     return {"success": True, "provider": "360dialog", "data": data}
