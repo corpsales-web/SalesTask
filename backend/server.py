@@ -202,16 +202,17 @@ async def list_leads(
 
 @app.get("/api/leads/search")
 async def search_leads(q: str = Query(..., min_length=1), limit: int = Query(10, ge=1, le=50), db=Depends(get_db)):
-    # Normalize possible phone and search by name/email contains (case-insensitive)
+    # Support search by name/email (case-insensitive) and phone substring
     phone_norm = normalize_phone_india(q)
     regex = {"$regex": re.escape(q), "$options": "i"}
-    query = {"$or": [
-        {"name": regex},
-        {"email": regex},
-        {"phone": phone_norm} if phone_norm else {"_skip": True}
-    ]}
-    # Remove dummy
-    query["$or"] = [c for c in query["$or"] if "_skip" not in c]
+    digits = "".join(ch for ch in q if ch.isdigit())
+    phone_regex = {"$regex": digits} if digits and len(digits) >= 4 else None
+    ors = [{"name": regex}, {"email": regex}]
+    if phone_norm:
+        ors.append({"phone": phone_norm})
+    if phone_regex:
+        ors.append({"phone": phone_regex})
+    query = {"$or": ors}
     cursor = db["leads"].find(query, {"_id": 0}).limit(limit)
     items = await cursor.to_list(length=limit)
     return {"items": items}
