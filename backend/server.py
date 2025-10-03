@@ -1,14 +1,17 @@
 import os
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional, Dict, Any, List
 
-from fastapi import FastAPI, WebSocket, HTTPException, Depends, Query
+from fastapi import FastAPI, WebSocket, HTTPException, Depends, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+import hmac
+import hashlib
+import httpx
 
 try:
     from dotenv import load_dotenv
@@ -242,13 +245,10 @@ async def dashboard_stats(db=Depends(get_db)):
     active_leads = await db["leads"].count_documents({"status": {"$nin": ["Closed", "Lost", "Archived"]}})
     pending_tasks = await db["tasks"].count_documents({"status": {"$in": ["Open", "Pending", "In Progress"]}})
 
-    # Optional conversion rate: percentage of leads with status Won over total (avoid div0)
     won_leads = await db["leads"].count_documents({"status": "Won"})
     conversion_rate = int(round((won_leads / total_leads) * 100)) if total_leads else 0
 
-    # Optional totalRevenue: sum of numeric field 'budget' on leads if present
     total_revenue = 0
-    # We avoid heavy aggregation for MVP; can be added later.
 
     return {
         "totalLeads": total_leads,
@@ -257,3 +257,127 @@ async def dashboard_stats(db=Depends(get_db)):
         "totalRevenue": total_revenue,
         "pendingTasks": pending_tasks,
     }
+
+# ----------------------
+# WhatsApp (360dialog) Integration
+# ----------------------
+D360_API_KEY = os.environ.get("WHATSAPP_360DIALOG_API_KEY", "")
+D360_BASE_URL = os.environ.get("WHATSAPP_BASE_URL", "https://waba-v2.360dialog.io")
+WA_VERIFY_TOKEN = os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
+WA_WEBHOOK_SECRET = os.environ.get("WHATSAPP_WEBHOOK_SECRET", "")
+
+
+def _hmac_valid(body: bytes, signature_header: Optional[str]) -> bool:
+    if not WA_WEBHOOK_SECRET:
+        # If no secret configured, skip signature verification (staging)
+        return True
+    if not signature_header:
+        return False
+    # Accept forms like 'sha256=...' or raw hex
+    try:
+        provided = signature_header
+        if provided.lower().startswith("sha256="):
+            provided = provided.split("=", 1)[1]
+        digest = hmac.new(WA_WEBHOOK_SECRET.encode("utf-8"), body, hashlib.sha256).hexdigest()
+        return hmac.compare_digest(digest, provided)
+    except Exception:
+        return False
+
+
+@app.get("/api/whatsapp/webhook")
+async def whatsapp_webhook_verify(
+    hub_mode: str = Query(None, alias="hub.mode"),
+    hub_token: str = Query(None, alias="hub.verify_token"),
+    hub_challenge: str = Query(None, alias="hub.challenge"),
+):
+    if hub_mode == "subscribe" and hub_token and WA_VERIFY_TOKEN and hub_token == WA_VERIFY_TOKEN:
+        return PlainTextResponse(hub_challenge or "")
+    raise HTTPException(status_code=403, detail="Verification failed")
+
+
+@app.post("/api/whatsapp/webhook")
+async def whatsapp_webhook_receive(request: Request, db=Depends(get_db)):
+    body = await request.body()
+    sig = request.headers.get("x-signature") or request.headers.get("X-Signature") or request.headers.get("X-Hub-Signature-256")
+    if not _hmac_valid(body, sig):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+
+    try:
+        payload = json.loads(body.decode("utf-8"))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+
+    doc = {
+        "id": str(uuid.uuid4()),
+        "received_at": now_iso(),
+        "raw": payload,
+        "source": "360dialog",
+        "type": payload.get("object", "event")
+    }
+    await db["whatsapp_events"].insert_one(doc)
+
+    return {"success": True}
+
+
+class WhatsAppSendRequest(BaseModel):
+    to: str
+    text: Optional[str] = None
+    # Optional future additions: template dict, media, etc.
+
+
+@app.get("/api/whatsapp/messages")
+async def whatsapp_messages(limit: int = Query(20, ge=1, le=100), db=Depends(get_db)):
+    cursor = db["whatsapp_events"].find({}, {"_id": 0}).sort("received_at", -1).limit(limit)
+    items = await cursor.to_list(length=limit)
+    return items
+
+
+@app.post("/api/whatsapp/send")
+async def whatsapp_send(body: WhatsAppSendRequest, db=Depends(get_db)):
+    if not body.to:
+        raise HTTPException(status_code=400, detail="'to' is required")
+
+    # If API key missing → stub mode: store and return mocked success
+    if not D360_API_KEY:
+        rec = {
+            "id": str(uuid.uuid4()),
+            "queued_at": now_iso(),
+            "to": body.to,
+            "text": body.text or "",
+            "mode": "stub",
+            "provider": "360dialog",
+        }
+        await db["whatsapp_outbox"].insert_one(rec)
+        return {"success": True, "mode": "stub", "message": "No API key configured. Stored locally.", "id": rec["id"]}
+
+    # Real send via 360dialog
+    payload: Dict[str, Any] = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": body.to,
+        "type": "text",
+        "text": {"body": body.text or ""},
+    }
+
+    headers = {
+        "D360-API-KEY": D360_API_KEY,
+        "Content-Type": "application/json",
+    }
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(f"{D360_BASE_URL}/messages", headers=headers, json=payload)
+        if resp.status_code >= 400:
+            raise HTTPException(status_code=resp.status_code, detail=f"Provider error: {resp.text}")
+        data = resp.json()
+
+    stored = {
+        "id": str(uuid.uuid4()),
+        "sent_at": now_iso(),
+        "to": body.to,
+        "payload": payload,
+        "provider_response": data,
+        "provider": "360dialog",
+    }
+    await db["whatsapp_sent"].insert_one(stored)
+
+    return {"success": True, "provider": "360dialog", "data": data}
