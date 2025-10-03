@@ -202,6 +202,32 @@ export default function WhatsAppInbox() {
           onLeadUpdated={()=>{ setLeadModalOpen(false); setLeadForModal(null); load() }}
         />
       )}
+
+      {linkingContact && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded shadow w-full max-w-sm">
+            <div className="font-semibold mb-2">Link conversation to a Lead</div>
+            <div className="text-xs text-gray-600 mb-2">Contact: {linkingContact}</div>
+            <input
+              className="border rounded px-2 py-1 w-full mb-3"
+              placeholder="Enter Lead ID"
+              value={linkLeadId}
+              onChange={(e)=>setLinkLeadId(e.target.value)}
+            />
+            <div className="flex gap-2 justify-end">
+              <button className="ghost" onClick={()=>{ setLinkingContact(''); setLinkLeadId('') }}>Cancel</button>
+              <button className="primary" onClick={async ()=>{
+                try {
+                  await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(linkingContact)}/link_lead`, { lead_id: linkLeadId })
+                  toast({ title: 'Linked to Lead' })
+                  setLinkingContact(''); setLinkLeadId('');
+                  await load()
+                } catch(e) { toast({ title: 'Failed to link', description: e.message, variant: 'destructive' }) }
+              }}>Link</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
