@@ -506,8 +506,8 @@ async def whatsapp_send(body: WhatsAppSendRequest, db=Depends(get_db)):
             "provider": "360dialog",
         }
         await db["whatsapp_outbox"].insert_one(rec)
-        # reduce unread Count of conversation since we responded
-        await db["whatsapp_conversations"].update_one({"contact": to_norm}, {"$set": {"unread_count": 0}})
+        # reduce unread Count of conversation since we responded and update preview
+        await db["whatsapp_conversations"].update_one({"contact": to_norm}, {"$set": {"unread_count": 0, "last_message_at": now_iso(), "last_message_text": body.text or "", "last_message_dir": "out"}}, upsert=True)
         return {"success": True, "mode": "stub", "message": "No API key configured. Stored locally.", "id": rec["id"]}
 
     # Real send via 360dialog
