@@ -70,21 +70,19 @@ def normalize_phone_india(raw: Optional[str]) -> Optional[str]:
     digits = "".join(ch for ch in str(raw) if ch.isdigit())
     if not digits:
         return None
+    # If starts with 0 and length 11 (e.g., 0 + 10-digit mobile), drop leading 0
+    if digits.startswith("0") and len(digits) == 11:
+        digits = digits[1:]
     # If starts with country 91 and total 12, keep
     if digits.startswith("91"):
-        if len(digits) == 12:
-            return "+" + digits
-        # Sometimes comes as 91 + 10 digits or just 91 + extra
-        if len(digits) > 12:
+        if len(digits) >= 12:
             digits = digits[:12]
-            return "+" + digits
-        if len(digits) == 11:  # rare cases missing a digit
             return "+" + digits
     # If exactly 10, assume India
     if len(digits) == 10:
         return DEFAULT_COUNTRY_CODE + digits
     # Fallback: prefix '+' if missing
-    return "+" + digits if not raw.startswith("+") else raw
+    return "+" + digits if not str(raw).startswith("+") else str(raw)
 
 async def find_lead_by_phone(db: AsyncIOMotorDatabase, phone_norm: str) -> Optional[Dict[str, Any]]:
     # Iterate leads and compare normalized phones (MVP)
@@ -92,9 +90,8 @@ async def find_lead_by_phone(db: AsyncIOMotorDatabase, phone_norm: str) -> Optio
     leads = await cursor.to_list(length=None)
     for ld in leads:
         p = ld.get("phone")
-        if p:
-            if normalize_phone_india(p) == phone_norm:
-                return ld
+        if p and normalize_phone_india(p) == phone_norm:
+            return ld
     return None
 
 # ----------------------
@@ -476,6 +473,22 @@ async def whatsapp_conversations(limit: int = Query(50, ge=1, le=200), db=Depend
 async def whatsapp_conversation_read(contact: str, db=Depends(get_db)):
     contact_norm = normalize_phone_india(contact)
     await db["whatsapp_conversations"].update_one({"contact": contact_norm}, {"$set": {"unread_count": 0, "last_read_at": now_iso()}})
+    return {"success": True}
+
+
+@app.post("/api/whatsapp/conversations/{contact}/link_lead")
+async def whatsapp_conversation_link_lead(contact: str, body: Dict[str, Any], db=Depends(get_db)):
+    contact_norm = normalize_phone_india(contact)
+    lead_id = (body or {}).get("lead_id")
+    if not lead_id:
+        raise HTTPException(status_code=400, detail="lead_id required")
+    lead = await db["leads"].find_one({"id": lead_id}, {"_id": 0})
+    owner_mobile = normalize_phone_india(lead.get("owner_mobile") if lead else DEFAULT_OWNER_MOBILE)
+    await db["whatsapp_conversations"].update_one(
+        {"contact": contact_norm},
+        {"$set": {"lead_id": lead_id, "owner_mobile": owner_mobile}},
+        upsert=True
+    )
     return {"success": True}
 
 
