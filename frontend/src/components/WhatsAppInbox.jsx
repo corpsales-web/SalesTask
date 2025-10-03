@@ -183,12 +183,39 @@ export default function WhatsAppInbox() {
                       <>
                         <button className="ghost" onClick={async ()=>{
                           try {
+                            // Check duplicate by phone before creating
+                            const sr = await axios.get(`${API}/api/leads/search`, { params: { q: contact } })
+                            const results = Array.isArray(sr.data.items) ? sr.data.items : []
+                            const exact = results.find(r => (r.phone||'').includes(contact.slice(-10)))
+                            if (exact) {
+                              if (window.confirm(`Lead with this phone already exists (ID: ${exact.id}). Link conversation to this lead instead?`)) {
+                                await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: exact.id })
+                                await load()
+                                toast({ title: 'Conversation linked to existing lead' })
+                                return
+                              }
+                            }
                             await axios.post(`${API}/api/leads`, { name: 'WhatsApp Contact', phone: contact, source: 'WhatsApp' })
                             await load()
                             toast({ title: 'Lead Created' })
                           } catch(e) { toast({ title: 'Lead creation failed', description: e.message, variant: 'destructive' }) }
                         }}>Convert to Lead</button>
-                        <button className="ghost" onClick={()=>{ setLinkingContact(contact); setLinkLeadId('') }}>Link to Lead</button>
+                        <button className="ghost" onClick={async ()=>{
+                          try {
+                            setLinkingContact(contact); setLinkLeadId(''); setSearchQuery(contact); setSearching(true)
+                            const res = await axios.get(`${API}/api/leads/search`, { params: { q: contact } })
+                            setSearchResults(Array.isArray(res.data.items) ? res.data.items : [])
+                            setSearching(false)
+                          } catch { setSearching(false) }
+                        }}>Link to Lead</button>
+                        <button className="ghost" onClick={async ()=>{
+                          try {
+                            setLinkingContact(contact); setLinkLeadId(''); setSearchQuery(contact); setSearching(true)
+                            const res = await axios.get(`${API}/api/leads/search`, { params: { q: contact } })
+                            setSearchResults(Array.isArray(res.data.items) ? res.data.items : [])
+                            setSearching(false)
+                          } catch { setSearching(false) }
+                        }}>Check Duplicate</button>
                       </>
                     )}
                     <button className="ghost" onClick={()=>markRead(contact)}>Mark Read</button>
