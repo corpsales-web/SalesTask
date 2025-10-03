@@ -22,6 +22,7 @@ const EnhancedLeadEditModal = ({ isOpen, onClose, leadData, onLeadUpdated }) => 
     email: '',
     phone: '',
     company: '',
+    owner_mobile: '',
     location: '',
     city: '',
     state: '',
