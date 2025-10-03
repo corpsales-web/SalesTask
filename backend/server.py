@@ -539,7 +539,7 @@ async def whatsapp_send(body: WhatsAppSendRequest, db=Depends(get_db)):
         "provider": "360dialog",
     }
     await db["whatsapp_sent"].insert_one(stored)
-    await db["whatsapp_conversations"].update_one({"contact": to_norm}, {"$set": {"unread_count": 0}})
+    await db["whatsapp_conversations"].update_one({"contact": to_norm}, {"$set": {"unread_count": 0, "last_message_at": now_iso(), "last_message_text": body.text or "", "last_message_dir": "out"}})
 
     return {"success": True, "provider": "360dialog", "data": data}
 
