@@ -24,6 +24,16 @@ import TrainingModule from './TrainingModule';
 import WhatsAppInbox from './WhatsAppInbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Camera } from 'lucide-react';
+// helper component listens for custom event to open AI Add Lead
+const OpenAIAddLeadListener = ({ onOpen }) => {
+  useEffect(()=>{
+    const h = ()=> onOpen && onOpen()
+    window.addEventListener('open_ai_add_lead', h)
+    return ()=> window.removeEventListener('open_ai_add_lead', h)
+  }, [onOpen])
+  return null
+}
+
 
 const TabContent = ({ 
   dashboardStats,
