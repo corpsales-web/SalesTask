@@ -114,6 +114,9 @@ export default function WhatsAppInbox() {
                       {it.unread_count > 0 && <Badge color='yellow'>{it.unread_count} unread</Badge>}
                     </div>
                     <div className="text-xs text-gray-500">Owner: {it.owner_mobile || 'Unassigned'} • Last: {new Date(it.last_message_at).toLocaleString()}</div>
+                    {it.last_message_text && (
+                      <div className="text-sm text-gray-800 mt-1 truncate">{it.last_message_dir==='out' ? 'You: ' : ''}{it.last_message_text}</div>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     {it.lead_id && (
