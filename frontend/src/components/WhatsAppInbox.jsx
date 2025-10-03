@@ -70,15 +70,13 @@ export default function WhatsAppInbox() {
 
   const openLead = async (leadId) => {
     try {
-      // simple fetch via /api/leads list and find by id (until single endpoint exists)
-      const res = await axios.get(`${API}/api/leads?limit=200`)
-      const arr = Array.isArray(res.data.items) ? res.data.items : []
-      const lead = arr.find(l => l.id === leadId)
+      const res = await axios.get(`${API}/api/leads/${leadId}`)
+      const lead = res.data?.lead
       if (lead) {
         setLeadForModal(lead)
         setLeadModalOpen(true)
       } else {
-        toast({ title: 'Lead not found in current page', description: 'Try again after creating or use search', variant: 'destructive' })
+        toast({ title: 'Lead not found', variant: 'destructive' })
       }
     } catch (e) {
       toast({ title: 'Load lead failed', description: e.message, variant: 'destructive' })
