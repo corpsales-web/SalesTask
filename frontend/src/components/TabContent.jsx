@@ -39,18 +39,6 @@ const TabContent = ({
   dashboardStats,
   leads,
   tasks,
-  useEffect(()=>{
-    if (activeTab === 'leads') {
-      try {
-        const flag = localStorage.getItem('OPEN_AI_ADD_LEAD')
-        if (flag === '1') {
-          setShowOptimizedLeadModal(true)
-          localStorage.removeItem('OPEN_AI_ADD_LEAD')
-        }
-      } catch (e) {}
-    }
-  }, [activeTab])
-
   showLeadActionsPanel,
   selectedLead,
   leadActionType,
