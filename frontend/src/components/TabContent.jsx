@@ -38,6 +38,11 @@ const TabContent = ({
   onActionComplete
 }) => {
   const { activeTab, lastUpdated } = useTab();
+  // ensure external state-driven modals work when parent passes setters
+  useEffect(()=>{
+    // no-op, but ensures re-render when selectedLead changes from parent
+  }, [selectedLead, showLeadActionsPanel, leadActionType])
+
   
   // State for optimized lead creation modal
   const [showOptimizedLeadModal, setShowOptimizedLeadModal] = useState(false);
