@@ -147,18 +147,19 @@ const TabContent = ({
                 <h2 className="text-2xl font-bold text-gray-900">Lead Management</h2>
                 <p className="text-gray-600">Manage your leads and prospects</p>
               </div>
-              <button 
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
-                onClick={() => setShowOptimizedLeadModal(true)}
-              {/* Listen for global trigger to open AI Add Lead */}
-              {typeof window !== 'undefined' && (
-                <OpenAIAddLeadListener onOpen={() => setShowOptimizedLeadModal(true)} />
-              )}
-
-              >
-                <span className="mr-2">➕</span>
-                Add Lead (AI-Optimized)
-              </button>
+              <div className="relative">
+                <button 
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                  onClick={() => setShowOptimizedLeadModal(true)}
+                >
+                  <span className="mr-2">➕</span>
+                  Add Lead (AI-Optimized)
+                </button>
+                {/* Listen for global trigger to open AI Add Lead */}
+                {typeof window !== 'undefined' && (
+                  <OpenAIAddLeadListener onOpen={() => setShowOptimizedLeadModal(true)} />
+                )}
+              </div>
             </div>
             
             <div className="grid gap-4">
