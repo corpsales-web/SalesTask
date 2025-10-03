@@ -11,6 +11,16 @@ function Badge({ children, color }) {
   return <span className={`text-xs px-2 py-1 rounded ${cls}`}>{children}</span>
 }
 
+function normalizePhoneUI(raw) {
+  if (!raw) return ''
+  const digits = String(raw).replace(/\D/g, '')
+  if (!digits) return ''
+  if (digits.startsWith('0') && digits.length === 11) return '+91' + digits.slice(1)
+  if (digits.startsWith('91') && digits.length >= 12) return '+' + digits.slice(0,12)
+  if (digits.length === 10) return '+91' + digits
+  return raw.startsWith('+') ? raw : ('+' + digits)
+}
+
 export default function WhatsAppInbox() {
   const { toast } = useToast();
   const { setActiveTab } = useTab();
@@ -31,6 +41,7 @@ export default function WhatsAppInbox() {
   const [previewMap, setPreviewMap] = useState({})
   const [filter, setFilter] = useState('all')
   const [ownerFilter, setOwnerFilter] = useState('')
+  const [convertBusy, setConvertBusy] = useState('')
 
   const load = async () => {
     try {
@@ -39,6 +50,7 @@ export default function WhatsAppInbox() {
       setItems(res.data || []);
     } catch (e) {
       toast({ title: 'Failed to load WhatsApp conversations', description: e.message, variant: 'destructive' });
+      console.error('Conversations load error', e?.response?.status, e?.response?.data || e.message)
     } finally { setLoading(false); }
   };
 
@@ -50,6 +62,7 @@ export default function WhatsAppInbox() {
       setSessionOk(Boolean(res.data?.within_24h))
     } catch (e) {
       setSessionOk(false)
+      console.warn('Session status error', e?.response?.status, e?.response?.data)
     }
   }
 
@@ -58,7 +71,7 @@ export default function WhatsAppInbox() {
       await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/read`)
       await load()
     } catch(e) {
-      // ignore
+      console.warn('Mark read failed', e?.response?.status, e?.response?.data)
     }
   }
 
@@ -76,6 +89,7 @@ export default function WhatsAppInbox() {
       await markRead(to)
     } catch (e) {
       toast({ title: 'Reply failed', description: e.message, variant: 'destructive' });
+      console.error('Reply error', e?.response?.status, e?.response?.data || e.message)
     }
   }
 
@@ -91,6 +105,7 @@ export default function WhatsAppInbox() {
       }
     } catch (e) {
       toast({ title: 'Load lead failed', description: e.message, variant: 'destructive' })
+      console.error('Open lead error', e?.response?.status, e?.response?.data || e.message)
     }
   }
 
@@ -102,6 +117,42 @@ export default function WhatsAppInbox() {
   const ageChip = (sec) => {
     const m = Math.floor(sec/60)
     return <span className="text-xs text-gray-500 border rounded px-1 py-0.5">{m}m</span>
+  }
+
+  const handleConvert = async (rawContact) => {
+    const contact = normalizePhoneUI(rawContact)
+    try {
+      setConvertBusy(contact)
+      // duplicate check by phone
+      const sr = await axios.get(`${API}/api/leads/search`, { params: { q: contact } })
+      const results = Array.isArray(sr.data.items) ? sr.data.items : []
+      const last10 = contact.replace(/\D/g, '').slice(-10)
+      const exact = results.find(r => (String(r.phone||'').replace(/\D/g,'').slice(-10) === last10))
+      if (exact) {
+        if (window.confirm(`Lead with this phone already exists (ID: ${exact.id}). Link conversation to this lead instead?`)) {
+          await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: exact.id })
+          await load()
+          toast({ title: 'Conversation linked to existing lead' })
+          return
+        }
+      }
+      // create
+      const res = await axios.post(`${API}/api/leads`, { name: 'WhatsApp Contact', phone: contact, source: 'WhatsApp' })
+      const newLead = res.data?.lead
+      if (!newLead?.id) throw new Error('Invalid create lead response')
+      // link
+      await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: newLead.id })
+      await load()
+      toast({ title: 'Lead Created & Linked' })
+      try { localStorage.setItem('OPEN_AI_ADD_LEAD','1') } catch(e) {}
+      setActiveTab('leads')
+    } catch (e) {
+      console.error('Convert to Lead error', e?.response?.status, e?.response?.data || e.message)
+      const msg = e?.response?.data?.detail || e?.response?.data?.message || e.message
+      toast({ title: 'Convert failed', description: msg, variant: 'destructive' })
+    } finally {
+      setConvertBusy('')
+    }
   }
 
   return (
@@ -161,6 +212,7 @@ export default function WhatsAppInbox() {
             return true
           }).map((it)=>{
             const contact = it.contact
+            const converting = convertBusy === normalizePhoneUI(contact)
             return (
               <div key={contact} className="border rounded-lg p-3">
                 <div className="flex justify-between items-center">
@@ -183,43 +235,21 @@ export default function WhatsAppInbox() {
                     )}
                     {!it.lead_id && (
                       <>
+                        <button className="ghost" disabled={converting} onClick={()=>handleConvert(contact)}>{converting ? 'Converting...' : 'Convert to Lead'}</button>
                         <button className="ghost" onClick={async ()=>{
                           try {
-                            // Check duplicate by phone before creating
-                            const sr = await axios.get(`${API}/api/leads/search`, { params: { q: contact } })
-                            const results = Array.isArray(sr.data.items) ? sr.data.items : []
-                            const exact = results.find(r => (r.phone||'').includes(contact.slice(-10)))
-                            if (exact) {
-                              if (window.confirm(`Lead with this phone already exists (ID: ${exact.id}). Link conversation to this lead instead?`)) {
-                                await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: exact.id })
-                                await load()
-                                toast({ title: 'Conversation linked to existing lead' })
-                                return
-                              }
-                            }
-                            const res = await axios.post(`${API}/api/leads`, { name: 'WhatsApp Contact', phone: contact, source: 'WhatsApp' })
-                            const newLead = res.data?.lead
-                            await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: newLead.id })
-                            await load()
-                            toast({ title: 'Lead Created & Linked' })
-                            // Auto-open AI Add Lead modal after convert
-                            try { localStorage.setItem('OPEN_AI_ADD_LEAD','1') } catch(e) {}
-                            setActiveTab('leads')
-
-                          } catch(e) { toast({ title: 'Lead creation failed', description: e.message, variant: 'destructive' }) }
-                        }}>Convert to Lead</button>
-                        <button className="ghost" onClick={async ()=>{
-                          try {
-                            setLinkingContact(contact); setLinkLeadId(''); setSearchQuery(contact); setSearching(true)
-                            const res = await axios.get(`${API}/api/leads/search`, { params: { q: contact } })
+                            const norm = normalizePhoneUI(contact)
+                            setLinkingContact(norm); setLinkLeadId(''); setSearchQuery(norm); setSearching(true)
+                            const res = await axios.get(`${API}/api/leads/search`, { params: { q: norm } })
                             setSearchResults(Array.isArray(res.data.items) ? res.data.items : [])
                             setSearching(false)
                           } catch { setSearching(false) }
                         }}>Link to Lead</button>
                         <button className="ghost" onClick={async ()=>{
                           try {
-                            setLinkingContact(contact); setLinkLeadId(''); setSearchQuery(contact); setSearching(true)
-                            const res = await axios.get(`${API}/api/leads/search`, { params: { q: contact } })
+                            const norm = normalizePhoneUI(contact)
+                            setLinkingContact(norm); setLinkLeadId(''); setSearchQuery(norm); setSearching(true)
+                            const res = await axios.get(`${API}/api/leads/search`, { params: { q: norm } })
                             setSearchResults(Array.isArray(res.data.items) ? res.data.items : [])
                             setSearching(false)
                           } catch { setSearching(false) }
@@ -297,7 +327,7 @@ export default function WhatsAppInbox() {
               <div className="max-h-40 overflow-auto border rounded mt-1">
                 {searching && <div className="text-xs p-2">Searching...</div>}
                 {!searching && searchResults.length===0 && <div className="text-xs p-2 text-gray-500">No results</div>}
-                {searchResults.map(ld=>(
+                {searchResults.map(ld=> (
                   <div key={ld.id} className="p-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center" onClick={()=>{ setLinkLeadId(ld.id) }}>
                     <div>
                       <div className="text-sm font-medium">{ld.name}</div>
