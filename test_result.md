@@ -201,6 +201,32 @@
 ## metadata:
 ##   created_by: "main_agent"
 ##   version: "1.3"
+## backend:
+##   - task: "WhatsApp (360dialog) integration scaffolding: webhook verify/receive, send, inbox list (stub-ready)"
+##     implemented: true
+##     working: true
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Added /api/whatsapp/webhook (GET verify + POST receive with HMAC), /api/whatsapp/messages, /api/whatsapp/send. Real provider call uses headers D360-API-KEY to {WHATSAPP_BASE_URL}/messages; stub mode when key missing. Data stored into collections whatsapp_events/whatsapp_outbox/whatsapp_sent."
+
+## frontend:
+##   - task: "Add Inbox tab and wire WhatsAppInbox to backend"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/contexts/TabContext.js, /app/frontend/src/components/TabContent.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Added new tab 'Inbox' (💬) and render WhatsAppInbox component which calls /api/whatsapp/messages and /api/whatsapp/send."
+
 ## frontend:
 ##   - task: "CRM Frontend - Tasks tab stable (no invalid element), Task Delegation works, Marketing UI removed"
 ##     implemented: true
