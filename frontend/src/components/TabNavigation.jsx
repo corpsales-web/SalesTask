@@ -17,11 +17,8 @@ const TabNavigation = () => {
           {Object.values(TAB_CONFIG).map((tab) => (
             <button
               key={tab.id}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleTabClick(tab.id);
-              }}
+              type="button"
+              onClick={() => handleTabClick(tab.id)}
               disabled={loading}
               className={`
                 px-2 py-3 sm:px-4 sm:py-3 flex items-center justify-center transition-all duration-200 
