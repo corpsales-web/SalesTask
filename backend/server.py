@@ -405,6 +405,8 @@ async def whatsapp_webhook_receive(request: Request, db=Depends(get_db)):
                             "lead_id": lead_id,
                             "owner_mobile": owner_mobile,
                             "last_message_at": ts_dt.isoformat(),
+                            "last_message_text": text or f"[{mtype}]",
+                            "last_message_dir": "in",
                         },
                         "$inc": {"unread_count": 1}
                     }
