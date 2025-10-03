@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useToast } from '../hooks/use-toast';
 import EnhancedLeadEditModal from './EnhancedLeadEditModal';
+import { useTab } from '../contexts/TabContext';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
