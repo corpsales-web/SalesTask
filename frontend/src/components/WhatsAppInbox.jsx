@@ -203,11 +203,8 @@ export default function WhatsAppInbox() {
                             await load()
                             toast({ title: 'Lead Created & Linked' })
                             // Auto-open AI Add Lead modal after convert
+                            try { localStorage.setItem('OPEN_AI_ADD_LEAD','1') } catch(e) {}
                             setActiveTab('leads')
-                            setTimeout(()=>{
-                              const evt = new Event('open_ai_add_lead')
-                              window.dispatchEvent(evt)
-                            }, 300)
 
                           } catch(e) { toast({ title: 'Lead creation failed', description: e.message, variant: 'destructive' }) }
                         }}>Convert to Lead</button>
