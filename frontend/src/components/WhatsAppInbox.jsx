@@ -195,9 +195,11 @@ export default function WhatsAppInbox() {
                                 return
                               }
                             }
-                            await axios.post(`${API}/api/leads`, { name: 'WhatsApp Contact', phone: contact, source: 'WhatsApp' })
+                            const res = await axios.post(`${API}/api/leads`, { name: 'WhatsApp Contact', phone: contact, source: 'WhatsApp' })
+                            const newLead = res.data?.lead
+                            await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: newLead.id })
                             await load()
-                            toast({ title: 'Lead Created' })
+                            toast({ title: 'Lead Created & Linked' })
                           } catch(e) { toast({ title: 'Lead creation failed', description: e.message, variant: 'destructive' }) }
                         }}>Convert to Lead</button>
                         <button className="ghost" onClick={async ()=>{
