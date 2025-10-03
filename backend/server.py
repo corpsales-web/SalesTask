@@ -203,6 +203,11 @@ async def update_lead(lead_id: str, body: LeadUpdate, db=Depends(get_db)):
     updates = body.dict(exclude_none=True)
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
+    # Normalize if present
+    if updates.get("phone"):
+        updates["phone"] = normalize_phone_india(updates.get("phone"))
+    if updates.get("owner_mobile"):
+        updates["owner_mobile"] = normalize_phone_india(updates.get("owner_mobile"))
     updates["updated_at"] = now_iso()
     res = await db["leads"].update_one({"id": lead_id}, {"$set": updates})
     if res.matched_count == 0:
