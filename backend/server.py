@@ -163,6 +163,14 @@ class TaskUpdate(BaseModel):
 @app.post("/api/leads")
 async def create_lead(body: LeadCreate, db=Depends(get_db)):
     doc = body.dict(exclude_none=True)
+    # Normalize phones
+    if doc.get("phone"):
+        doc["phone"] = normalize_phone_india(doc.get("phone"))
+    # Owner mobile default + normalize
+    if doc.get("owner_mobile"):
+        doc["owner_mobile"] = normalize_phone_india(doc.get("owner_mobile"))
+    else:
+        doc["owner_mobile"] = DEFAULT_OWNER_MOBILE
     doc["id"] = str(uuid.uuid4())
     doc.setdefault("status", "New")
     doc["created_at"] = now_iso()
