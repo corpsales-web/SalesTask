@@ -101,6 +101,9 @@ export default function WhatsAppInbox() {
       </div>
       <div className="panel-body">
         <div className="space-y-2">
+          {(!items || items.length===0) && (
+            <div className="text-sm text-gray-600">No conversations yet. Post a sample inbound to /api/whatsapp/webhook or wait for live messages.</div>
+          )}
           {(items||[]).map((it)=>{
             const contact = it.contact
             return (
