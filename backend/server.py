@@ -127,6 +127,21 @@ META_VERIFY_TOKEN = os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
 META_API_VERSION = os.environ.get("WHATSAPP_API_VERSION", "v20.0")
 META_BASE_URL = f"https://graph.facebook.com/{META_API_VERSION}"
 
+def _hmac_valid(body: bytes, signature_header: Optional[str]) -> bool:
+    # Meta: X-Hub-Signature-256 = sha256=...
+    if not META_APP_SECRET:
+        return True
+    if not signature_header:
+        return False
+    try:
+        provided = signature_header
+        if provided.lower().startswith("sha256="):
+            provided = provided.split("=", 1)[1]
+        digest = hmac.new(META_APP_SECRET.encode("utf-8"), body, hashlib.sha256).hexdigest()
+        return hmac.compare_digest(digest, provided)
+    except Exception:
+        return False
+
 class WhatsAppMediaRequest(BaseModel):
     to: str
     media_url: str
