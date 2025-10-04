@@ -86,6 +86,17 @@ async def find_lead_by_phone(db: AsyncIOMotorDatabase, phone_norm: str) -> Optio
             return ld
     return None
 
+# Build absolute URL behind ingress
+from urllib.parse import urljoin
+
+def build_absolute_url(request: Request, path: str) -> str:
+    proto = request.headers.get("x-forwarded-proto") or "https"
+    host = request.headers.get("x-forwarded-host") or request.client.host
+    base = f"{proto}://{host}"
+    if not path.startswith("/"):
+        path = "/" + path
+    return base.rstrip("/") + path
+
 # Health
 @app.get("/api/health")
 async def health():
