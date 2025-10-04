@@ -285,10 +285,7 @@ async def execute_lead_action(lead_id: str, body: LeadActionRequest, request: Re
             if not to:
                 raise HTTPException(status_code=400, detail="Lead has no phone number")
             # simple text send
-            async def send_text():
-                from fastapi import Body  # local import to avoid circular hinting
-                return await whatsapp_send({"to": to, "text": body.message or ""}, db)  # type: ignore
-            res = await send_text()
+            res = await wa_send_text(to, body.message or "", db)
             await db["lead_actions"].update_one({"id": action_id}, {"$set": {"status": "completed", "provider": res}})
             return {"success": True, "id": action_id}
 
