@@ -204,6 +204,79 @@ async def update_lead(lead_id: str, body: LeadUpdate, db=Depends(get_db)):
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="Lead not found")
     doc = await db["leads"].find_one({"id": lead_id}, {"_id": 0})
+# ======== Uploads (Chunked) ========
+class UploadInit(BaseModel):
+    filename: str
+    category: Optional[str] = "general"
+    tags: Optional[str] = None
+
+@app.post("/api/uploads/catalogue/init")
+async def upload_init(body: UploadInit):
+    upload_id = str(uuid.uuid4())
+    tmp_dir = os.path.join(UPLOAD_ROOT, "tmp", upload_id)
+    os.makedirs(tmp_dir, exist_ok=True)
+    return {"success": True, "upload_id": upload_id, "filename": body.filename, "category": body.category or "general", "tags": body.tags}
+
+@app.post("/api/uploads/catalogue/chunk")
+async def upload_chunk(upload_id: str = Form(...), index: int = Form(...), total: int = Form(...), chunk: UploadFile = File(...)):
+    tmp_dir = os.path.join(UPLOAD_ROOT, "tmp", upload_id)
+    if not os.path.isdir(tmp_dir):
+        raise HTTPException(status_code=400, detail="Invalid upload_id")
+    part_path = os.path.join(tmp_dir, f"part_{index:06d}")
+    with open(part_path, "wb") as out:
+        shutil.copyfileobj(chunk.file, out)
+    return {"success": True, "index": index, "received": True}
+
+class UploadComplete(BaseModel):
+    upload_id: str
+    filename: str
+    category: Optional[str] = "general"
+    tags: Optional[str] = None
+
+@app.post("/api/uploads/catalogue/complete")
+async def upload_complete(request: Request, body: UploadComplete, db=Depends(get_db)):
+    tmp_dir = os.path.join(UPLOAD_ROOT, "tmp", body.upload_id)
+    if not os.path.isdir(tmp_dir):
+        raise HTTPException(status_code=400, detail="Invalid upload_id")
+    # Merge
+    final_name = f"{uuid.uuid4()}_{re.sub(r'[^a-zA-Z0-9._-]', '_', body.filename or 'file')}"
+    final_path = os.path.join(UPLOAD_ROOT, final_name)
+    parts = sorted([p for p in os.listdir(tmp_dir) if p.startswith("part_")])
+    with open(final_path, "wb") as out:
+        for p in parts:
+            with open(os.path.join(tmp_dir, p), "rb") as src:
+                shutil.copyfileobj(src, out)
+    # Cleanup tmp
+    shutil.rmtree(tmp_dir, ignore_errors=True)
+    rel_path = f"/api/files/{final_name}"
+    abs_url = build_absolute_url(request, rel_path)
+    doc = {
+        "id": str(uuid.uuid4()),
+        "original_name": body.filename,
+        "stored_as": final_name,
+        "url": abs_url,
+        "path": rel_path,
+        "category": body.category or "general",
+        "tags": body.tags,
+        "uploaded_at": now_iso(),
+    }
+    await db["catalogues"].insert_one(doc)
+    return {"success": True, "file": doc}
+
+@app.get("/api/uploads/catalogue/list")
+async def uploads_list(limit: int = Query(50, ge=1, le=200), category: Optional[str] = None, db=Depends(get_db)):
+    q: Dict[str, Any] = {}
+    if category:
+        q["category"] = category
+    cursor = db["catalogues"].find(q, {"_id": 0}).sort("uploaded_at", -1).limit(limit)
+    items = await cursor.to_list(length=limit)
+    return {"catalogues": items}
+
+@app.get("/api/uploads/catalogue/categories")
+async def uploads_categories(db=Depends(get_db)):
+    cats = await db["catalogues"].distinct("category")
+    return {"categories": cats}
+
     return {"success": True, "lead": doc}
 
 @app.delete("/api/leads/{lead_id}")
