@@ -135,6 +135,43 @@ async def whatsapp_send_media(body: WhatsAppMediaRequest, db=Depends(get_db)):
     to_norm = normalize_phone_india(body.to)
     if not to_norm:
         raise HTTPException(status_code=400, detail="Invalid recipient number")
+# Helper to send WhatsApp text via 360dialog or stub
+async def wa_send_text(to_norm: str, text: str, db: AsyncIOMotorDatabase) -> Dict[str, Any]:
+    if not D360_API_KEY:
+        rec = {
+            "id": str(uuid.uuid4()),
+            "queued_at": now_iso(),
+            "to": to_norm,
+            "text": text or "",
+            "mode": "stub",
+            "provider": "360dialog",
+        }
+        await db["whatsapp_outbox"].insert_one(rec)
+        await db["whatsapp_conversations"].update_one({"contact": to_norm}, {"$set": {"unread_count": 0, "last_message_at": now_iso(), "last_message_text": text or "", "last_message_dir": "out"}}, upsert=True)
+        return {"success": True, "mode": "stub", "id": rec["id"]}
+    headers = {"D360-API-KEY": D360_API_KEY, "Content-Type": "application/json"}
+    payload = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": to_norm,
+        "type": "text",
+        "text": {"body": text or ""},
+    }
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(f"{D360_BASE_URL}/messages", headers=headers, json=payload)
+        if resp.status_code >= 400:
+            raise HTTPException(status_code=resp.status_code, detail=f"Provider error: {resp.text}")
+        data = resp.json()
+    await db["whatsapp_sent"].insert_one({
+        "id": str(uuid.uuid4()),
+        "sent_at": now_iso(),
+        "to": to_norm,
+        "payload": payload,
+        "provider_response": data,
+    })
+    await db["whatsapp_conversations"].update_one({"contact": to_norm}, {"$set": {"unread_count": 0, "last_message_at": now_iso(), "last_message_text": text or "", "last_message_dir": "out"}})
+    return {"success": True, "provider": "360dialog", "data": data}
+
 
     if not D360_API_KEY:
         await db["whatsapp_outbox"].insert_one({
