@@ -117,7 +117,7 @@ async def upload_catalogue(request: Request, file: UploadFile = File(...), categ
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 # ----------------------
-# WhatsApp Media (360dialog) - stub/real
+# WhatsApp Media (Meta Cloud API) - stub/real
 # ----------------------
 D360_API_KEY = os.environ.get("WHATSAPP_360DIALOG_API_KEY", "")
 D360_BASE_URL = os.environ.get("WHATSAPP_BASE_URL", "https://waba-v2.360dialog.io")
