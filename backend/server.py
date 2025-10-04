@@ -119,10 +119,13 @@ async def upload_catalogue(request: Request, file: UploadFile = File(...), categ
 # ----------------------
 # WhatsApp Media (Meta Cloud API) - stub/real
 # ----------------------
-D360_API_KEY = os.environ.get("WHATSAPP_360DIALOG_API_KEY", "")
-D360_BASE_URL = os.environ.get("WHATSAPP_BASE_URL", "https://waba-v2.360dialog.io")
-WA_VERIFY_TOKEN = os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
-WA_WEBHOOK_SECRET = os.environ.get("WHATSAPP_WEBHOOK_SECRET", "")
+META_ACCESS_TOKEN = os.environ.get("WHATSAPP_ACCESS_TOKEN", "")
+META_PHONE_NUMBER_ID = os.environ.get("WHATSAPP_PHONE_NUMBER_ID", "")
+META_BUSINESS_ACCOUNT_ID = os.environ.get("WHATSAPP_BUSINESS_ACCOUNT_ID", "")
+META_APP_SECRET = os.environ.get("WHATSAPP_APP_SECRET", "")
+META_VERIFY_TOKEN = os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
+META_API_VERSION = os.environ.get("WHATSAPP_API_VERSION", "v20.0")
+META_BASE_URL = f"https://graph.facebook.com/{META_API_VERSION}"
 
 class WhatsAppMediaRequest(BaseModel):
     to: str
