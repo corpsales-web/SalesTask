@@ -403,7 +403,7 @@ def _hmac_valid(body: bytes, signature_header: Optional[str]) -> bool:
 class WhatsAppMediaRequest(BaseModel):
     to: str
     media_url: str
-    media_type: str = Field(..., regex="^(image|document)$")
+    media_type: str = Field(..., pattern="^(image|document)$")
     caption: Optional[str] = None
 
 @app.get("/api/whatsapp/webhook")
