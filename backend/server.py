@@ -113,6 +113,8 @@ class LeadCreate(BaseModel):
     owner_mobile: Optional[str] = None
 
 class LeadUpdate(BaseModel):
+    pass
+
 # ======== Indexes on startup ========
 @app.on_event("startup")
 async def ensure_indexes():
