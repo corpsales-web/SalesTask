@@ -144,7 +144,11 @@ export default function WhatsAppInbox() {
       await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: newLead.id })
       await load()
       toast({ title: 'Lead Created & Linked' })
-      try { localStorage.setItem('OPEN_AI_ADD_LEAD','1'); window.location.hash = '#open_ai_add_lead' } catch(e) {}
+      try {
+        localStorage.setItem('OPEN_AI_ADD_LEAD','1');
+        window.location.hash = '#open_ai_add_lead';
+        window.dispatchEvent(new Event('open_ai_add_lead'));
+      } catch(e) {}
       setActiveTab('leads')
     } catch (e) {
       console.error('Convert to Lead error', e?.response?.status, e?.response?.data || e.message)
