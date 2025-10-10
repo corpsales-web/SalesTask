@@ -148,11 +148,18 @@ export default function WhatsAppInbox() {
         window.location.hash = '#open_ai_add_lead';
         window.dispatchEvent(new Event('open_ai_add_lead'));
       } catch(e) { console.warn('AI flag set failed', e) }
-      setActiveTab('leads')
-      setTimeout(()=> setActiveTab('leads'), 50)
-      // background refresh (non-blocking)
-      load().catch(()=>{})
+      // Force deterministic navigation and modal open via hash + reload (Option A)
+      try {
+        setActiveTab('leads')
+      } catch {}
+      try {
+        const base = window.location.pathname || '/'
+        window.location.replace(base + '#open_ai_add_lead')
+        setTimeout(()=> { try { window.location.reload() } catch {} }, 50)
+      } catch {}
+      // No further awaits after scheduling reload
       toast({ title: 'Lead Created & Linked' })
+      return
     } catch (e) {
       console.error('Convert to Lead error', e?.response?.status, e?.response?.data || e.message)
       const msg = e?.response?.data?.detail || e?.response?.data?.message || e.message
