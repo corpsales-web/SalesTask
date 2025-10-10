@@ -6,6 +6,21 @@ const TabNavigation = () => {
   
   const handleTabClick = (tabId) => {
     console.log(`🖱️ TAB CLICKED: ${tabId}`);
+  // Hash-based deep-link handling for AI Add Lead trigger
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handler = () => {
+      const hash = window.location.hash
+      if (hash === '#open_ai_add_lead') {
+        setActiveTab('leads')
+        setTimeout(() => window.dispatchEvent(new Event('open_ai_add_lead')), 100)
+      }
+    }
+    handler()
+    window.addEventListener('hashchange', handler)
+    return () => window.removeEventListener('hashchange', handler)
+  }, [setActiveTab])
+
     setActiveTab(tabId);
   };
   
