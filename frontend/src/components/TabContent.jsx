@@ -69,9 +69,13 @@ const TabContent = ({
     if (activeTab === 'leads') {
       try {
         const flag = localStorage.getItem('OPEN_AI_ADD_LEAD')
-        if (flag === '1') {
+        const hash = typeof window !== 'undefined' ? window.location.hash : ''
+        if (flag === '1' || hash === '#open_ai_add_lead') {
           setShowOptimizedLeadModal(true)
           localStorage.removeItem('OPEN_AI_ADD_LEAD')
+          if (hash === '#open_ai_add_lead') {
+            try { window.history.replaceState(null, '', window.location.pathname) } catch {}
+          }
         }
       } catch (e) {}
     }
