@@ -261,8 +261,21 @@
 ##     -agent: "testing"
 ##     -message: "FRONTEND UI TESTING COMPLETED SUCCESSFULLY: Executed comprehensive automated test suite covering all 4 requested scenarios. ✅ All tests PASSED: 1) Initial load verification (no Marketing buttons/modals), 2) Tasks tab functionality (Task Delegation working, no React errors, task creation successful), 3) Ops smoke test (Tasks Round-Trip with all expected logs), 4) AI tab Marketing removal (Digital Marketing Manager heading not present). Minor 404 errors in AI tab for workflow/routing endpoints are expected as those features are not yet implemented. CRM frontend is fully functional and ready for production use."
 
-##   test_sequence: 6
+##   test_sequence: 7
 ##   run_ui: true
+
+## frontend:
+##   - task: "AI Add Lead Modal Auto-Open After Convert to Lead"
+##     implemented: true
+##     working: false
+##     file: "/app/frontend/src/components/WhatsAppInbox.jsx, /app/frontend/src/components/TabContent.jsx"
+##     stuck_count: 1
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: false
+##         -agent: "testing"
+##         -comment: "CRITICAL ISSUE CONFIRMED: AI Add Lead modal does NOT auto-open after Convert to Lead action. Testing shows: ✅ Convert to Lead works (creates lead, updates conversation to show 'View Lead'), ❌ App does NOT switch to Leads tab automatically, ❌ localStorage flag 'OPEN_AI_ADD_LEAD' is not being set (shows None), ❌ AI modal does not auto-open. Root cause: handleConvert function in WhatsAppInbox.jsx is not properly executing the localStorage.setItem and setActiveTab calls after successful lead creation and linking."
 
 ## frontend:
 ##   - task: "Remove Marketing from CRM UI and fix Tasks invalid element error"
