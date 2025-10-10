@@ -263,7 +263,7 @@
 ##     -agent: "testing"
 ##     -message: "COMPREHENSIVE AI MODAL AUTO-OPEN TEST COMPLETED: Fixed critical React hook error in TabNavigation.jsx that was causing red screen crashes. Executed full test suite focusing on Convert to Lead → AI modal auto-open reliability: ❌ CRITICAL FAILURES FOUND: 1) Convert to Lead trigger path completely broken - tab does not switch to Leads, localStorage flag not set, hash not applied, AI modal does not open. 2) Fallback handler also broken - manual hash setting does not trigger tab switch or modal opening. 3) Both primary and fallback mechanisms are non-functional. ✅ NO REGRESSIONS: All other Inbox flows working (duplicate check, link to lead, filters), Catalogue upload/share functionality operational. URGENT ACTION REQUIRED: The AI Add Lead modal auto-open feature needs complete debugging and reimplementation as both trigger mechanisms are failing."
 
-##   test_sequence: 7
+##   test_sequence: 8
 ##   run_ui: true
 
 ## frontend:
@@ -271,7 +271,7 @@
 ##     implemented: true
 ##     working: false
 ##     file: "/app/frontend/src/components/WhatsAppInbox.jsx, /app/frontend/src/components/TabContent.jsx, /app/frontend/src/components/TabNavigation.jsx"
-##     stuck_count: 2
+##     stuck_count: 3
 ##     priority: "high"
 ##     needs_retesting: false
 ##     status_history:
@@ -284,6 +284,9 @@
 ##         -working: false
 ##         -agent: "testing"
 ##         -comment: "COMPREHENSIVE UI TEST SUITE COMPLETED: Fixed critical React hook error in TabNavigation.jsx (useEffect was inside handleTabClick function causing 'Invalid hook call' error and red screen). After fix, executed full test suite: ✅ TEST SET A (Trigger Path): Convert to Lead button found and clicked, but ❌ Tab does NOT switch to Leads (remains on Inbox), ❌ localStorage OPEN_AI_ADD_LEAD remains None, ❌ Hash remains empty, ❌ AI modal does NOT open. ✅ TEST SET B (Fallback Handler): Hash manually set to #open_ai_add_lead, but ❌ Fallback tab switch FAILED, ❌ AI modal did NOT open via fallback. ✅ TEST SET C (No Regressions): All Inbox flows working (Check Duplicate modal ✅, Link to Lead modal ✅, filters ✅), Catalogue functionality working (Upload buttons found ✅). CRITICAL FINDING: Both primary trigger path AND fallback handler are completely broken - the AI modal auto-open feature is non-functional. The handleConvert function trigger logic and TabNavigation hashchange listener are not working as intended."
+##         -working: false
+##         -agent: "testing"
+##         -comment: "FINAL AI MODAL DETERMINISTIC TEST COMPLETED (Option A): Executed comprehensive test suite as requested in review with all 8 steps. ✅ PARTIAL SUCCESS: Steps 1-4 PASSED (Inbox navigation, Add Sample/Refresh, Convert to Lead click, lead creation confirmed with 'View Lead' button), ❌ CRITICAL FAILURES: Step 5 - Hash does NOT contain '#open_ai_add_lead' (found empty), Step 6 - App does NOT switch to Leads tab (remains on Inbox, debug shows 'active: inbox'), Step 7 - AI Add Lead modal does NOT auto-open, Step 8 - localStorage 'OPEN_AI_ADD_LEAD' is None (not set). ROOT CAUSE CONFIRMED: The handleConvert function in WhatsAppInbox.jsx lines 146-159 contains the correct trigger code but the execution flow is broken. Despite having localStorage.setItem('OPEN_AI_ADD_LEAD','1'), window.location.hash = '#open_ai_add_lead', window.location.replace(), and setActiveTab('leads') calls, NONE of these execute after successful lead creation. The conversion mechanism works perfectly (creates lead, links conversation), but the entire auto-tab-switch and AI modal trigger system is completely non-functional. This is a CRITICAL ISSUE requiring immediate main agent attention to debug the handleConvert execution flow and fix the deterministic reload mechanism (Option A)."
 
 ## frontend:
 ##   - task: "Remove Marketing from CRM UI and fix Tasks invalid element error"
