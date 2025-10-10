@@ -4,8 +4,6 @@ import { useTab, TAB_CONFIG } from '../contexts/TabContext';
 const TabNavigation = () => {
   const { activeTab, setActiveTab, loading } = useTab();
   
-  const handleTabClick = (tabId) => {
-    console.log(`🖱️ TAB CLICKED: ${tabId}`);
   // Hash-based deep-link handling for AI Add Lead trigger
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -21,6 +19,8 @@ const TabNavigation = () => {
     return () => window.removeEventListener('hashchange', handler)
   }, [setActiveTab])
 
+  const handleTabClick = (tabId) => {
+    console.log(`🖱️ TAB CLICKED: ${tabId}`);
     setActiveTab(tabId);
   };
   
