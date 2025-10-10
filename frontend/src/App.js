@@ -68,6 +68,19 @@ const App = () => {
 
   useEffect(() => { initializeApp(); }, []);
 
+  // Global refresh for leads when other components (e.g., Inbox) create/link leads
+  useEffect(() => {
+    const handler = () => { try { fetchLeads(); } catch(e) {} }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('refresh_leads', handler)
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('refresh_leads', handler)
+      }
+    }
+  }, [])
+
   const initializeApp = async () => {
     setLoading(true);
     try {
