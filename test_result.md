@@ -276,6 +276,9 @@
 ##         -working: false
 ##         -agent: "testing"
 ##         -comment: "CRITICAL ISSUE CONFIRMED: AI Add Lead modal does NOT auto-open after Convert to Lead action. Testing shows: ✅ Convert to Lead works (creates lead, updates conversation to show 'View Lead'), ❌ App does NOT switch to Leads tab automatically, ❌ localStorage flag 'OPEN_AI_ADD_LEAD' is not being set (shows None), ❌ AI modal does not auto-open. Root cause: handleConvert function in WhatsAppInbox.jsx is not properly executing the localStorage.setItem and setActiveTab calls after successful lead creation and linking."
+##         -working: false
+##         -agent: "testing"
+##         -comment: "RE-TESTED AI MODAL AUTO-OPEN FLOW: Comprehensive test executed on https://aavana-crm-dmm.preview.emergentagent.com with updated trigger logic. ✅ Steps 1-3: Inbox navigation, Add Sample, Refresh - PASS, ✅ Step 4: Convert to Lead button click - PASS, ✅ Step 5: Conversation shows 'View Lead' after conversion - PASS (conversion works correctly), ❌ Step 6: App does NOT switch to Leads tab automatically - FAIL (remains on Inbox tab), ❌ Step 7: localStorage flag 'OPEN_AI_ADD_LEAD' is None (not set), window.location.hash is empty, ❌ Step 8: AI Add Lead modal does NOT appear - FAIL. CONFIRMED ISSUE: The handleConvert function in WhatsAppInbox.jsx lines 147-152 contains the localStorage.setItem('OPEN_AI_ADD_LEAD','1'), window.location.hash, and setActiveTab('leads') calls, but they are not executing properly after successful lead creation. The conversion itself works (creates lead, links conversation), but the auto-tab-switch and AI modal trigger mechanism is broken."
 
 ## frontend:
 ##   - task: "Remove Marketing from CRM UI and fix Tasks invalid element error"
