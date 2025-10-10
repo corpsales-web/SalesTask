@@ -158,6 +158,7 @@ export default function WhatsAppInbox() {
         setTimeout(()=> { try { window.location.reload() } catch {} }, 50)
       } catch {}
       // No further awaits after scheduling reload
+      try { window.dispatchEvent(new Event('refresh_leads')) } catch {}
       toast({ title: 'Lead Created & Linked' })
       return
     } catch (e) {
