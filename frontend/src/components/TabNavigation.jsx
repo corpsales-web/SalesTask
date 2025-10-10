@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTab, TAB_CONFIG } from '../contexts/TabContext';
 
 const TabNavigation = () => {
