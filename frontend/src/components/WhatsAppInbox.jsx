@@ -142,14 +142,17 @@ export default function WhatsAppInbox() {
       if (!newLead?.id) throw new Error('Invalid create lead response')
       // link
       await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: newLead.id })
-      await load()
-      toast({ title: 'Lead Created & Linked' })
+      // Immediately trigger AI modal + tab switch BEFORE any further awaits
       try {
         localStorage.setItem('OPEN_AI_ADD_LEAD','1');
         window.location.hash = '#open_ai_add_lead';
         window.dispatchEvent(new Event('open_ai_add_lead'));
-      } catch(e) {}
+      } catch(e) { console.warn('AI flag set failed', e) }
       setActiveTab('leads')
+      setTimeout(()=> setActiveTab('leads'), 50)
+      // background refresh (non-blocking)
+      load().catch(()=>{})
+      toast({ title: 'Lead Created & Linked' })
     } catch (e) {
       console.error('Convert to Lead error', e?.response?.status, e?.response?.data || e.message)
       const msg = e?.response?.data?.detail || e?.response?.data?.message || e.message
