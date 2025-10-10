@@ -113,6 +113,21 @@ class LeadCreate(BaseModel):
     owner_mobile: Optional[str] = None
 
 class LeadUpdate(BaseModel):
+# ======== Indexes on startup ========
+@app.on_event("startup")
+async def ensure_indexes():
+    try:
+        db = await get_db()
+        await db["leads"].create_index("phone")
+        await db["leads"].create_index("owner_mobile")
+        await db["whatsapp_conversations"].create_index("contact", unique=True)
+        await db["whatsapp_conversations"].create_index("lead_id")
+        await db["whatsapp_messages"].create_index("from")
+        await db["whatsapp_messages"].create_index("lead_id")
+    except Exception:
+        # Index creation failure should not crash app
+        pass
+
     name: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
