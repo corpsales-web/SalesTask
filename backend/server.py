@@ -180,7 +180,7 @@ async def list_leads(status: Optional[str] = None, source: Optional[str] = None,
     if source:
         q["source"] = source
     skip = (page - 1) * limit
-    cursor = db["leads"].find(q, {"_id": 0}).skip(skip).limit(limit)
+    cursor = db["leads"].find(q, {"_id": 0}).sort("updated_at", -1).skip(skip).limit(limit)
     items = await cursor.to_list(length=limit)
     total = await db["leads"].count_documents(q)
     return {"items": items, "page": page, "limit": limit, "total": total}
