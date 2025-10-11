@@ -137,7 +137,7 @@ export default function WhatsAppInbox() {
         }
       }
       // create
-      const res = await axios.post(`${API}/api/leads`, { name: 'WhatsApp Contact', phone: contact, source: 'WhatsApp' })
+      const res = await axios.post(`${API}/api/leads`, { name: `WhatsApp Contact ${new Date().toLocaleTimeString()}`, phone: contact, source: 'WhatsApp' })
       const newLead = res.data?.lead
       if (!newLead?.id) throw new Error('Invalid create lead response')
       // link
