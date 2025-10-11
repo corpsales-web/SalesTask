@@ -103,7 +103,7 @@ const App = () => {
 
   const fetchLeads = async () => {
     try {
-      const response = await axios.get(`${API}/api/leads`);
+      const response = await axios.get(`${API}/api/leads`, { params: { page: 1, limit: 50 } });
       const data = response.data;
       if (Array.isArray(data.items)) setLeads(data.items); else if (Array.isArray(data)) setLeads(data); else setLeads([]);
     } catch (error) {
