@@ -37,6 +37,7 @@ import TabNavigation from './components/TabNavigation';
 import TabContent from './components/TabContent';
 import OpsSmoke from './components/OpsSmoke';
 import HeaderInboxButton from './components/HeaderInboxButton';
+import GlobalLeadConversionListener from './components/GlobalLeadConversionListener';
 
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
@@ -182,6 +183,7 @@ const App = () => {
         </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <GlobalLeadConversionListener />
           <div className="space-y-6">
             <TabNavigation />
             {loading ? (
