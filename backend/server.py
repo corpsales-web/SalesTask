@@ -280,13 +280,7 @@ async def dashboard_stats(db=Depends(get_db)):
     won_leads = await db["leads"].count_documents({"status": "Won"})
     conversion_rate = int(round((won_leads / total_leads) * 100)) if total_leads else 0
     total_revenue = 0
-    return {
-        "totalLeads": total_leads,
-        "activeLeads": active_leads,
-        "conversion_rate": conversion_rate,
-        "totalRevenue": total_revenue,
-        "pendingTasks": pending_tasks,
-    }
+    return {"totalLeads": total_leads, "activeLeads": active_leads, "conversion_rate": conversion_rate, "totalRevenue": total_revenue, "pendingTasks": pending_tasks}
 
 # ======== Uploads ========
 class UploadInit(BaseModel):
@@ -350,7 +344,24 @@ async def uploads_categories(db=Depends(get_db)):
     cats = await db["catalogues"].distinct("category")
     return {"categories": cats}
 
-# ======== WhatsApp (Meta Cloud API - STUB until keys) ========
+# State and cancel for resumable uploads
+@app.get("/api/uploads/catalogue/state")
+async def uploads_state(upload_id: str = Query(...)):
+    tmp_dir = os.path.join(UPLOAD_ROOT, "tmp", upload_id)
+    if not os.path.isdir(tmp_dir):
+        return {"exists": False, "parts": 0}
+    parts = [p for p in os.listdir(tmp_dir) if p.startswith("part_")]
+    return {"exists": True, "parts": len(parts)}
+
+@app.post("/api/uploads/catalogue/cancel")
+async def uploads_cancel(upload_id: str = Form(...)):
+    tmp_dir = os.path.join(UPLOAD_ROOT, "tmp", upload_id)
+    if os.path.isdir(tmp_dir):
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        return {"success": True}
+    return {"success": False, "message": "Not found"}
+
+# ======== WhatsApp (Meta Cloud API - STUB) ========
 META_ACCESS_TOKEN = os.environ.get("WHATSAPP_ACCESS_TOKEN", "")
 META_PHONE_NUMBER_ID = os.environ.get("WHATSAPP_PHONE_NUMBER_ID", "")
 META_BUSINESS_ACCOUNT_ID = os.environ.get("WHATSAPP_BUSINESS_ACCOUNT_ID", "")
@@ -426,21 +437,13 @@ async def whatsapp_webhook_receive(request: Request, db=Depends(get_db)):
                     mtype = m.get("type", "text")
                     text = (m.get("text") or {}).get("body") if mtype == "text" else None
 
-                    linked_lead = await find_lead_by_phone(db, from_norm) if from_norm else None
-                    lead_id = linked_lead.get("id") if linked_lead else None
+                    # link lead if possible
+                    lead = await db["leads"].find_one({"phone": from_norm}, {"_id": 0}) if from_norm else None
+                    lead_id = lead.get("id") if lead else None
 
-                    await db["whatsapp_messages"].insert_one({
-                        "id": str(uuid.uuid4()),
-                        "direction": "inbound",
-                        "from": from_norm,
-                        "to": meta.get("display_phone_number"),
-                        "type": mtype,
-                        "text": text,
-                        "timestamp": ts_dt.isoformat(),
-                        "lead_id": lead_id,
-                    })
+                    await db["whatsapp_messages"].insert_one({"id": str(uuid.uuid4()), "direction": "inbound", "from": from_norm, "to": meta.get("display_phone_number"), "type": mtype, "text": text, "timestamp": ts_dt.isoformat(), "lead_id": lead_id})
 
-                    owner_mobile = normalize_phone_india(linked_lead.get("owner_mobile")) if linked_lead and linked_lead.get("owner_mobile") else DEFAULT_OWNER_MOBILE
+                    owner_mobile = (lead.get("owner_mobile") if lead and lead.get("owner_mobile") else DEFAULT_OWNER_MOBILE)
                     await db["whatsapp_conversations"].update_one({"contact": from_norm}, {"$set": {"contact": from_norm, "lead_id": lead_id, "owner_mobile": owner_mobile, "last_message_at": ts_dt.isoformat(), "last_message_text": text or f"[{mtype}]", "last_message_dir": "in"}, "$inc": {"unread_count": 1}}, upsert=True)
     except Exception:
         pass
@@ -479,7 +482,7 @@ async def whatsapp_conversation_link_lead(contact: str, body: Dict[str, Any], db
     if not lead_id:
         raise HTTPException(status_code=400, detail="lead_id required")
     lead = await db["leads"].find_one({"id": lead_id}, {"_id": 0})
-    owner_mobile = normalize_phone_india(lead.get("owner_mobile") if lead else DEFAULT_OWNER_MOBILE)
+    owner_mobile = lead.get("owner_mobile") if lead else DEFAULT_OWNER_MOBILE
     await db["whatsapp_conversations"].update_one({"contact": contact_norm}, {"$set": {"lead_id": lead_id, "owner_mobile": owner_mobile}}, upsert=True)
     await db["whatsapp_messages"].update_many({"from": contact_norm}, {"$set": {"lead_id": lead_id}})
     return {"success": True}
