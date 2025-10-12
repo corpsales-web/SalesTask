@@ -103,6 +103,12 @@ class LeadCreate(BaseModel):
 
 class LeadUpdate(BaseModel):
     name: Optional[str] = None
+
+# Backward compatible search route
+@app.get("/api/leads/search")
+async def search_leads_alias(q: str = Query(..., min_length=1), limit: int = Query(10, ge=1, le=50), db=Depends(get_db)):
+    return await search_leads_new(q=q, limit=limit, db=db)
+
     email: Optional[str] = None
     phone: Optional[str] = None
     status: Optional[str] = None
