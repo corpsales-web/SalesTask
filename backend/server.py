@@ -59,6 +59,28 @@ DEFAULT_OWNER_MOBILE = "+919999139938"  # Manager
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# Phone normalization helper (India default)
+from typing import Optional as _Opt
+
+def normalize_phone_india(raw: _Opt[str]) -> _Opt[str]:
+    if not raw:
+        return None
+    digits = "".join(ch for ch in str(raw) if ch.isdigit())
+    if not digits:
+        return None
+    # Drop leading 0 in 0XXXXXXXXXX format
+    if digits.startswith("0") and len(digits) == 11:
+        digits = digits[1:]
+    # If starts with 91 and has at least country+10 digits
+    if digits.startswith("91") and len(digits) >= 12:
+        return "+" + digits[:12]
+    # If exactly 10, assume +91
+    if len(digits) == 10:
+        return "+91" + digits
+    # Fallback
+    return "+" + digits if not str(raw).startswith("+") else str(raw)
+
 def build_absolute_url(request: Request, path: str) -> str:
     proto = request.headers.get("x-forwarded-proto") or "https"
     host = request.headers.get("x-forwarded-host") or request.client.host
