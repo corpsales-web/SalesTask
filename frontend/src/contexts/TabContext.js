@@ -23,7 +23,7 @@ function deriveInitialActiveTab() {
 
 
 const initialState = {
-  activeTab: 'dashboard',
+  activeTab: deriveInitialActiveTab(),
   loading: false,
   error: null,
   lastUpdated: Date.now()
