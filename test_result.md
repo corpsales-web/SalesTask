@@ -264,6 +264,19 @@
 ##     -message: "COMPREHENSIVE AI MODAL AUTO-OPEN TEST COMPLETED: Fixed critical React hook error in TabNavigation.jsx that was causing red screen crashes. Executed full test suite focusing on Convert to Lead → AI modal auto-open reliability: ❌ CRITICAL FAILURES FOUND: 1) Convert to Lead trigger path completely broken - tab does not switch to Leads, localStorage flag not set, hash not applied, AI modal does not open. 2) Fallback handler also broken - manual hash setting does not trigger tab switch or modal opening. 3) Both primary and fallback mechanisms are non-functional. ✅ NO REGRESSIONS: All other Inbox flows working (duplicate check, link to lead, filters), Catalogue upload/share functionality operational. URGENT ACTION REQUIRED: The AI Add Lead modal auto-open feature needs complete debugging and reimplementation as both trigger mechanisms are failing."
 
 ##   test_sequence: 8
+## frontend:
+##   - task: "AI Add Lead Modal Auto-Open After Convert to Lead"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/components/WhatsAppInbox.jsx, /app/frontend/src/components/TabContent.jsx"
+##     stuck_count: 3
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Implemented deterministic Option A with flags + reload, plus chain to open newly created Lead edit modal after AI modal closes. WhatsAppInbox now sets OPEN_AI_ADD_LEAD, POST_CONVERT_LEAD_ID, POST_CONVERT_CHAIN, POST_CONVERT_TS and triggers hash + reload + lead:converted event. TabContent reads flags, opens AI modal on Leads tab, and on close opens EnhancedLeadEditModal for created lead."
+
 ##   run_ui: true
 
 ## frontend:
