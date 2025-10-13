@@ -283,15 +283,18 @@
 ## frontend:
 ##   - task: "AI Add Lead Modal Auto-Open After Convert to Lead"
 ##     implemented: true
-##     working: "NA"
+##     working: false
 ##     file: "/app/frontend/src/components/WhatsAppInbox.jsx, /app/frontend/src/components/TabContent.jsx"
-##     stuck_count: 3
+##     stuck_count: 4
 ##     priority: "high"
-##     needs_retesting: true
+##     needs_retesting: false
 ##     status_history:
 ##         -working: "NA"
 ##         -agent: "main"
 ##         -comment: "Implemented deterministic Option A with flags + reload, plus chain to open newly created Lead edit modal after AI modal closes. WhatsAppInbox now sets OPEN_AI_ADD_LEAD, POST_CONVERT_LEAD_ID, POST_CONVERT_CHAIN, POST_CONVERT_TS and triggers hash + reload + lead:converted event. TabContent reads flags, opens AI modal on Leads tab, and on close opens EnhancedLeadEditModal for created lead."
+##         -working: false
+##         -agent: "testing"
+##         -comment: "COMPREHENSIVE UI TESTING COMPLETED: Executed automated test suite for AI modal auto-open flow. ✅ PARTIAL SUCCESS: Steps 1-4 PASSED (Inbox navigation, Add Sample, Refresh, Convert to Lead button click and lead creation successful - new lead visible in dashboard). ❌ CRITICAL FAILURES: Step 5 - localStorage.OPEN_AI_ADD_LEAD remains None (not set to '1'), window.location.hash remains empty (not set to '#open_ai_add_lead'), Steps 6-8 - App does NOT switch to Leads tab automatically, AI Add Lead modal does NOT auto-open, EnhancedLeadEditModal does NOT open automatically. ROOT CAUSE CONFIRMED: The handleConvert function in WhatsAppInbox.jsx lines 146-159 contains all the correct trigger code (localStorage.setItem('OPEN_AI_ADD_LEAD','1'), window.location.hash = '#open_ai_add_lead', setActiveTab('leads'), window.location.replace()) but NONE of these execute after successful lead creation. The conversion mechanism works perfectly (creates lead, links conversation), but the entire deterministic reload mechanism (Option A) with auto-tab-switch and AI modal trigger system is completely non-functional. This is a HIGH PRIORITY CRITICAL ISSUE requiring immediate main agent debugging of the handleConvert execution flow."
 
 ##   run_ui: true
 
