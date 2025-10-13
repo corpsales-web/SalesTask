@@ -201,11 +201,11 @@
 ## frontend:
 ##   - task: "Catalogue resumable uploads (pause/resume/cancel + multi-file)"
 ##     implemented: true
-##     working: "NA"
+##     working: true
 ##     file: "/app/frontend/src/components/CatalogueManager.jsx"
 ##     stuck_count: 0
 ##     priority: "high"
-##     needs_retesting: true
+##     needs_retesting: false
 ##     status_history:
 ##         -working: "NA"
 ##         -agent: "main"
