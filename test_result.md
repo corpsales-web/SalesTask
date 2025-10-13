@@ -302,6 +302,20 @@
 ##         -comment: "FINAL AI MODAL DETERMINISTIC TEST COMPLETED (Option A): Executed comprehensive test suite as requested in review with all 8 steps. ✅ PARTIAL SUCCESS: Steps 1-4 PASSED (Inbox navigation, Add Sample/Refresh, Convert to Lead click, lead creation confirmed with 'View Lead' button), ❌ CRITICAL FAILURES: Step 5 - Hash does NOT contain '#open_ai_add_lead' (found empty), Step 6 - App does NOT switch to Leads tab (remains on Inbox, debug shows 'active: inbox'), Step 7 - AI Add Lead modal does NOT auto-open, Step 8 - localStorage 'OPEN_AI_ADD_LEAD' is None (not set). ROOT CAUSE CONFIRMED: The handleConvert function in WhatsAppInbox.jsx lines 146-159 contains the correct trigger code but the execution flow is broken. Despite having localStorage.setItem('OPEN_AI_ADD_LEAD','1'), window.location.hash = '#open_ai_add_lead', window.location.replace(), and setActiveTab('leads') calls, NONE of these execute after successful lead creation. The conversion mechanism works perfectly (creates lead, links conversation), but the entire auto-tab-switch and AI modal trigger system is completely non-functional. This is a CRITICAL ISSUE requiring immediate main agent attention to debug the handleConvert execution flow and fix the deterministic reload mechanism (Option A)."
 
 ## frontend:
+## test_plan:
+##   current_focus:
+##     - "AI Add Lead Modal Auto-Open After Convert to Lead"
+##     - "Catalogue resumable uploads (pause/resume/cancel + multi-file)"
+##     - "Meta WhatsApp go-live checklist validation (docs only)"
+##   stuck_tasks:
+##     - "AI Add Lead Modal Auto-Open After Convert to Lead"
+##   test_all: false
+##   test_priority: "high_first"
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Please run frontend automated tests focused on two flows: (A) Inbox → Add Sample → Refresh → Convert to Lead: confirm localStorage OPEN_AI_ADD_LEAD is set, hash becomes #open_ai_add_lead, app switches to Leads, AI Add Lead modal opens, then closes and the newly created Lead edit modal opens (use POST_CONVERT_LEAD_ID). (B) ERP → Catalogue Upload: select two files (simulate 500MB+ by overriding file size in test if needed), start upload; verify per-file progress bars, pause/resume for first file mid-way, cancel second file mid-way, and ensure completed file appears in list while canceled file does not trigger complete. Also validate that backend endpoints /api/uploads/catalogue/state and /cancel are invoked."
+
 ##   - task: "Remove Marketing from CRM UI and fix Tasks invalid element error"
 ##     implemented: true
 ##     working: "NA"
