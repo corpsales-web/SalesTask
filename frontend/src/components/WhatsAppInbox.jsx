@@ -194,6 +194,9 @@ export default function WhatsAppInbox() {
           <button className="ghost" onClick={async ()=>{
             try {
               const ts = Math.floor(Date.now()/1000)
+              // generate a fresh demo contact to avoid auto-linking to existing leads
+              const rand10 = String(Math.floor(6000000000 + Math.random()*3999999999))
+              const demoFrom = '91' + rand10 // e.g., 91XXXXXXXXXX
               const payload = {
                 object: 'whatsapp_business_account',
                 entry: [{
@@ -203,7 +206,7 @@ export default function WhatsAppInbox() {
                       messaging_product: 'whatsapp',
                       metadata: { display_phone_number: '+911234567890' },
                       messages: [{
-                        from: '919876543210',
+                        from: demoFrom,
                         id: `wamid.DEMO.${ts}`,
                         timestamp: ts.toString(),
                         type: 'text',
