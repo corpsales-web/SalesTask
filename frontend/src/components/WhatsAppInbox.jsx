@@ -145,6 +145,9 @@ export default function WhatsAppInbox() {
       // Immediately trigger AI modal + tab switch BEFORE any further awaits
       try {
         localStorage.setItem('OPEN_AI_ADD_LEAD','1');
+        localStorage.setItem('POST_CONVERT_LEAD_ID', newLead.id);
+        localStorage.setItem('POST_CONVERT_CHAIN', 'open_edit_after_ai');
+        localStorage.setItem('POST_CONVERT_TS', String(Date.now()));
         window.location.hash = '#open_ai_add_lead';
         window.dispatchEvent(new Event('open_ai_add_lead'));
       } catch(e) { console.warn('AI flag set failed', e) }
@@ -158,7 +161,10 @@ export default function WhatsAppInbox() {
         setTimeout(()=> { try { window.location.reload() } catch {} }, 50)
       } catch {}
       // No further awaits after scheduling reload
-      try { window.dispatchEvent(new Event('refresh_leads')) } catch {}
+      try { 
+        window.dispatchEvent(new Event('refresh_leads'))
+        window.dispatchEvent(new CustomEvent('lead:converted', { detail: { lead_id: newLead.id, source: 'whatsapp' } }))
+      } catch {}
       toast({ title: 'Lead Created & Linked' })
       return
     } catch (e) {

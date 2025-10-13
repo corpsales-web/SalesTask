@@ -24,6 +24,10 @@ import TrainingModule from './TrainingModule';
 import WhatsAppInbox from './WhatsAppInbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Camera } from 'lucide-react';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
+
 // helper component listens for custom event to open AI Add Lead
 const OpenAIAddLeadListener = ({ onOpen }) => {
   useEffect(()=>{
@@ -72,6 +76,7 @@ const TabContent = ({
         const hash = typeof window !== 'undefined' ? window.location.hash : ''
         if (flag === '1' || hash === '#open_ai_add_lead') {
           setShowOptimizedLeadModal(true)
+          // do not clear chain id here; it is needed to open edit after AI closes
           localStorage.removeItem('OPEN_AI_ADD_LEAD')
           if (hash === '#open_ai_add_lead') {
             try { window.history.replaceState(null, '', window.location.pathname) } catch {}
@@ -80,6 +85,54 @@ const TabContent = ({
       } catch (e) {}
     }
   }, [activeTab])
+
+  // Helper: open the newly converted lead's edit modal by id if flags exist
+  const openEditByIdIfFlag = async () => {
+    try {
+      const leadId = localStorage.getItem('POST_CONVERT_LEAD_ID')
+      const chain = localStorage.getItem('POST_CONVERT_CHAIN')
+      if (!leadId) return
+      // try find in props.leads
+      let leadObj = (leads || []).find(l => l.id === leadId)
+      if (!leadObj) {
+        try {
+          const res = await axios.get(`${API}/api/leads/${leadId}`)
+          leadObj = res.data?.lead
+        } catch (e) {
+          console.warn('Fetch lead by id failed for auto-open', e?.response?.status)
+        }
+      }
+      if (leadObj) {
+        setSelectedLead && setSelectedLead(leadObj)
+        setShowLeadEditModal(true)
+        // clear flags after opening edit modal
+        try {
+          localStorage.removeItem('POST_CONVERT_LEAD_ID')
+          localStorage.removeItem('POST_CONVERT_CHAIN')
+        } catch {}
+      }
+    } catch {}
+  }
+
+  // When AI modal closes, open the created Lead's edit modal if requested
+  const handleAIModalClose = () => {
+    setShowOptimizedLeadModal(false)
+    // small delay to ensure DOM settles
+    setTimeout(() => { openEditByIdIfFlag() }, 100)
+  }
+
+  // Fallback: if AI modal not opened for some reason, still open edit modal when landing on Leads
+  useEffect(() => {
+    if (activeTab === 'leads') {
+      const flag = localStorage.getItem('OPEN_AI_ADD_LEAD')
+      const leadId = localStorage.getItem('POST_CONVERT_LEAD_ID')
+      const hash = typeof window !== 'undefined' ? window.location.hash : ''
+      if ((!flag && hash !== '#open_ai_add_lead') && leadId) {
+        // open edit directly
+        openEditByIdIfFlag()
+      }
+    }
+  }, [activeTab, leads])
 
   
   // Memoize content to ensure it updates when activeTab changes
@@ -549,7 +602,7 @@ const TabContent = ({
       {/* Optimized Lead Creation Form Modal */}
       <OptimizedLeadCreationForm 
         isOpen={showOptimizedLeadModal}
-        onClose={() => setShowOptimizedLeadModal(false)}
+        onClose={handleAIModalClose}
         onLeadCreated={(lead, deal) => {
           console.log('✅ Lead created:', lead);
           if (deal) {
