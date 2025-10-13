@@ -7,6 +7,21 @@ const TAB_ACTIONS = {
   SET_ERROR: 'SET_ERROR'
 };
 
+// Derive initial active tab based on flags/hash to support deterministic flows (e.g., AI Add Lead)
+function deriveInitialActiveTab() {
+  if (typeof window !== 'undefined') {
+    try {
+      const hash = window.location.hash || ''
+      const openFlag = localStorage.getItem('OPEN_AI_ADD_LEAD')
+      if (hash === '#open_ai_add_lead' || openFlag === '1') {
+        return 'leads'
+      }
+    } catch {}
+  }
+  return 'dashboard'
+}
+
+
 const initialState = {
   activeTab: 'dashboard',
   loading: false,
