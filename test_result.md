@@ -330,8 +330,6 @@
 ## test_plan:
 ##   current_focus:
 ##     - "AI Add Lead Modal Auto-Open After Convert to Lead"
-##     - "Catalogue resumable uploads (pause/resume/cancel + multi-file)"
-##     - "Meta WhatsApp go-live checklist validation (docs only)"
 ##   stuck_tasks:
 ##     - "AI Add Lead Modal Auto-Open After Convert to Lead"
 ##   test_all: false
