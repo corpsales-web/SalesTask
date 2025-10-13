@@ -210,6 +210,9 @@
 ##         -working: "NA"
 ##         -agent: "main"
 ##         -comment: "Implemented multi-file uploads with 1MB chunk size, resumable via /state, and controls to Pause, Resume, Cancel per file. Uses existing /init, /chunk, /complete, /state, /cancel endpoints. Progress per file with UI list. Supports large files (500MB+)."
+        -working: false
+        -agent: "testing"
+        -comment: "CATALOGUE UPLOAD TESTING COMPLETED: Frontend UI functionality working correctly - upload modal opens, file attachment works, pause/resume/cancel controls are functional and responsive. ✅ UI COMPONENTS: Upload button opens modal, file input accepts multiple files, Start Upload button triggers upload jobs, progress bars display correctly, pause/resume/cancel buttons work as expected. ❌ BACKEND API FAILURES: Critical errors prevent successful completion - 500 status on /api/uploads/catalogue/complete endpoint, 400 status on /api/uploads/catalogue/chunk endpoint. These backend errors prevent files from completing upload and appearing in catalogue list with Open/Share buttons. Frontend implementation is correct but backend API endpoints need fixing."
 
 ## metadata:
 ##   created_by: "main_agent"
