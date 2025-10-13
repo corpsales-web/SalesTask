@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List
 
 # Configuration - Use external URL from frontend/.env
-BASE_URL = "https://aavana-crm-dmm.preview.emergentagent.com"
+BASE_URL = "https://crm-whatsapp-hub-1.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 class CRMEndpointsTester:
