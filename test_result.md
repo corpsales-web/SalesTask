@@ -198,6 +198,19 @@
 ##         -agent: "main"
 ##         -comment: "Created .env file with REACT_APP_BACKEND_URL pointing to backend ingress external URL per platform rules. API client uses env var and auto-prefixes '/api'. Will wire to DMM once deployed."
 
+## frontend:
+##   - task: "Catalogue resumable uploads (pause/resume/cancel + multi-file)"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/components/CatalogueManager.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Implemented multi-file uploads with 1MB chunk size, resumable via /state, and controls to Pause, Resume, Cancel per file. Uses existing /init, /chunk, /complete, /state, /cancel endpoints. Progress per file with UI list. Supports large files (500MB+)."
+
 ## metadata:
 ##   created_by: "main_agent"
 ##   version: "1.3"
