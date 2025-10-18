@@ -404,6 +404,10 @@ class WhatsAppSendTemplateRequest(BaseModel):
 
 @app.get("/api/whatsapp/webhook")
 async def whatsapp_webhook_verify(hub_mode: str = Query(None, alias="hub.mode"), hub_token: str = Query(None, alias="hub.verify_token"), hub_challenge: str = Query(None, alias="hub.challenge")):
+    # Some Meta UI flows first hit the URL without query params as a reachability check.
+    # Return 200 OK in that case to avoid a false failure before the actual verify step.
+    if hub_mode is None and hub_token is None and hub_challenge is None:
+        return PlainTextResponse("ok")
     if hub_mode == "subscribe" and hub_token and META_VERIFY_TOKEN and hub_token == META_VERIFY_TOKEN:
         return PlainTextResponse(hub_challenge or "")
     raise HTTPException(status_code=403, detail="Verification failed")
