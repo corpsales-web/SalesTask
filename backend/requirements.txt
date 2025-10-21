@@ -108,7 +108,6 @@ python-multipart==0.0.20
 pytz==2025.2
 pywebpush==2.0.3
 PyYAML==6.0.2
-redis==4.6.0
 referencing==0.36.2
 regex==2025.9.1
 requests==2.32.5
@@ -127,7 +126,10 @@ sympy==1.14.0
 tenacity==9.1.2
 tiktoken==0.11.0
 tokenizers==0.22.0
-torch==2.8.0
+# torch removed
+# redis removed
+# aioredis retained but not used; safe to keep or remove later
+# whisper retained for future (not used now)
 tqdm==4.67.1
 twilio==9.8.0
 typer==0.17.4
