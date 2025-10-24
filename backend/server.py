@@ -24,13 +24,7 @@ except Exception:
 
 app = FastAPI(title="Aavana CRM API")
 
-# Mount Visual Upgrades router
-try:
-    from visual_upgrades import router as visual_router
-    app.include_router(visual_router)
-except Exception:
-    # Router optional; avoid crash if file missing
-    pass
+# Visual Upgrades router will be included AFTER core utilities are defined to avoid circular imports.
 
 # CORS
 CORS_ORIGINS = os.environ.get("CRM_CORS_ORIGINS", "*")
