@@ -133,9 +133,9 @@ export const TAB_CONFIG = {
   },
   erp: {
     id: 'erp',
-    label: 'ERP',
-    icon: '🏢',
-    description: 'Business management and operations'
+    label: 'Visual Studio',
+    icon: '🎨',
+    description: 'AI-powered visual upgrades and mockups'
   },
   hrms: {
     id: 'hrms',
