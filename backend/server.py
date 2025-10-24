@@ -593,3 +593,11 @@ async def whatsapp_send_template(body: WhatsAppSendTemplateRequest, db=Depends(g
         data = resp.json()
     await db["whatsapp_sent"].insert_one({"id": str(uuid.uuid4()), "sent_at": now_iso(), "to": to_norm, "payload": payload, "provider_response": data})
     return {"success": True, "provider": "meta", "data": data}
+
+
+# === Include Visual Upgrades router at the end to avoid import issues ===
+try:
+    from visual_upgrades import router as visual_router
+    app.include_router(visual_router)
+except Exception as e:
+    print('Visual upgrades router not loaded:', e)
