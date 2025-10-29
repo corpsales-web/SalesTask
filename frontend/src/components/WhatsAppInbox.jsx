@@ -4,7 +4,7 @@ import { useToast } from '../hooks/use-toast';
 import EnhancedLeadEditModal from './EnhancedLeadEditModal';
 import { useTab } from '../contexts/TabContext';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+const API = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
 
 function Badge({ children, color }) {
   const cls = color === 'red' ? 'bg-red-100 text-red-800' : color === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
@@ -151,17 +151,9 @@ export default function WhatsAppInbox() {
         window.location.hash = '#open_ai_add_lead';
         window.dispatchEvent(new Event('open_ai_add_lead'));
       } catch(e) { console.warn('AI flag set failed', e) }
-      // Force deterministic navigation and modal open via hash + reload (Option A)
+      // Prefer event + tab switch (no hard reload)
+      try { setActiveTab('leads') } catch {}
       try {
-        setActiveTab('leads')
-      } catch {}
-      try {
-        const base = window.location.pathname || '/'
-        window.location.replace(base + '#open_ai_add_lead')
-        setTimeout(()=> { try { window.location.reload() } catch {} }, 50)
-      } catch {}
-      // No further awaits after scheduling reload
-      try { 
         window.dispatchEvent(new Event('refresh_leads'))
         window.dispatchEvent(new CustomEvent('lead:converted', { detail: { lead_id: newLead.id, source: 'whatsapp' } }))
       } catch {}

@@ -16,6 +16,7 @@ export default function VisualUpgradeStudio({ leadId }){
   const imgRef = useRef(null)
   const drawing = useRef(false)
   const [brush, setBrush] = useState(30)
+  const [fullFrame, setFullFrame] = useState(false)
 
   useEffect(()=>{
     return ()=>{
@@ -133,17 +134,19 @@ export default function VisualUpgradeStudio({ leadId }){
       fd.append('size', size)
       fd.append('response_format', 'url')
       if (leadId) fd.append('lead_id', leadId)
-      // attach mask from canvas
-      const blob = await exportMaskBlob()
-      if (blob) {
-        // convert mask white=preserve, transparent=edit (already done via destination-out)
-        const maskFile = new File([blob], 'mask.png', { type: 'image/png' })
-        fd.append('mask', maskFile)
+      if (!fullFrame) {
+        // attach mask from canvas
+        const blob = await exportMaskBlob()
+        if (blob) {
+          const maskFile = new File([blob], 'mask.png', { type: 'image/png' })
+          fd.append('mask', maskFile)
+        }
       }
       const res = await fetch(`${API}/api/visual-upgrades/render`, { method:'POST', body: fd })
       if (!res.ok) {
-        const t = await res.text()
-        throw new Error(t || `HTTP ${res.status}`)
+        let msg = `HTTP ${res.status}`
+        try { const t = await res.text(); msg = t } catch {}
+        throw new Error(msg || `HTTP ${res.status}`)
       }
       const data = await res.json()
       const url = data?.upgrade?.result?.url
@@ -176,8 +179,12 @@ export default function VisualUpgradeStudio({ leadId }){
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-          <div className="mb-2">
+          <div className="mb-2 flex items-center gap-3">
             <input type="file" accept="image/*" onChange={onBaseChange} disabled={loading} />
+            <label className="flex items-center gap-1 text-sm">
+              <input type="checkbox" checked={fullFrame} onChange={(e)=>setFullFrame(e.target.checked)} disabled={loading} />
+              Full-frame (no mask)
+            </label>
           </div>
           <div className="border rounded overflow-hidden max-w-full">
             <canvas ref={canvasRef}
@@ -207,7 +214,7 @@ export default function VisualUpgradeStudio({ leadId }){
             </button>
           </div>
           {progressText && <div className="text-xs text-gray-600 mt-1">{progressText}</div>}
-          {error && <div className="text-sm text-red-600 mt-2">{error}</div>}
+          {error && <div className="text-sm text-red-600 mt-2 break-words whitespace-pre-wrap">{error}</div>}
           {resultUrl && (
             <div className="mt-3">
               <div className="text-sm font-medium mb-1">Result</div>
