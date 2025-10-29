@@ -357,6 +357,11 @@
 ##     - "AI Add Lead modal auto-open after Convert to Lead"
 ##     - "Visual Studio AI Render via Emergent key + Full-frame toggle"
 ##     - "Catalogue uploads chunked reliability"
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Please run BACKEND tests first for CRM endpoints to validate /api/visual-upgrades/render (OpenAI via Emergent key, mask optional, response_format=url), /api/uploads/catalogue/* chunked endpoints (init/chunk/state/complete/cancel), and Leads/Tasks CRUD smoke. Then run FRONTEND UI tests: A) Tabs render for Dashboard/Leads/Pipeline/Tasks/HRMS/AI/Training/Admin and Inbox shows WhatsAppInbox. B) WhatsApp Inbox flow: Add Sample → Refresh → Convert to Lead on an UNLINKED conversation (ensure fresh random contact) → assert localStorage.OPEN_AI_ADD_LEAD === '1' and hash '#open_ai_add_lead' (pre-reload) → switch to Leads → 'Add Lead (AI-Optimized)' modal auto-opens → close → EnhancedLeadEditModal auto-opens for created lead ID. C) Visual Studio: Upload image, paint mask, toggle Full-frame on/off and run AI Render; show readable error if EMERGENT_LLM_KEY missing. D) Catalogue: Select two files, Start Upload, pause/resume first mid-way, cancel second, ensure first completes and appears with Open/Share buttons. E) Tasks: Create a task via TaskDelegationPanel and verify it appears in Recent Tasks list."
+
 ##     - "Task management end-to-end checks"
 ##   stuck_tasks: []
 ##   test_all: false
