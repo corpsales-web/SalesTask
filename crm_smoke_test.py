@@ -11,7 +11,7 @@ import time
 from typing import Dict, Any
 
 # Configuration - Use frontend's REACT_APP_BACKEND_URL
-BASE_URL = "https://crm-whatsapp-hub-1.preview.emergentagent.com"
+BASE_URL = "https://crm-visual-studio.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 class CRMSmokeTest:
