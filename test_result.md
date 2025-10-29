@@ -334,6 +334,7 @@
 ##     - "AI Add Lead Modal Auto-Open After Convert to Lead"
 ##   test_all: false
 ##   test_priority: "high_first"
+##   backend_testing_complete: true
 
 ## agent_communication:
 ##     -agent: "main"
