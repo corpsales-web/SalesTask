@@ -223,6 +223,25 @@ async def delete_lead(lead_id: str, db=Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Leads search endpoint for linking/duplicate checks
+@app.get("/api/leads/search")
+async def search_leads(q: str, page: int = 1, limit: int = 20, db=Depends(get_db)):
+    try:
+        regex = {"$regex": re.escape(q), "$options": "i"}
+        # Match by name/email or phone last 10 digits
+        phone_digits = re.sub(r"\D", "", q)
+        phone_last10 = phone_digits[-10:] if len(phone_digits) >= 4 else None
+        criteria = [{"name": regex}, {"email": regex}]
+        if phone_last10:
+            criteria.append({"phone": {"$regex": phone_last10 + "$"}})
+        cursor = db["leads"].find({"$or": criteria}, {"_id": 0}).skip((page-1)*limit).limit(limit)
+        items = await cursor.to_list(length=limit)
+        total = await db["leads"].count_documents({"$or": criteria})
+        return {"items": items, "page": page, "limit": limit, "total": total}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Tasks CRUD endpoints
 @app.post("/api/tasks")
 async def create_task(task: TaskCreate, db=Depends(get_db)):
