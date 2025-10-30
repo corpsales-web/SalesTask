@@ -15,7 +15,7 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
   useEffect(()=>{ setProjectId(externalProjectId) }, [externalProjectId])
 
     try{
-      const res = await fetch(`${API}/api/uploads/catalogue/list`)
+      const res = await fetch(`${API}/api/uploads/catalogue/list${projectId? ('?project_id='+encodeURIComponent(projectId)) : ''}`)
       const data = await res.json()
       setCatalogues(Array.isArray(data.catalogues) ? data.catalogues : [])
     }catch(e){ console.error('catalogue list', e) }
