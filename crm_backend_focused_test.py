@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-CRM Backend Focused Test Suite
-Tests specific endpoints as requested in review:
-1. /api/visual-upgrades/render: POST with image + prompt (without mask first, then with mask)
-2. /api/uploads/catalogue init/chunk/state/complete/cancel: simulate 2MB file sliced 1MB chunks
-3. Leads/Tasks CRUD smoke: POST/GET/PUT/DELETE basic flows
-4. WhatsApp webhook and conversations endpoints (stub mode)
+CRM Backend Focused Test Suite - Review Request
+Re-run CRM backend tests focusing on updated endpoints as per review request:
+1. /api/leads/search returns items array and supports phone-last10 matching
+2. WhatsApp helpers: /api/whatsapp/session_status, /api/whatsapp/contact_messages, 
+   POST /api/whatsapp/conversations/{contact}/read, POST /api/whatsapp/conversations/{contact}/link_lead
+3. Ensure prior tests still pass
 """
 
 import requests
