@@ -211,7 +211,7 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
               <div className="flex items-center gap-2 mb-2">
                 <ProjectSelector />
               </div>
-              <CatalogueManager isEmbeded={true} />
+              <CatalogueManager isEmbeded={true} projectId={leadForStudio?.project_id || null} />
             </div>
           </div>
         )
