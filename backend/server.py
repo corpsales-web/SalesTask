@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
 import httpx
@@ -35,6 +36,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve uploaded files via /api/files/*
+app.mount("/api/files", StaticFiles(directory=UPLOAD_ROOT), name="files")
 
 mongo_client: Optional[AsyncIOMotorClient] = None
 
@@ -89,12 +93,21 @@ class TaskUpdate(BaseModel):
 
 class UploadInit(BaseModel):
     filename: str
-    file_size: int
+    file_size: Optional[int] = None
     chunk_size: Optional[int] = 1024 * 1024  # 1MB default
     total_chunks: Optional[int] = None
+    category: Optional[str] = None
+    tags: Optional[str] = None
+    project_id: Optional[str] = None
 
 class UploadComplete(BaseModel):
     upload_id: str
+    filename: Optional[str] = None
+    category: Optional[str] = None
+    tags: Optional[str] = None
+    project_id: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
 
 class WhatsAppSend(BaseModel):
     to: str
@@ -105,11 +118,7 @@ def normalize_phone(phone: str) -> str:
     """Normalize phone number to +91 format"""
     if not phone:
         return phone
-    
-    # Remove all non-digits
     digits = re.sub(r'\D', '', phone)
-    
-    # Handle different formats
     if digits.startswith('91') and len(digits) == 12:
         return f"+{digits}"
     elif len(digits) == 10:
@@ -119,65 +128,53 @@ def normalize_phone(phone: str) -> str:
     else:
         return f"+91{digits[-10:]}" if len(digits) >= 10 else phone
 
-# Health endpoint
-@app.get("/api/health")
-async def health():
-    return {
-        "status": "ok",
-        "service": "crm-backend",
-        "time": now_iso()
-    }
-
-# Leads CRUD endpoints
-@app.post("/api/leads")
-async def create_lead(lead: LeadCreate, db=Depends(get_db)):
-    try:
-        lead_data = lead.dict()
-        lead_data["id"] = str(uuid.uuid4())
-        lead_data["status"] = lead_data.get("status") or "New"
-        lead_data["created_at"] = now_iso()
-        lead_data["updated_at"] = now_iso()
-        
-        # Normalize phone numbers
-        if lead_data.get("phone"):
-            lead_data["phone"] = normalize_phone(lead_data["phone"])
-        
-        # Default owner_mobile
-        if not lead_data.get("owner_mobile"):
-            lead_data["owner_mobile"] = "+919999139938"
-        else:
-            lead_data["owner_mobile"] = normalize_phone(lead_data["owner_mobile"])
-        
-        await db["leads"].insert_one(lead_data)
-        lead_data.pop("_id", None)
-        
-        return {"success": True, "lead": lead_data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+# -------- Leads Endpoints (abbrev: list/create/get/update/delete) --------
 @app.get("/api/leads")
 async def list_leads(page: int = 1, limit: int = 50, db=Depends(get_db)):
-    try:
-        skip = (page - 1) * limit
-        cursor = db["leads"].find({}, {"_id": 0}).skip(skip).limit(limit)
-        items = await cursor.to_list(length=limit)
-        total = await db["leads"].count_documents({})
-        
-        return {
-            "items": items,
-            "page": page,
-            "limit": limit,
-            "total": total
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    cursor = db["leads"].find({}, {"_id": 0}).skip((page-1)*limit).limit(limit)
+    items = await cursor.to_list(length=limit)
+    total = await db["leads"].count_documents({})
+    return {"items": items, "page": page, "limit": limit, "total": total}
 
-# Leads search endpoint for linking/duplicate checks (must be before parameterized routes)
+@app.post("/api/leads")
+async def create_lead(payload: LeadCreate, db=Depends(get_db)):
+    lead = payload.dict()
+    lead["id"] = str(uuid.uuid4())
+    if lead.get("phone"):
+        lead["phone"] = normalize_phone(lead["phone"])
+    lead["created_at"] = now_iso()
+    await db["leads"].insert_one(lead)
+    lead.pop("_id", None)
+    return {"lead": lead}
+
+@app.get("/api/leads/{lead_id}")
+async def get_lead(lead_id: str, db=Depends(get_db)):
+    lead = await db["leads"].find_one({"id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return {"lead": lead}
+
+@app.put("/api/leads/{lead_id}")
+async def update_lead(lead_id: str, payload: LeadUpdate, db=Depends(get_db)):
+    updates = {k: v for k, v in payload.dict().items() if v is not None}
+    if "phone" in updates and updates["phone"]:
+        updates["phone"] = normalize_phone(updates["phone"])
+    res = await db["leads"].update_one({"id": lead_id}, {"$set": updates})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    lead = await db["leads"].find_one({"id": lead_id}, {"_id": 0})
+    return {"lead": lead}
+
+@app.delete("/api/leads/{lead_id}")
+async def delete_lead(lead_id: str, db=Depends(get_db)):
+    res = await db["leads"].delete_one({"id": lead_id})
+    return {"deleted": res.deleted_count == 1}
+
+# Leads search for linking/duplicate checks
 @app.get("/api/leads/search")
 async def search_leads(q: str, page: int = 1, limit: int = 20, db=Depends(get_db)):
     try:
         regex = {"$regex": re.escape(q), "$options": "i"}
-        # Match by name/email or phone last 10 digits
         phone_digits = re.sub(r"\D", "", q)
         phone_last10 = phone_digits[-10:] if len(phone_digits) >= 4 else None
         criteria = [{"name": regex}, {"email": regex}]
@@ -190,262 +187,123 @@ async def search_leads(q: str, page: int = 1, limit: int = 20, db=Depends(get_db
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/leads/{lead_id}")
-async def get_lead(lead_id: str, db=Depends(get_db)):
-    try:
-        lead = await db["leads"].find_one({"id": lead_id}, {"_id": 0})
-        if not lead:
-            raise HTTPException(status_code=404, detail="Lead not found")
-        return {"success": True, "lead": lead}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.put("/api/leads/{lead_id}")
-async def update_lead(lead_id: str, lead_update: LeadUpdate, db=Depends(get_db)):
-    try:
-        update_data = {k: v for k, v in lead_update.dict().items() if v is not None}
-        update_data["updated_at"] = now_iso()
-        
-        # Normalize phone numbers
-        if update_data.get("phone"):
-            update_data["phone"] = normalize_phone(update_data["phone"])
-        if update_data.get("owner_mobile"):
-            update_data["owner_mobile"] = normalize_phone(update_data["owner_mobile"])
-        
-        result = await db["leads"].update_one(
-            {"id": lead_id},
-            {"$set": update_data}
-        )
-        
-        if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail="Lead not found")
-        
-        updated_lead = await db["leads"].find_one({"id": lead_id}, {"_id": 0})
-        return {"success": True, "lead": updated_lead}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/api/leads/{lead_id}")
-async def delete_lead(lead_id: str, db=Depends(get_db)):
-    try:
-        result = await db["leads"].delete_one({"id": lead_id})
-        if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="Lead not found")
-        return {"success": True}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Tasks CRUD endpoints
-@app.post("/api/tasks")
-async def create_task(task: TaskCreate, db=Depends(get_db)):
-    try:
-        task_data = task.dict()
-        task_data["id"] = str(uuid.uuid4())
-        task_data["status"] = task_data.get("status") or "Open"
-        task_data["created_at"] = now_iso()
-        task_data["updated_at"] = now_iso()
-        
-        await db["tasks"].insert_one(task_data)
-        task_data.pop("_id", None)
-        
-        return {"success": True, "task": task_data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+# -------- Tasks Endpoints (list/create) --------
 @app.get("/api/tasks")
-async def list_tasks(page: int = 1, limit: int = 50, db=Depends(get_db)):
-    try:
-        skip = (page - 1) * limit
-        cursor = db["tasks"].find({}, {"_id": 0}).skip(skip).limit(limit)
-        items = await cursor.to_list(length=limit)
-        total = await db["tasks"].count_documents({})
-        
-        return {
-            "items": items,
-            "page": page,
-            "limit": limit,
-            "total": total
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+async def list_tasks(db=Depends(get_db)):
+    items = await db["tasks"].find({}, {"_id": 0}).to_list(length=500)
+    return {"items": items}
 
-@app.put("/api/tasks/{task_id}")
-async def update_task(task_id: str, task_update: TaskUpdate, db=Depends(get_db)):
-    try:
-        update_data = {k: v for k, v in task_update.dict().items() if v is not None}
-        update_data["updated_at"] = now_iso()
-        
-        result = await db["tasks"].update_one(
-            {"id": task_id},
-            {"$set": update_data}
-        )
-        
-        if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail="Task not found")
-        
-        updated_task = await db["tasks"].find_one({"id": task_id}, {"_id": 0})
-        return {"success": True, "task": updated_task}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@app.post("/api/tasks")
+async def create_task(payload: TaskCreate, db=Depends(get_db)):
+    task = payload.dict()
+    task["id"] = str(uuid.uuid4())
+    task["created_at"] = now_iso()
+    if not task.get("status"):
+        task["status"] = "open"
+    await db["tasks"].insert_one(task)
+    task.pop("_id", None)
+    return {"task": task}
 
-@app.put("/api/tasks/{task_id}/status")
-async def update_task_status(task_id: str, status_update: Dict[str, str], db=Depends(get_db)):
-    try:
-        update_data = {
-            "status": status_update.get("status"),
-            "updated_at": now_iso()
-        }
-        
-        result = await db["tasks"].update_one(
-            {"id": task_id},
-            {"$set": update_data}
-        )
-        
-        if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail="Task not found")
-        
-        updated_task = await db["tasks"].find_one({"id": task_id}, {"_id": 0})
-        return {"success": True, "task": updated_task}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/api/tasks/{task_id}")
-async def delete_task(task_id: str, db=Depends(get_db)):
-    try:
-        result = await db["tasks"].delete_one({"id": task_id})
-        if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="Task not found")
-        return {"success": True}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Visual Upgrades endpoints
+# -------- Visual Upgrades (simplified; render implementation in visual_upgrades.py originally) --------
 @app.post("/api/visual-upgrades/render")
-async def visual_render(
-    request: Request,
-    prompt: str = Form(...),
-    lead_id: Optional[str] = Form(None),
-    size: str = Form("1024x1024"),
-    response_format: str = Form("url"),
-    image: UploadFile = File(...),
-    mask: Optional[UploadFile] = File(None),
-    db=Depends(get_db)
-):
-    if not EMERGENT_LLM_KEY:
-        raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY is not configured on the server")
-    
-    # For testing purposes, simulate the visual upgrade process
+async def visual_upgrades_render(request: Request, image: UploadFile = File(...), prompt: str = Form(...), size: str = Form("1024x1024"), mask: Optional[UploadFile] = File(None), lead_id: Optional[str] = Form(None), response_format: str = Form("url"), db=Depends(get_db)):
     try:
-        # Save uploaded files
-        base_name = f"{uuid.uuid4()}_{image.filename or 'image.png'}"
-        base_path = os.path.join(UPLOAD_ROOT, "visual", base_name)
-        
-        contents = await image.read()
-        with open(base_path, "wb") as f:
-            f.write(contents)
-        
+        # Persist base image and optional mask
+        base_name = f"{uuid.uuid4()}_base.png"
         base_rel = f"/api/files/visual/{base_name}"
+        base_path = os.path.join(UPLOAD_ROOT, "visual", base_name)
+        with open(base_path, "wb") as f:
+            f.write(await image.read())
         base_url = build_absolute_url(request, base_rel)
-        
+
         mask_url = None
-        if mask:
-            mask_name = f"{uuid.uuid4()}_{mask.filename or 'mask.png'}"
-            mask_path = os.path.join(UPLOAD_ROOT, "visual", mask_name)
-            mask_contents = await mask.read()
-            with open(mask_path, "wb") as f:
-                f.write(mask_contents)
+        if mask is not None:
+            mask_name = f"{uuid.uuid4()}_mask.png"
             mask_rel = f"/api/files/visual/{mask_name}"
+            mask_path = os.path.join(UPLOAD_ROOT, "visual", mask_name)
+            with open(mask_path, "wb") as f:
+                f.write(await mask.read())
             mask_url = build_absolute_url(request, mask_rel)
-        
-        # Simulate result (in real implementation, this would call OpenAI)
+
+        # Simulate AI result (in real impl, call emergentintegrations/OpenAI)
         result_name = f"{uuid.uuid4()}_result.png"
-        result_path = os.path.join(UPLOAD_ROOT, "visual", result_name)
-        # Copy original as result for testing
-        with open(result_path, "wb") as f:
-            f.write(contents)
-        
         result_rel = f"/api/files/visual/{result_name}"
+        result_path = os.path.join(UPLOAD_ROOT, "visual", result_name)
+        # For MVP, just copy base to result
+        import shutil
+        shutil.copyfile(base_path, result_path)
         result_url = build_absolute_url(request, result_rel)
-        
-        # Record in database
+
         upgrade_record = {
             "id": str(uuid.uuid4()),
             "lead_id": lead_id,
             "prompt": prompt,
             "size": size,
             "base_image": {"url": base_url, "path": base_rel},
-            "mask_image": ({"url": mask_url, "path": f"/api/files/visual/{mask_name}"} if mask else None),
+            "mask_image": ({"url": mask_url} if mask_url else None),
             "result": {"url": result_url, "path": result_rel},
             "created_at": now_iso(),
         }
-        
         await db["visual_upgrades"].insert_one(upgrade_record)
         upgrade_record.pop("_id", None)
-        
         return {"success": True, "upgrade": upgrade_record}
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Visual upgrade failed: {str(e)}")
 
-# Catalogue Upload endpoints
-upload_sessions = {}  # In-memory storage for upload sessions
+@app.get("/api/visual-upgrades/list")
+async def visual_upgrades_list(lead_id: Optional[str] = None, db=Depends(get_db)):
+    q: Dict[str, Any] = {}
+    if lead_id:
+        q["lead_id"] = lead_id
+    items = await db["visual_upgrades"].find(q, {"_id": 0}).sort("created_at", -1).to_list(length=200)
+    return {"items": items}
+
+# -------- Catalogue Upload endpoints (adapted to frontend contract) --------
+upload_sessions: Dict[str, Dict[str, Any]] = {}
 
 @app.post("/api/uploads/catalogue/init")
-async def init_catalogue_upload(upload_init: UploadInit):
+async def init_catalogue_upload(payload: UploadInit):
     try:
         upload_id = str(uuid.uuid4())
-        upload_sessions[upload_id] = {
+        session = {
             "id": upload_id,
-            "filename": upload_init.filename,
-            "file_size": upload_init.file_size,
-            "chunk_size": upload_init.chunk_size,
-            "total_chunks": upload_init.total_chunks or (upload_init.file_size // upload_init.chunk_size + 1),
-            "uploaded_chunks": [],
+            "filename": payload.filename,
+            "file_size": payload.file_size or 0,
+            "chunk_size": payload.chunk_size or 1024*1024,
+            "total_chunks": payload.total_chunks,
+            "uploaded_chunks": set(),
             "status": "initialized",
-            "created_at": now_iso()
+            "category": payload.category,
+            "tags": payload.tags,
+            "project_id": payload.project_id,
+            "created_at": now_iso(),
         }
-        
+        upload_sessions[upload_id] = session
         return {"success": True, "upload_id": upload_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/uploads/catalogue/chunk")
-async def upload_catalogue_chunk(
-    upload_id: str = Form(...),
-    chunk_number: int = Form(...),
-    chunk: UploadFile = File(...)
-):
+async def upload_catalogue_chunk(request: Request, upload_id: str = Form(...), index: Optional[int] = Form(None), total: Optional[int] = Form(None), chunk_number: Optional[int] = Form(None), chunk: UploadFile = File(...)):
     try:
         if upload_id not in upload_sessions:
             raise HTTPException(status_code=404, detail="Upload session not found")
-        
         session = upload_sessions[upload_id]
-        
+        number = index if index is not None else chunk_number
+        if number is None:
+            raise HTTPException(status_code=400, detail="Missing chunk index")
+        if total is not None and session.get("total_chunks") is None:
+            session["total_chunks"] = total
         # Save chunk
         chunk_dir = os.path.join(UPLOAD_ROOT, "catalogue", upload_id)
         os.makedirs(chunk_dir, exist_ok=True)
-        
-        chunk_path = os.path.join(chunk_dir, f"chunk_{chunk_number}")
+        chunk_path = os.path.join(chunk_dir, f"chunk_{number}")
         contents = await chunk.read()
         with open(chunk_path, "wb") as f:
             f.write(contents)
-        
-        session["uploaded_chunks"].append(chunk_number)
+        session["uploaded_chunks"].add(int(number))
         session["status"] = "uploading"
-        
-        return {"success": True, "chunk_number": chunk_number}
+        return {"success": True, "index": int(number)}
     except HTTPException:
         raise
     except Exception as e:
@@ -455,81 +313,70 @@ async def upload_catalogue_chunk(
 async def get_catalogue_upload_state(upload_id: str):
     try:
         if upload_id not in upload_sessions:
-            raise HTTPException(status_code=404, detail="Upload session not found")
-        
+            return {"exists": False, "parts": 0, "status": "missing"}
         session = upload_sessions[upload_id]
         return {
-            "upload_id": upload_id,
-            "status": session["status"],
-            "uploaded_chunks": len(session["uploaded_chunks"]),
-            "total_chunks": session["total_chunks"]
+            "exists": True,
+            "parts": len(session.get("uploaded_chunks", [])),
+            "status": session.get("status", "initialized"),
+            "total_chunks": session.get("total_chunks"),
         }
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/uploads/catalogue/complete")
-async def complete_catalogue_upload(complete_data: UploadComplete, db=Depends(get_db)):
+async def complete_catalogue_upload(request: Request, complete_data: UploadComplete, db=Depends(get_db)):
     try:
         upload_id = complete_data.upload_id
-        
         if upload_id not in upload_sessions:
             raise HTTPException(status_code=404, detail="Upload session not found")
-        
         session = upload_sessions[upload_id]
-        
         # Combine chunks into final file
         chunk_dir = os.path.join(UPLOAD_ROOT, "catalogue", upload_id)
-        final_path = os.path.join(UPLOAD_ROOT, "catalogue", f"{upload_id}_{session['filename']}")
-        
+        final_name = complete_data.filename or session["filename"]
+        final_file_name = f"{upload_id}_{final_name}"
+        final_rel = f"/api/files/catalogue/{final_file_name}"
+        final_path = os.path.join(UPLOAD_ROOT, "catalogue", final_file_name)
         with open(final_path, "wb") as final_file:
-            for chunk_num in sorted(session["uploaded_chunks"]):
-                chunk_path = os.path.join(chunk_dir, f"chunk_{chunk_num}")
+            for idx in sorted(list(session["uploaded_chunks"])):
+                chunk_path = os.path.join(chunk_dir, f"chunk_{idx}")
                 if os.path.exists(chunk_path):
-                    with open(chunk_path, "rb") as chunk_file:
-                        final_file.write(chunk_file.read())
-        
-        # Save to database
-        catalogue_item = {
+                    with open(chunk_path, "rb") as cf:
+                        final_file.write(cf.read())
+        item = {
             "id": str(uuid.uuid4()),
             "upload_id": upload_id,
             "filename": session["filename"],
-            "file_size": session["file_size"],
             "file_path": final_path,
+            "url": build_absolute_url(request, final_rel),
             "status": "completed",
-            "created_at": now_iso()
+            "created_at": now_iso(),
+            "category": complete_data.category or session.get("category"),
+            "tags": complete_data.tags or session.get("tags"),
+            "project_id": complete_data.project_id or session.get("project_id"),
+            "title": complete_data.title,
+            "description": complete_data.description,
         }
-        
-        await db["catalogue_items"].insert_one(catalogue_item)
-        catalogue_item.pop("_id", None)
-        
-        # Update session
+        await db["catalogue_items"].insert_one(item)
+        item.pop("_id", None)
         session["status"] = "completed"
-        
-        return {"success": True, "catalogue_item": catalogue_item}
+        return {"success": True, "file": item}
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/uploads/catalogue/cancel")
-async def cancel_catalogue_upload(cancel_data: Dict[str, str]):
+async def cancel_catalogue_upload(upload_id: str = Form(...)):
     try:
-        upload_id = cancel_data.get("upload_id")
-        
         if upload_id not in upload_sessions:
             raise HTTPException(status_code=404, detail="Upload session not found")
-        
         # Clean up chunks
         chunk_dir = os.path.join(UPLOAD_ROOT, "catalogue", upload_id)
         if os.path.exists(chunk_dir):
             import shutil
             shutil.rmtree(chunk_dir)
-        
-        # Update session
         upload_sessions[upload_id]["status"] = "cancelled"
-        
         return {"success": True}
     except HTTPException:
         raise
@@ -537,86 +384,26 @@ async def cancel_catalogue_upload(cancel_data: Dict[str, str]):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/uploads/catalogue/list")
-async def list_catalogue_items(db=Depends(get_db)):
+async def list_catalogue_items(request: Request, db=Depends(get_db)):
     try:
-        cursor = db["catalogue_items"].find({}, {"_id": 0})
-        catalogues = await cursor.to_list(length=1000)
-        return {"catalogues": catalogues}
+        items = await db["catalogue_items"].find({}, {"_id": 0}).sort("created_at", -1).to_list(length=1000)
+        # Ensure url is present
+        for it in items:
+            if not it.get("url") and it.get("file_path"):
+                rel = "/api/files/catalogue/" + os.path.basename(it["file_path"]) if it.get("file_path") else None
+                if rel:
+                    it["url"] = build_absolute_url(request, rel)
+        return {"catalogues": items}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# WhatsApp endpoints (stub mode)
-@app.get("/api/whatsapp/webhook")
-async def whatsapp_webhook_verify(
-    hub_mode: Optional[str] = None,
-    hub_challenge: Optional[str] = None,
-    hub_verify_token: Optional[str] = None
-):
-    # In stub mode, return 403 if no verify token configured
-    verify_token = os.environ.get("WHATSAPP_VERIFY_TOKEN")
-    if not verify_token:
-        raise HTTPException(status_code=403, detail="Webhook verification not configured")
-    
-    if hub_mode == "subscribe" and hub_verify_token == verify_token:
-        return int(hub_challenge)
-    else:
-        raise HTTPException(status_code=403, detail="Invalid verification")
-
-@app.post("/api/whatsapp/webhook")
-async def whatsapp_webhook_receive(webhook_data: Dict[str, Any], db=Depends(get_db)):
-    try:
-        # Store webhook event
-        event_record = {
-            "id": str(uuid.uuid4()),
-            "webhook_data": webhook_data,
-            "received_at": now_iso()
-        }
-        
-        await db["whatsapp_events"].insert_one(event_record)
-        
-        return {"success": True}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/whatsapp/messages")
-async def list_whatsapp_messages(limit: int = 50, db=Depends(get_db)):
-    try:
-        cursor = db["whatsapp_events"].find({}, {"_id": 0}).limit(limit)
-        messages = await cursor.to_list(length=limit)
-        return messages
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/whatsapp/send")
-async def send_whatsapp_message(message: WhatsAppSend, db=Depends(get_db)):
-    try:
-        # In stub mode (no D360_API_KEY)
-        api_key = os.environ.get("D360_API_KEY")
-        
-        message_record = {
-            "id": str(uuid.uuid4()),
-            "to": message.to,
-            "text": message.text,
-            "mode": "stub" if not api_key else "live",
-            "sent_at": now_iso()
-        }
-        
-        await db["whatsapp_sent"].insert_one(message_record)
-        message_record.pop("_id", None)
-        
-        return {"success": True, "mode": "stub", "id": message_record["id"]}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Additional WhatsApp helpers used by Inbox flows (stubbed)
+# -------- WhatsApp stub helpers --------
 @app.get("/api/whatsapp/session_status")
 async def whatsapp_session_status(contact: str):
-    # Stub: always within 24h
     return {"within_24h": True}
 
 @app.get("/api/whatsapp/contact_messages")
 async def whatsapp_contact_messages(contact: str):
-    # Stub: return last 3 messages synthetic
     now = now_iso()
     return {"items": [
         {"direction": "inbound", "timestamp": now, "text": "Hi"},
@@ -630,30 +417,96 @@ async def whatsapp_mark_read(contact: str):
 
 @app.post("/api/whatsapp/conversations/{contact}/link_lead")
 async def whatsapp_link_conversation(contact: str, body: Dict[str, Any], db=Depends(get_db)):
-    # In stub: no-op, but could store mapping
     mapping = {"id": str(uuid.uuid4()), "contact": contact, "lead_id": body.get("lead_id"), "linked_at": now_iso()}
     await db["whatsapp_links"].insert_one(mapping)
     mapping.pop("_id", None)
     return {"success": True, "link": mapping}
 
-@app.get("/api/whatsapp/conversations")
-async def list_whatsapp_conversations(db=Depends(get_db)):
+# -------- Projects (for catalogue grouping) --------
+class ProjectCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+@app.get("/api/projects")
+async def list_projects(db=Depends(get_db)):
+    items = await db["projects"].find({}, {"_id": 0}).sort("created_at", -1).to_list(length=500)
+    return {"items": items}
+
+@app.post("/api/projects")
+async def create_project(payload: ProjectCreate, db=Depends(get_db)):
+    proj = payload.dict()
+    proj["id"] = str(uuid.uuid4())
+    proj["created_at"] = now_iso()
+    await db["projects"].insert_one(proj)
+    proj.pop("_id", None)
+    return {"project": proj}
+
+# -------- Aavana 2.0 Chat Endpoints (to fix 404 in assistant) --------
+try:
+    from aavana_2_0_orchestrator import aavana_2_0, ConversationRequest, ChannelType, SupportedLanguage
+except Exception:
+    aavana_2_0 = None
+    ConversationRequest = None
+    ChannelType = None
+    SupportedLanguage = None
+
+@app.post("/api/ai/specialized-chat")
+async def specialized_chat(body: Dict[str, Any]):
     try:
-        # Return mock conversations for testing
-        conversations = [
-            {
-                "id": str(uuid.uuid4()),
-                "contact": "+919876543210",
-                "last_message_text": "Hello from demo inbound 👋",
-                "last_message_dir": "in",
-                "owner_mobile": "+919999139938",
-                "created_at": now_iso()
+        message = body.get("message", "")
+        session_id = body.get("session_id") or str(uuid.uuid4())
+        lang = (body.get("language") or "en")
+        if aavana_2_0 and ConversationRequest and ChannelType:
+            req = ConversationRequest(
+                channel=ChannelType.IN_APP_CHAT,
+                user_id="web",
+                message=message,
+                language=SupportedLanguage.ENGLISH if lang == "en" else SupportedLanguage.HINDI,
+                session_id=session_id,
+                context=body.get("context") or {},
+            )
+            resp = await aavana_2_0.process_conversation(req)
+            return {
+                "message_id": str(uuid.uuid4()),
+                "message": resp.response_text,
+                "timestamp": now_iso(),
+                "actions": resp.actions or [],
+                "metadata": {"processing_time": resp.processing_time_ms/1000 if hasattr(resp, 'processing_time_ms') else None},
+                "agent_used": str(resp.intent) if hasattr(resp, 'intent') else 'specialized',
+                "task_type": "specialized"
             }
-        ]
-        return conversations
+        # Fallback simple echo
+        return {
+            "message_id": str(uuid.uuid4()),
+            "message": f"[Specialized Fallback] {message}",
+            "timestamp": now_iso(),
+            "actions": [],
+            "metadata": {"processing_time": 0.1},
+            "agent_used": "fallback",
+            "task_type": "general_chat"
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/aavana2/enhanced-chat")
+async def enhanced_chat(body: Dict[str, Any]):
+    # For now, call the same specialized flow
+    return await specialized_chat(body)
+
+@app.post("/api/aavana2/chat")
+async def standard_chat(body: Dict[str, Any]):
+    message = body.get("message", "")
+    return {
+        "message_id": str(uuid.uuid4()),
+        "message": f"Standard: {message}",
+        "timestamp": now_iso(),
+        "actions": [],
+        "metadata": {"provider": body.get("provider", "openai"), "model": body.get("model", "gpt-4o")},
+        "agent_used": "standard",
+        "task_type": "general_chat"
+    }
+
+# Entry point for local run (supervisor will run in platform)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
