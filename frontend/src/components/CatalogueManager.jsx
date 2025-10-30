@@ -12,6 +12,8 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
   const controllersRef = useRef({}) // key: jobId -> AbortController
 
   const load = async()=>{
+  useEffect(()=>{ setProjectId(externalProjectId) }, [externalProjectId])
+
     try{
       const res = await fetch(`${API}/api/uploads/catalogue/list`)
       const data = await res.json()
