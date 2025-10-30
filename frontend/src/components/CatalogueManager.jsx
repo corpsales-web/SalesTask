@@ -18,6 +18,8 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
       setCatalogues(Array.isArray(data.catalogues) ? data.catalogues : [])
     }catch(e){ console.error('catalogue list', e) }
   }
+  const [projectId, setProjectId] = useState(externalProjectId)
+
   useEffect(()=>{ load() },[])
 
   const createJob = (file)=>({
