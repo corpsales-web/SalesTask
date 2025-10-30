@@ -43,7 +43,7 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
       // init if not already
       let uploadId = job.uploadId
       if (!uploadId) {
-        const initRes = await fetch(`${API}/api/uploads/catalogue/init`,{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ filename: file.name, category: uploadCategory, tags: uploadTags })})
+        const initRes = await fetch(`${API}/api/uploads/catalogue/init`,{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ filename: file.name, category: uploadCategory, tags: uploadTags, project_id: projectId })})
         if(!initRes.ok) throw new Error('init failed')
         const init = await initRes.json()
         uploadId = init.upload_id
