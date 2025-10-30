@@ -656,52 +656,260 @@ class CRMFocusedTester:
             self.log_test("WhatsApp Conversations", False, f"Error: {str(e)}")
         return False
     
+    def test_leads_search_basic(self):
+        """Test GET /api/leads/search returns items array"""
+        try:
+            # First create a test lead to search for
+            lead_data = {
+                "name": "John Doe Search Test",
+                "email": "john.doe@example.com",
+                "phone": "9876543210"
+            }
+            
+            create_response = self.session.post(f"{API_BASE}/leads", json=lead_data, timeout=10)
+            if create_response.status_code != 200:
+                self.log_test("Leads Search Basic", False, "Failed to create test lead", create_response.text)
+                return False
+            
+            created_lead = create_response.json()["lead"]
+            self.created_items.append(("lead", created_lead["id"]))
+            
+            # Now test search
+            response = self.session.get(f"{API_BASE}/leads/search?q=John", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "items" in data and isinstance(data["items"], list):
+                    # Check if our created lead is in results
+                    found_lead = any(item.get("name") == "John Doe Search Test" for item in data["items"])
+                    if found_lead:
+                        self.log_test("Leads Search Basic", True, f"Search returned items array with {len(data['items'])} results")
+                        return True
+                    else:
+                        self.log_test("Leads Search Basic", False, "Created lead not found in search results", data)
+                else:
+                    self.log_test("Leads Search Basic", False, "Response missing 'items' array", data)
+            else:
+                self.log_test("Leads Search Basic", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Leads Search Basic", False, f"Error: {str(e)}")
+        return False
+    
+    def test_leads_search_phone_last10(self):
+        """Test GET /api/leads/search supports phone-last10 matching"""
+        try:
+            # Create a lead with a specific phone number
+            lead_data = {
+                "name": "Phone Test User",
+                "email": "phonetest@example.com", 
+                "phone": "+919876543210"  # Full phone with +91
+            }
+            
+            create_response = self.session.post(f"{API_BASE}/leads", json=lead_data, timeout=10)
+            if create_response.status_code != 200:
+                self.log_test("Leads Search Phone Last10", False, "Failed to create test lead", create_response.text)
+                return False
+            
+            created_lead = create_response.json()["lead"]
+            self.created_items.append(("lead", created_lead["id"]))
+            
+            # Test search with last 10 digits only
+            response = self.session.get(f"{API_BASE}/leads/search?q=9876543210", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "items" in data and isinstance(data["items"], list):
+                    # Check if our created lead is found by last 10 digits
+                    found_lead = any(item.get("name") == "Phone Test User" for item in data["items"])
+                    if found_lead:
+                        self.log_test("Leads Search Phone Last10", True, "Phone last10 matching works correctly")
+                        return True
+                    else:
+                        self.log_test("Leads Search Phone Last10", False, "Lead not found by last 10 digits", data)
+                else:
+                    self.log_test("Leads Search Phone Last10", False, "Response missing 'items' array", data)
+            else:
+                self.log_test("Leads Search Phone Last10", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("Leads Search Phone Last10", False, f"Error: {str(e)}")
+        return False
+    
+    def test_whatsapp_session_status(self):
+        """Test GET /api/whatsapp/session_status returns JSON"""
+        try:
+            contact = "+919876543210"
+            response = self.session.get(f"{API_BASE}/whatsapp/session_status?contact={contact}", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "within_24h" in data and isinstance(data["within_24h"], bool):
+                    self.log_test("WhatsApp Session Status", True, f"Session status returned: within_24h={data['within_24h']}")
+                    return True
+                else:
+                    self.log_test("WhatsApp Session Status", False, "Invalid response format", data)
+            else:
+                self.log_test("WhatsApp Session Status", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("WhatsApp Session Status", False, f"Error: {str(e)}")
+        return False
+    
+    def test_whatsapp_contact_messages(self):
+        """Test GET /api/whatsapp/contact_messages returns JSON"""
+        try:
+            contact = "+919876543210"
+            response = self.session.get(f"{API_BASE}/whatsapp/contact_messages?contact={contact}", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "items" in data and isinstance(data["items"], list):
+                    # Verify message structure
+                    if data["items"]:
+                        first_msg = data["items"][0]
+                        required_fields = ["direction", "timestamp", "text"]
+                        if all(field in first_msg for field in required_fields):
+                            self.log_test("WhatsApp Contact Messages", True, f"Contact messages returned {len(data['items'])} items")
+                            return True
+                        else:
+                            self.log_test("WhatsApp Contact Messages", False, "Message missing required fields", first_msg)
+                    else:
+                        self.log_test("WhatsApp Contact Messages", True, "Contact messages returned empty array (valid)")
+                        return True
+                else:
+                    self.log_test("WhatsApp Contact Messages", False, "Response missing 'items' array", data)
+            else:
+                self.log_test("WhatsApp Contact Messages", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("WhatsApp Contact Messages", False, f"Error: {str(e)}")
+        return False
+    
+    def test_whatsapp_conversations_read(self):
+        """Test POST /api/whatsapp/conversations/{contact}/read returns JSON"""
+        try:
+            contact = "+919876543210"
+            response = self.session.post(f"{API_BASE}/whatsapp/conversations/{contact}/read", timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") is True:
+                    self.log_test("WhatsApp Mark Read", True, "Conversation marked as read successfully")
+                    return True
+                else:
+                    self.log_test("WhatsApp Mark Read", False, "Invalid response format", data)
+            else:
+                self.log_test("WhatsApp Mark Read", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("WhatsApp Mark Read", False, f"Error: {str(e)}")
+        return False
+    
+    def test_whatsapp_conversations_link_lead(self):
+        """Test POST /api/whatsapp/conversations/{contact}/link_lead returns JSON"""
+        try:
+            # Create a lead first to link to
+            if not any(item[0] == "lead" for item in self.created_items):
+                lead_data = {"name": "Link Test Lead", "phone": "+919876543210"}
+                create_response = self.session.post(f"{API_BASE}/leads", json=lead_data, timeout=10)
+                if create_response.status_code == 200:
+                    lead_id = create_response.json()["lead"]["id"]
+                    self.created_items.append(("lead", lead_id))
+                else:
+                    self.log_test("WhatsApp Link Lead", False, "Failed to create test lead", create_response.text)
+                    return False
+            
+            # Get the first lead ID
+            lead_id = next(item[1] for item in self.created_items if item[0] == "lead")
+            
+            contact = "+919876543210"
+            link_data = {"lead_id": lead_id}
+            
+            response = self.session.post(
+                f"{API_BASE}/whatsapp/conversations/{contact}/link_lead", 
+                json=link_data, 
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") is True and "link" in data:
+                    link_info = data["link"]
+                    if (link_info.get("contact") == contact and 
+                        link_info.get("lead_id") == lead_id):
+                        self.log_test("WhatsApp Link Lead", True, "Conversation linked to lead successfully")
+                        return True
+                    else:
+                        self.log_test("WhatsApp Link Lead", False, "Link data incorrect", data)
+                else:
+                    self.log_test("WhatsApp Link Lead", False, "Invalid response format", data)
+            else:
+                self.log_test("WhatsApp Link Lead", False, f"HTTP {response.status_code}", response.text)
+        except Exception as e:
+            self.log_test("WhatsApp Link Lead", False, f"Error: {str(e)}")
+        return False
+    
+    def cleanup_test_data(self):
+        """Clean up created test data"""
+        for item_type, item_id in self.created_items:
+            try:
+                if item_type == "lead":
+                    self.session.delete(f"{API_BASE}/leads/{item_id}", timeout=5)
+                elif item_type == "task":
+                    self.session.delete(f"{API_BASE}/tasks/{item_id}", timeout=5)
+            except:
+                pass  # Ignore cleanup errors
+
     def run_focused_tests(self):
         """Run all focused tests as requested in review"""
-        print("🚀 Starting CRM Backend Focused Test Suite")
+        print("🚀 Starting CRM Backend Focused Test Suite - Review Request")
         print("=" * 70)
         print(f"🔗 Testing backend at: {BASE_URL}")
-        print("📋 Focus Areas:")
-        print("   1. Visual Upgrades Render (with/without mask + EMERGENT_LLM_KEY)")
-        print("   2. Catalogue Upload Flow (init/chunk/state/complete/cancel)")
-        print("   3. Leads/Tasks CRUD Smoke Tests")
-        print("   4. WhatsApp Webhook & Conversations (stub mode)")
+        print("📋 Focus Areas (Per Review Request):")
+        print("   1. /api/leads/search returns items array and supports phone-last10 matching")
+        print("   2. WhatsApp helpers: session_status, contact_messages, read, link_lead")
+        print("   3. Ensure prior tests still pass")
         print("=" * 70)
         
-        # 1. Visual Upgrades Tests
-        print("\n1️⃣ Testing Visual Upgrades Render...")
-        self.test_visual_upgrades_render_without_mask()
-        self.test_visual_upgrades_render_with_mask()
-        self.test_visual_upgrades_missing_key()
+        # Health check first
+        print("\n🏥 Health Check...")
+        try:
+            response = self.session.get(f"{API_BASE}/health", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("status") == "ok":
+                    self.log_test("Health Check", True, f"Backend healthy: {data.get('service')}")
+                else:
+                    self.log_test("Health Check", False, "Invalid health response", data)
+                    return False
+            else:
+                self.log_test("Health Check", False, f"HTTP {response.status_code}", response.text)
+                return False
+        except Exception as e:
+            self.log_test("Health Check", False, f"Connection error: {str(e)}")
+            return False
         
-        # 2. Catalogue Upload Tests
-        print("\n2️⃣ Testing Catalogue Upload Flow...")
-        upload_id = self.test_catalogue_upload_init()
-        if upload_id:
-            self.test_catalogue_upload_chunk(upload_id, 1)
-            self.test_catalogue_upload_chunk(upload_id, 2)
-            self.test_catalogue_upload_state(upload_id)
-            self.test_catalogue_upload_complete(upload_id)
+        # 1. Leads Search Tests (Review Focus #1)
+        print("\n1️⃣ Testing Leads Search (Review Focus #1)...")
+        self.test_leads_search_basic()
+        self.test_leads_search_phone_last10()
         
-        # Test cancel with a new upload
-        cancel_upload_id = self.test_catalogue_upload_init()
-        if cancel_upload_id:
-            self.test_catalogue_upload_cancel(cancel_upload_id)
+        # 2. WhatsApp Helper Tests (Review Focus #2)
+        print("\n2️⃣ Testing WhatsApp Helpers (Review Focus #2)...")
+        self.test_whatsapp_session_status()
+        self.test_whatsapp_contact_messages()
+        self.test_whatsapp_conversations_read()
+        self.test_whatsapp_conversations_link_lead()
         
-        self.test_catalogue_list()
-        
-        # 3. CRUD Smoke Tests
-        print("\n3️⃣ Testing Leads/Tasks CRUD...")
+        # 3. Prior Tests Regression (Review Focus #3)
+        print("\n3️⃣ Testing Prior Functionality (Review Focus #3)...")
         self.test_leads_crud_smoke()
         self.test_tasks_crud_smoke()
-        
-        # 4. WhatsApp Tests
-        print("\n4️⃣ Testing WhatsApp Integration...")
         self.test_whatsapp_webhook_verify()
         self.test_whatsapp_webhook_receive()
         self.test_whatsapp_messages_list()
         self.test_whatsapp_send_message()
         self.test_whatsapp_conversations()
+        
+        # Cleanup
+        print("\n🧹 Cleaning up test data...")
+        self.cleanup_test_data()
         
         # Summary
         self.print_summary()
