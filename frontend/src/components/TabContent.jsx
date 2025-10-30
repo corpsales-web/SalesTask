@@ -11,6 +11,8 @@ import EnhancedLeadEditModal from './EnhancedLeadEditModal';
 const API = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
 
 const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLead, onActionComplete }) => {
+  const openedRef = React.useRef(false);
+
   const { activeTab, setActiveTab } = useTab();
   const [leadForStudio, setLeadForStudio] = useState(null);
   const [pastUpgrades, setPastUpgrades] = useState([]);
