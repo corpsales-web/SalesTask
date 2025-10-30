@@ -605,6 +605,35 @@ async def send_whatsapp_message(message: WhatsAppSend, db=Depends(get_db)):
         await db["whatsapp_sent"].insert_one(message_record)
         message_record.pop("_id", None)
         
+
+# Additional WhatsApp helpers used by Inbox flows (stubbed)
+@app.get("/api/whatsapp/session_status")
+async def whatsapp_session_status(contact: str):
+    # Stub: always within 24h
+    return {"within_24h": True}
+
+@app.get("/api/whatsapp/contact_messages")
+async def whatsapp_contact_messages(contact: str):
+    # Stub: return last 3 messages synthetic
+    now = now_iso()
+    return {"items": [
+        {"direction": "inbound", "timestamp": now, "text": "Hi"},
+        {"direction": "outbound", "timestamp": now, "text": "Hello"},
+        {"direction": "inbound", "timestamp": now, "text": "How are you?"}
+    ]}
+
+@app.post("/api/whatsapp/conversations/{contact}/read")
+async def whatsapp_mark_read(contact: str):
+    return {"success": True}
+
+@app.post("/api/whatsapp/conversations/{contact}/link_lead")
+async def whatsapp_link_conversation(contact: str, body: Dict[str, Any], db=Depends(get_db)):
+    # In stub: no-op, but could store mapping
+    mapping = {"id": str(uuid.uuid4()), "contact": contact, "lead_id": body.get("lead_id"), "linked_at": now_iso()}
+    await db["whatsapp_links"].insert_one(mapping)
+    mapping.pop("_id", None)
+    return {"success": True, "link": mapping}
+
         return {"success": True, "mode": "stub", "id": message_record["id"]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
