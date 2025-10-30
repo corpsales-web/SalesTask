@@ -34,7 +34,7 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
         const chain = localStorage.getItem('POST_CONVERT_CHAIN');
         if (flag === '1') {
           setPostConvertLeadId(id || null);
-          setShowAIModal(true);
+          if (!openedRef.current) { setShowAIModal(true); openedRef.current = true; }
           // Ensure Leads tab active
           setActiveTab('leads');
         }
