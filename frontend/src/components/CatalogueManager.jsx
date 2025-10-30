@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
-const API = process.env.REACT_APP_BACKEND_URL
+const API = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL
 
 export default function CatalogueManager({ isEmbeded=false, projectId: externalProjectId=null }){
   const [catalogues, setCatalogues] = useState([])
