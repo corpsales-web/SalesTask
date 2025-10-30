@@ -22,7 +22,8 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
   const [postConvertLeadId, setPostConvertLeadId] = useState(null);
   const [leadEditOpen, setLeadEditOpen] = useState(false);
   const [leadEditData, setLeadEditData] = useState(null);
-    if (openedRef.current) return;
+  // Guard against infinite re-opens
+  // Note: do NOT early-return at component top level to avoid breaking renders
 
   // Listen for deterministic triggers
   useEffect(() => {
