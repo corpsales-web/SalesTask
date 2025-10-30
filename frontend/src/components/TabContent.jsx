@@ -22,6 +22,7 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
   const [postConvertLeadId, setPostConvertLeadId] = useState(null);
   const [leadEditOpen, setLeadEditOpen] = useState(false);
   const [leadEditData, setLeadEditData] = useState(null);
+    if (openedRef.current) return;
 
   // Listen for deterministic triggers
   useEffect(() => {
