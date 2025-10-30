@@ -506,6 +506,24 @@ async def standard_chat(body: Dict[str, Any]):
         "task_type": "general_chat"
     }
 
+
+# Filtered list endpoint (project_id)
+@app.get("/api/uploads/catalogue/list")
+async def list_catalogue_items_filtered(request: Request, project_id: Optional[str] = None, db=Depends(get_db)):
+    try:
+        q: Dict[str, Any] = {}
+        if project_id:
+            q["project_id"] = project_id
+        items = await db["catalogue_items"].find(q, {"_id": 0}).sort("created_at", -1).to_list(length=1000)
+        for it in items:
+            if not it.get("url") and it.get("file_path"):
+                rel = "/api/files/catalogue/" + os.path.basename(it["file_path"]) if it.get("file_path") else None
+                if rel:
+                    it["url"] = build_absolute_url(request, rel)
+        return {"catalogues": items}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Entry point for local run (supervisor will run in platform)
 if __name__ == "__main__":
     import uvicorn
