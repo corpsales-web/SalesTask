@@ -605,6 +605,9 @@ async def send_whatsapp_message(message: WhatsAppSend, db=Depends(get_db)):
         await db["whatsapp_sent"].insert_one(message_record)
         message_record.pop("_id", None)
         
+        return {"success": True, "mode": "stub", "id": message_record["id"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Additional WhatsApp helpers used by Inbox flows (stubbed)
 @app.get("/api/whatsapp/session_status")
@@ -633,10 +636,6 @@ async def whatsapp_link_conversation(contact: str, body: Dict[str, Any], db=Depe
     await db["whatsapp_links"].insert_one(mapping)
     mapping.pop("_id", None)
     return {"success": True, "link": mapping}
-
-        return {"success": True, "mode": "stub", "id": message_record["id"]}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/whatsapp/conversations")
 async def list_whatsapp_conversations(db=Depends(get_db)):
