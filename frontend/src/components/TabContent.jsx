@@ -5,6 +5,7 @@ import VisualUpgradeStudio from './VisualUpgradeStudio';
 import WhatsAppInbox from './WhatsAppInbox';
 import TaskDelegationPanel from './TaskDelegationPanel';
 import CatalogueManager from './CatalogueManager';
+import ProjectSelector from './ProjectSelector';
 import OptimizedLeadCreationForm from './OptimizedLeadCreationForm';
 import EnhancedLeadEditModal from './EnhancedLeadEditModal';
 
