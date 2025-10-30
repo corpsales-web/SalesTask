@@ -207,7 +207,10 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
               </div>
             </div>
             <div className="mt-6">
-              <div className="text-sm font-semibold mb-2">Catalogue</div>
+              <div className="text-sm font-semibold mb-2">Project Catalogue</div>
+              <div className="flex items-center gap-2 mb-2">
+                <ProjectSelector />
+              </div>
               <CatalogueManager isEmbeded={true} />
             </div>
           </div>
