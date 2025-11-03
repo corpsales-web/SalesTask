@@ -107,7 +107,7 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
 
       const finalJob = jobsRef.current.find(j=>j.id===job.id)
       if (finalJob && finalJob.sent === finalJob.total && finalJob.status === 'uploading'){
-        const compRes = await fetch(`${API}/api/uploads/catalogue/complete`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ upload_id: uploadId, filename: file.name, category: uploadCategory, tags: uploadTags, project_id: projectId, title: title || file.name, description: description || '' }) })
+        const compRes = await fetch(`${API}/api/uploads/catalogue/complete`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ upload_id: uploadId, filename: file.name, category: uploadCategory, tags: uploadTags, project_id: projectId, album_id: albumId, title: title || file.name, description: description || '' }) })
         if(!compRes.ok) throw new Error('complete failed')
         const out = await compRes.json()
         finalJob.status = 'completed'
