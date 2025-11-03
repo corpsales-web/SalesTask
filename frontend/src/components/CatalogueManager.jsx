@@ -23,7 +23,8 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
 
   const load = async()=>{
     try{
-      const res = await fetch(`${API}/api/uploads/catalogue/list${projectId? ('?project_id='+encodeURIComponent(projectId)) : ''}`)
+      const qp = new URLSearchParams(); if (projectId) qp.set('project_id', projectId); if (albumId) qp.set('album_id', albumId);
+      const res = await fetch(`${API}/api/uploads/catalogue/list${qp.toString()? ('?'+qp.toString()) : ''}`)
       const data = await res.json()
       setCatalogues(Array.isArray(data.catalogues) ? data.catalogues : [])
     }catch(e){ console.error('catalogue list', e) }
