@@ -2,7 +2,7 @@ import os
 import uuid
 import re
 import io
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date, timedelta
 from typing import Optional, Dict, Any, List
 from dotenv import load_dotenv
 
@@ -27,6 +27,7 @@ UPLOAD_ROOT = "/app/uploads"
 os.makedirs(UPLOAD_ROOT, exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_ROOT, "visual"), exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_ROOT, "catalogue"), exist_ok=True)
+os.makedirs(os.path.join(UPLOAD_ROOT, "training"), exist_ok=True)
 
 app = FastAPI(title="CRM Backend", version="1.0.0")
 app.add_middleware(
@@ -46,7 +47,6 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 def build_absolute_url(request: Request, path: str) -> str:
-    """Build absolute URL for file access"""
     base_url = str(request.base_url).rstrip('/')
     return f"{base_url}{path}"
 
@@ -94,11 +94,12 @@ class TaskUpdate(BaseModel):
 class UploadInit(BaseModel):
     filename: str
     file_size: Optional[int] = None
-    chunk_size: Optional[int] = 1024 * 1024  # 1MB default
+    chunk_size: Optional[int] = 1024 * 1024
     total_chunks: Optional[int] = None
     category: Optional[str] = None
     tags: Optional[str] = None
     project_id: Optional[str] = None
+    album_id: Optional[str] = None
 
 class UploadComplete(BaseModel):
     upload_id: str
@@ -106,6 +107,7 @@ class UploadComplete(BaseModel):
     category: Optional[str] = None
     tags: Optional[str] = None
     project_id: Optional[str] = None
+    album_id: Optional[str] = None
     title: Optional[str] = None
     description: Optional[str] = None
 
@@ -113,9 +115,17 @@ class WhatsAppSend(BaseModel):
     to: str
     text: str
 
-# Utility functions
+class ProjectCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class AlbumCreate(BaseModel):
+    project_id: str
+    name: str
+    description: Optional[str] = None
+
+# Utility
 def normalize_phone(phone: str) -> str:
-    """Normalize phone number to +91 format"""
     if not phone:
         return phone
     digits = re.sub(r'\D', '', phone)
@@ -128,7 +138,7 @@ def normalize_phone(phone: str) -> str:
     else:
         return f"+91{digits[-10:]}" if len(digits) >= 10 else phone
 
-# -------- Leads Endpoints (abbrev: list/create/get/update/delete) --------
+# -------- Leads --------
 @app.get("/api/leads")
 async def list_leads(page: int = 1, limit: int = 50, db=Depends(get_db)):
     cursor = db["leads"].find({}, {"_id": 0}).skip((page-1)*limit).limit(limit)
@@ -143,6 +153,8 @@ async def create_lead(payload: LeadCreate, db=Depends(get_db)):
     if lead.get("phone"):
         lead["phone"] = normalize_phone(lead["phone"])
     lead["created_at"] = now_iso()
+    if not lead.get("status"):
+        lead["status"] = "New"
     await db["leads"].insert_one(lead)
     lead.pop("_id", None)
     return {"lead": lead}
@@ -170,7 +182,6 @@ async def delete_lead(lead_id: str, db=Depends(get_db)):
     res = await db["leads"].delete_one({"id": lead_id})
     return {"deleted": res.deleted_count == 1}
 
-# Leads search for linking/duplicate checks
 @app.get("/api/leads/search")
 async def search_leads(q: str, page: int = 1, limit: int = 20, db=Depends(get_db)):
     try:
@@ -187,7 +198,7 @@ async def search_leads(q: str, page: int = 1, limit: int = 20, db=Depends(get_db
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# -------- Tasks Endpoints (list/create) --------
+# -------- Tasks --------
 @app.get("/api/tasks")
 async def list_tasks(db=Depends(get_db)):
     items = await db["tasks"].find({}, {"_id": 0}).to_list(length=500)
@@ -204,18 +215,16 @@ async def create_task(payload: TaskCreate, db=Depends(get_db)):
     task.pop("_id", None)
     return {"task": task}
 
-# -------- Visual Upgrades (simplified; render implementation in visual_upgrades.py originally) --------
+# -------- Visual Upgrades (MVP simulate) --------
 @app.post("/api/visual-upgrades/render")
 async def visual_upgrades_render(request: Request, image: UploadFile = File(...), prompt: str = Form(...), size: str = Form("1024x1024"), mask: Optional[UploadFile] = File(None), lead_id: Optional[str] = Form(None), response_format: str = Form("url"), db=Depends(get_db)):
     try:
-        # Persist base image and optional mask
         base_name = f"{uuid.uuid4()}_base.png"
         base_rel = f"/api/files/visual/{base_name}"
         base_path = os.path.join(UPLOAD_ROOT, "visual", base_name)
         with open(base_path, "wb") as f:
             f.write(await image.read())
         base_url = build_absolute_url(request, base_rel)
-
         mask_url = None
         if mask is not None:
             mask_name = f"{uuid.uuid4()}_mask.png"
@@ -224,16 +233,12 @@ async def visual_upgrades_render(request: Request, image: UploadFile = File(...)
             with open(mask_path, "wb") as f:
                 f.write(await mask.read())
             mask_url = build_absolute_url(request, mask_rel)
-
-        # Simulate AI result (in real impl, call emergentintegrations/OpenAI)
         result_name = f"{uuid.uuid4()}_result.png"
         result_rel = f"/api/files/visual/{result_name}"
         result_path = os.path.join(UPLOAD_ROOT, "visual", result_name)
-        # For MVP, just copy base to result
         import shutil
         shutil.copyfile(base_path, result_path)
         result_url = build_absolute_url(request, result_rel)
-
         upgrade_record = {
             "id": str(uuid.uuid4()),
             "lead_id": lead_id,
@@ -258,7 +263,37 @@ async def visual_upgrades_list(lead_id: Optional[str] = None, db=Depends(get_db)
     items = await db["visual_upgrades"].find(q, {"_id": 0}).sort("created_at", -1).to_list(length=200)
     return {"items": items}
 
-# -------- Catalogue Upload endpoints (adapted to frontend contract) --------
+# -------- Projects & Albums --------
+@app.get("/api/projects")
+async def list_projects(db=Depends(get_db)):
+    items = await db["projects"].find({}, {"_id": 0}).sort("created_at", -1).to_list(length=500)
+    return {"items": items}
+
+@app.post("/api/projects")
+async def create_project(payload: ProjectCreate, db=Depends(get_db)):
+    proj = payload.dict()
+    proj["id"] = str(uuid.uuid4())
+    proj["created_at"] = now_iso()
+    await db["projects"].insert_one(proj)
+    proj.pop("_id", None)
+    return {"project": proj}
+
+@app.get("/api/albums")
+async def list_albums(project_id: Optional[str] = None, db=Depends(get_db)):
+    q = {"project_id": project_id} if project_id else {}
+    items = await db["albums"].find(q, {"_id": 0}).sort("created_at", -1).to_list(length=1000)
+    return {"items": items}
+
+@app.post("/api/albums")
+async def create_album(payload: AlbumCreate, db=Depends(get_db)):
+    alb = payload.dict()
+    alb["id"] = str(uuid.uuid4())
+    alb["created_at"] = now_iso()
+    await db["albums"].insert_one(alb)
+    alb.pop("_id", None)
+    return {"album": alb}
+
+# -------- Catalogue Upload (projects + albums) --------
 upload_sessions: Dict[str, Dict[str, Any]] = {}
 
 @app.post("/api/uploads/catalogue/init")
@@ -276,6 +311,7 @@ async def init_catalogue_upload(payload: UploadInit):
             "category": payload.category,
             "tags": payload.tags,
             "project_id": payload.project_id,
+            "album_id": payload.album_id,
             "created_at": now_iso(),
         }
         upload_sessions[upload_id] = session
@@ -284,7 +320,7 @@ async def init_catalogue_upload(payload: UploadInit):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/uploads/catalogue/chunk")
-async def upload_catalogue_chunk(request: Request, upload_id: str = Form(...), index: Optional[int] = Form(None), total: Optional[int] = Form(None), chunk_number: Optional[int] = Form(None), chunk: UploadFile = File(...)):
+async def upload_catalogue_chunk(upload_id: str = Form(...), index: Optional[int] = Form(None), total: Optional[int] = Form(None), chunk_number: Optional[int] = Form(None), chunk: UploadFile = File(...)):
     try:
         if upload_id not in upload_sessions:
             raise HTTPException(status_code=404, detail="Upload session not found")
@@ -294,7 +330,6 @@ async def upload_catalogue_chunk(request: Request, upload_id: str = Form(...), i
             raise HTTPException(status_code=400, detail="Missing chunk index")
         if total is not None and session.get("total_chunks") is None:
             session["total_chunks"] = total
-        # Save chunk
         chunk_dir = os.path.join(UPLOAD_ROOT, "catalogue", upload_id)
         os.makedirs(chunk_dir, exist_ok=True)
         chunk_path = os.path.join(chunk_dir, f"chunk_{number}")
@@ -331,7 +366,6 @@ async def complete_catalogue_upload(request: Request, complete_data: UploadCompl
         if upload_id not in upload_sessions:
             raise HTTPException(status_code=404, detail="Upload session not found")
         session = upload_sessions[upload_id]
-        # Combine chunks into final file
         chunk_dir = os.path.join(UPLOAD_ROOT, "catalogue", upload_id)
         final_name = complete_data.filename or session["filename"]
         final_file_name = f"{upload_id}_{final_name}"
@@ -339,9 +373,9 @@ async def complete_catalogue_upload(request: Request, complete_data: UploadCompl
         final_path = os.path.join(UPLOAD_ROOT, "catalogue", final_file_name)
         with open(final_path, "wb") as final_file:
             for idx in sorted(list(session["uploaded_chunks"])):
-                chunk_path = os.path.join(chunk_dir, f"chunk_{idx}")
-                if os.path.exists(chunk_path):
-                    with open(chunk_path, "rb") as cf:
+                cpath = os.path.join(chunk_dir, f"chunk_{idx}")
+                if os.path.exists(cpath):
+                    with open(cpath, "rb") as cf:
                         final_file.write(cf.read())
         item = {
             "id": str(uuid.uuid4()),
@@ -354,6 +388,7 @@ async def complete_catalogue_upload(request: Request, complete_data: UploadCompl
             "category": complete_data.category or session.get("category"),
             "tags": complete_data.tags or session.get("tags"),
             "project_id": complete_data.project_id or session.get("project_id"),
+            "album_id": complete_data.album_id or session.get("album_id"),
             "title": complete_data.title,
             "description": complete_data.description,
         }
@@ -371,7 +406,6 @@ async def cancel_catalogue_upload(upload_id: str = Form(...)):
     try:
         if upload_id not in upload_sessions:
             raise HTTPException(status_code=404, detail="Upload session not found")
-        # Clean up chunks
         chunk_dir = os.path.join(UPLOAD_ROOT, "catalogue", upload_id)
         if os.path.exists(chunk_dir):
             import shutil
@@ -384,10 +418,14 @@ async def cancel_catalogue_upload(upload_id: str = Form(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/uploads/catalogue/list")
-async def list_catalogue_items(request: Request, db=Depends(get_db)):
+async def list_catalogue_items(request: Request, project_id: Optional[str] = None, album_id: Optional[str] = None, db=Depends(get_db)):
     try:
-        items = await db["catalogue_items"].find({}, {"_id": 0}).sort("created_at", -1).to_list(length=1000)
-        # Ensure url is present
+        q: Dict[str, Any] = {}
+        if project_id:
+            q["project_id"] = project_id
+        if album_id:
+            q["album_id"] = album_id
+        items = await db["catalogue_items"].find(q, {"_id": 0}).sort("created_at", -1).to_list(length=1000)
         for it in items:
             if not it.get("url") and it.get("file_path"):
                 rel = "/api/files/catalogue/" + os.path.basename(it["file_path"]) if it.get("file_path") else None
@@ -397,22 +435,19 @@ async def list_catalogue_items(request: Request, db=Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# -------- WhatsApp stub helpers --------
+# -------- WhatsApp stub helpers + conversations --------
 @app.get("/api/whatsapp/session_status")
 async def whatsapp_session_status(contact: str):
     return {"within_24h": True}
 
 @app.get("/api/whatsapp/contact_messages")
-async def whatsapp_contact_messages(contact: str):
-    now = now_iso()
-    return {"items": [
-        {"direction": "inbound", "timestamp": now, "text": "Hi"},
-        {"direction": "outbound", "timestamp": now, "text": "Hello"},
-        {"direction": "inbound", "timestamp": now, "text": "How are you?"}
-    ]}
+async def whatsapp_contact_messages(contact: str, db=Depends(get_db)):
+    items = await db["whatsapp_messages"].find({"contact": contact}, {"_id": 0}).sort("timestamp", -1).limit(3).to_list(length=3)
+    return {"items": items}
 
 @app.post("/api/whatsapp/conversations/{contact}/read")
-async def whatsapp_mark_read(contact: str):
+async def whatsapp_mark_read(contact: str, db=Depends(get_db)):
+    await db["whatsapp_conversations"].update_one({"contact": contact}, {"$set": {"unread_count": 0}})
     return {"success": True}
 
 @app.post("/api/whatsapp/conversations/{contact}/link_lead")
@@ -422,100 +457,14 @@ async def whatsapp_link_conversation(contact: str, body: Dict[str, Any], db=Depe
     mapping.pop("_id", None)
     return {"success": True, "link": mapping}
 
-# -------- Projects (for catalogue grouping) --------
-class ProjectCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-
-@app.get("/api/projects")
-async def list_projects(db=Depends(get_db)):
-    items = await db["projects"].find({}, {"_id": 0}).sort("created_at", -1).to_list(length=500)
-    return {"items": items}
-
-@app.post("/api/projects")
-async def create_project(payload: ProjectCreate, db=Depends(get_db)):
-    proj = payload.dict()
-    proj["id"] = str(uuid.uuid4())
-    proj["created_at"] = now_iso()
-    await db["projects"].insert_one(proj)
-    proj.pop("_id", None)
-    return {"project": proj}
-
-# -------- Aavana 2.0 Chat Endpoints (to fix 404 in assistant) --------
-try:
-    from aavana_2_0_orchestrator import aavana_2_0, ConversationRequest, ChannelType, SupportedLanguage
-except Exception:
-    aavana_2_0 = None
-    ConversationRequest = None
-    ChannelType = None
-    SupportedLanguage = None
-
-@app.post("/api/ai/specialized-chat")
-async def specialized_chat(body: Dict[str, Any]):
-    try:
-        message = body.get("message", "")
-        session_id = body.get("session_id") or str(uuid.uuid4())
-        lang = (body.get("language") or "en")
-        if aavana_2_0 and ConversationRequest and ChannelType:
-            req = ConversationRequest(
-                channel=ChannelType.IN_APP_CHAT,
-                user_id="web",
-                message=message,
-                language=SupportedLanguage.ENGLISH if lang == "en" else SupportedLanguage.HINDI,
-                session_id=session_id,
-                context=body.get("context") or {},
-            )
-            resp = await aavana_2_0.process_conversation(req)
-            return {
-                "message_id": str(uuid.uuid4()),
-                "message": resp.response_text,
-                "timestamp": now_iso(),
-                "actions": resp.actions or [],
-                "metadata": {"processing_time": resp.processing_time_ms/1000 if hasattr(resp, 'processing_time_ms') else None},
-                "agent_used": str(resp.intent) if hasattr(resp, 'intent') else 'specialized',
-                "task_type": "specialized"
-            }
-        # Fallback simple echo
-        return {
-            "message_id": str(uuid.uuid4()),
-            "message": f"[Specialized Fallback] {message}",
-            "timestamp": now_iso(),
-            "actions": [],
-            "metadata": {"processing_time": 0.1},
-            "agent_used": "fallback",
-            "task_type": "general_chat"
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/aavana2/enhanced-chat")
-async def enhanced_chat(body: Dict[str, Any]):
-    # For now, call the same specialized flow
-    return await specialized_chat(body)
-
-@app.post("/api/aavana2/chat")
-async def standard_chat(body: Dict[str, Any]):
-    message = body.get("message", "")
-    return {
-        "message_id": str(uuid.uuid4()),
-        "message": f"Standard: {message}",
-        "timestamp": now_iso(),
-        "actions": [],
-        "metadata": {"provider": body.get("provider", "openai"), "model": body.get("model", "gpt-4o")},
-        "agent_used": "standard",
-        "task_type": "general_chat"
-    }
-
-
-# ---- WhatsApp Inbox core endpoints (stubbed, DB-backed) ----
 @app.get("/api/whatsapp/conversations")
 async def whatsapp_conversations(limit: int = 50, db=Depends(get_db)):
     items = await db["whatsapp_conversations"].find({}, {"_id": 0}).sort("last_message_at", -1).limit(limit).to_list(length=limit)
-    now = datetime.now(timezone.utc)
+    nowdt = datetime.now(timezone.utc)
     for it in items:
         try:
             ts = datetime.fromisoformat(it.get("last_message_at"))
-            it["age_sec"] = int((now - ts).total_seconds())
+            it["age_sec"] = int((nowdt - ts).total_seconds())
         except Exception:
             it["age_sec"] = None
         it["unread_count"] = it.get("unread_count", 0)
@@ -525,45 +474,23 @@ async def whatsapp_conversations(limit: int = 50, db=Depends(get_db)):
 async def whatsapp_webhook(body: Dict[str, Any], db=Depends(get_db)):
     try:
         changes = body.get("entry", [{}])[0].get("changes", [])
-        messages = []
         for ch in changes:
             val = ch.get("value", {})
-            msgs = val.get("messages", [])
-            for m in msgs:
-                messages.append(m)
-        for m in messages:
-            contact = m.get("from") or m.get("contact") or "unknown"
-            text = (m.get("text") or {}).get("body") if isinstance(m.get("text"), dict) else m.get("text")
-            ts = m.get("timestamp")
-            try:
-                ts_iso = datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat() if ts else now_iso()
-            except Exception:
-                ts_iso = now_iso()
-            conv = await db["whatsapp_conversations"].find_one({"contact": contact})
-            if not conv:
-                conv = {
-                    "id": str(uuid.uuid4()),
-                    "contact": contact,
-                    "last_message_at": ts_iso,
-                    "last_message_text": text or "",
-                    "last_message_dir": "in",
-                    "unread_count": 1,
-                }
-                await db["whatsapp_conversations"].insert_one(conv)
-            else:
-                await db["whatsapp_conversations"].update_one(
-                    {"contact": contact},
-                    {"$set": {"last_message_at": ts_iso, "last_message_text": text or "", "last_message_dir": "in"}, "$inc": {"unread_count": 1}}
-                )
-            msg_doc = {
-                "id": str(uuid.uuid4()),
-                "contact": contact,
-                "direction": "inbound",
-                "type": m.get("type", "text"),
-                "text": text,
-                "timestamp": ts_iso
-            }
-            await db["whatsapp_messages"].insert_one(msg_doc)
+            for m in val.get("messages", []):
+                contact = m.get("from") or m.get("contact") or "unknown"
+                text = (m.get("text") or {}).get("body") if isinstance(m.get("text"), dict) else m.get("text")
+                ts = m.get("timestamp")
+                try:
+                    ts_iso = datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat() if ts else now_iso()
+                except Exception:
+                    ts_iso = now_iso()
+                conv = await db["whatsapp_conversations"].find_one({"contact": contact})
+                if not conv:
+                    conv = {"id": str(uuid.uuid4()), "contact": contact, "last_message_at": ts_iso, "last_message_text": text or "", "last_message_dir": "in", "unread_count": 1}
+                    await db["whatsapp_conversations"].insert_one(conv)
+                else:
+                    await db["whatsapp_conversations"].update_one({"contact": contact}, {"$set": {"last_message_at": ts_iso, "last_message_text": text or "", "last_message_dir": "in"}, "$inc": {"unread_count": 1}})
+                await db["whatsapp_messages"].insert_one({"id": str(uuid.uuid4()), "contact": contact, "direction": "inbound", "type": m.get("type", "text"), "text": text, "timestamp": ts_iso})
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -604,8 +531,7 @@ async def whatsapp_send_media(payload: Dict[str, Any], db=Depends(get_db)):
     await db["whatsapp_messages"].insert_one({"id": str(uuid.uuid4()), "contact": to, "direction": "outbound", "type": media_type, "media_url": media_url, "timestamp": ts_iso})
     return {"success": True}
 
-
-# ---- HRMS minimal endpoints ----
+# ---- HRMS ----
 _hrms_state: Dict[str, Any] = {"today": {"checked_in": False, "checkin_time": None, "checkout_time": None}}
 
 @app.get("/api/hrms/today")
@@ -625,22 +551,23 @@ async def hrms_checkout():
 
 @app.get("/api/hrms/summary")
 async def hrms_summary(days: int = 7):
-    from datetime import date, timedelta
-    today = date.today()
+    todayd = date.today()
     items = []
     for i in range(days):
-        d = today - timedelta(days=i)
+        d = todayd - timedelta(days=i)
         items.append({"date": d.isoformat(), "checked_in": True if i % 2 == 0 else False})
     return {"items": items}
 
-# ---- Training modules ----
+# ---- Training ----
 _training: List[Dict[str, Any]] = []
 
 @app.get("/api/training/modules")
-async def training_list(q: Optional[str] = None):
+async def training_list(q: Optional[str] = None, feature: Optional[str] = None):
     items = _training
+    if feature:
+        items = [m for m in items if m.get("feature") == feature]
     if q:
-        items = [m for m in items if q.lower() in m.get("title", "").lower()]
+        items = [m for m in items if q.lower() in (m.get("title", "").lower())]
     return {"items": items}
 
 @app.post("/api/training/modules")
@@ -648,14 +575,31 @@ async def training_add(body: Dict[str, Any]):
     item = {
         "id": str(uuid.uuid4()),
         "title": body.get("title"),
-        "type": body.get("type"),
+        "type": body.get("type", "link"),
         "url": body.get("url"),
+        "feature": body.get("feature"),
         "created_at": now_iso(),
     }
     _training.insert(0, item)
     return {"module": item}
 
-# ---- Admin settings & roles ----
+@app.post("/api/training/upload")
+async def training_upload(request: Request, file: UploadFile = File(...), title: str = Form(...), feature: str = Form("general")):
+    try:
+        # Save PDF
+        safe_name = f"{uuid.uuid4()}_{file.filename}"
+        rel = f"/api/files/training/{safe_name}"
+        path = os.path.join(UPLOAD_ROOT, "training", safe_name)
+        with open(path, "wb") as f:
+            f.write(await file.read())
+        url = build_absolute_url(request, rel)
+        item = {"id": str(uuid.uuid4()), "title": title, "type": "pdf", "url": url, "feature": feature, "created_at": now_iso()}
+        _training.insert(0, item)
+        return {"module": item}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ---- Admin ----
 _admin_settings: Dict[str, Any] = {"sla_minutes": 300, "whatsapp_mode": "stub"}
 _roles: List[Dict[str, Any]] = [{"id": "admin", "name": "Administrator"}, {"id": "sales", "name": "Sales"}]
 
@@ -672,25 +616,69 @@ async def admin_put_settings(body: Dict[str, Any]):
 async def admin_roles():
     return {"items": _roles}
 
+# ---- AI chat (Aavana 2.0) ----
+try:
+    from aavana_2_0_orchestrator import aavana_2_0, ConversationRequest, ChannelType, SupportedLanguage
+except Exception:
+    aavana_2_0 = None
+    ConversationRequest = None
+    ChannelType = None
+    SupportedLanguage = None
 
-# Filtered list endpoint (project_id)
-@app.get("/api/uploads/catalogue/list")
-async def list_catalogue_items_filtered(request: Request, project_id: Optional[str] = None, db=Depends(get_db)):
+@app.post("/api/ai/specialized-chat")
+async def specialized_chat(body: Dict[str, Any]):
     try:
-        q: Dict[str, Any] = {}
-        if project_id:
-            q["project_id"] = project_id
-        items = await db["catalogue_items"].find(q, {"_id": 0}).sort("created_at", -1).to_list(length=1000)
-        for it in items:
-            if not it.get("url") and it.get("file_path"):
-                rel = "/api/files/catalogue/" + os.path.basename(it["file_path"]) if it.get("file_path") else None
-                if rel:
-                    it["url"] = build_absolute_url(request, rel)
-        return {"catalogues": items}
+        message = body.get("message", "")
+        session_id = body.get("session_id") or str(uuid.uuid4())
+        lang = (body.get("language") or "en")
+        if aavana_2_0 and ConversationRequest and ChannelType:
+            req = ConversationRequest(
+                channel=ChannelType.IN_APP_CHAT,
+                user_id="web",
+                message=message,
+                language=SupportedLanguage.ENGLISH if lang == "en" else SupportedLanguage.HINDI,
+                session_id=session_id,
+                context=body.get("context") or {},
+            )
+            resp = await aavana_2_0.process_conversation(req)
+            return {
+                "message_id": str(uuid.uuid4()),
+                "message": resp.response_text,
+                "timestamp": now_iso(),
+                "actions": resp.actions or [],
+                "metadata": {"processing_time": getattr(resp, 'processing_time_ms', 0)/1000},
+                "agent_used": str(getattr(resp, 'intent', 'specialized')),
+                "task_type": "specialized"
+            }
+        return {
+            "message_id": str(uuid.uuid4()),
+            "message": f"[Specialized Fallback] {message}",
+            "timestamp": now_iso(),
+            "actions": [],
+            "metadata": {"processing_time": 0.05},
+            "agent_used": "fallback",
+            "task_type": "general_chat"
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Entry point for local run (supervisor will run in platform)
+@app.post("/api/aavana2/enhanced-chat")
+async def enhanced_chat(body: Dict[str, Any]):
+    return await specialized_chat(body)
+
+@app.post("/api/aavana2/chat")
+async def standard_chat(body: Dict[str, Any]):
+    message = body.get("message", "")
+    return {
+        "message_id": str(uuid.uuid4()),
+        "message": f"Standard: {message}",
+        "timestamp": now_iso(),
+        "actions": [],
+        "metadata": {"provider": body.get("provider", "openai"), "model": body.get("model", "gpt-4o")},
+        "agent_used": "standard",
+        "task_type": "general_chat"
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
