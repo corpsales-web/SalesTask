@@ -180,6 +180,11 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {catalogues.map((c)=>(
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+              <ProjectSelector value={projectId||''} onChange={(v)=>setProjectId(v||null)} />
+              <AlbumSelector projectId={projectId||''} value={albumId||''} onChange={(v)=>setAlbumId(v||null)} />
+            </div>
+
           <div key={c.id} className="border rounded p-3">
             <div className="font-medium truncate" title={c.title || c.filename}>{c.title || c.filename}</div>
             <div className="text-xs text-gray-600">{c.category || 'general'} • {new Date(c.created_at).toLocaleString()}</div>
