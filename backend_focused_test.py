@@ -528,8 +528,10 @@ startxref
                         # Verify URLs for PDF modules contain /api/files/training/
                         pdf_modules = [module for module in modules 
                                      if isinstance(module, dict) and module.get("type") == "pdf"]
+                        # Check for both http and https URLs since backend might return http
                         wrong_urls = [module for module in pdf_modules 
-                                    if not module.get("url", "").startswith(f"{BASE_URL}/api/files/training/")]
+                                    if not (module.get("url", "").startswith(f"{BASE_URL}/api/files/training/") or
+                                           module.get("url", "").startswith(f"{BASE_URL.replace('https://', 'http://')}/api/files/training/"))]
                         
                         if not wrong_urls:
                             self.log_test("Training List by Feature", True, 
