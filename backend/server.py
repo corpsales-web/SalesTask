@@ -507,6 +507,104 @@ async def standard_chat(body: Dict[str, Any]):
     }
 
 
+# ---- WhatsApp Inbox core endpoints (stubbed, DB-backed) ----
+@app.get("/api/whatsapp/conversations")
+async def whatsapp_conversations(limit: int = 50, db=Depends(get_db)):
+    items = await db["whatsapp_conversations"].find({}, {"_id": 0}).sort("last_message_at", -1).limit(limit).to_list(length=limit)
+    now = datetime.now(timezone.utc)
+    for it in items:
+        try:
+            ts = datetime.fromisoformat(it.get("last_message_at"))
+            it["age_sec"] = int((now - ts).total_seconds())
+        except Exception:
+            it["age_sec"] = None
+        it["unread_count"] = it.get("unread_count", 0)
+    return items
+
+@app.post("/api/whatsapp/webhook")
+async def whatsapp_webhook(body: Dict[str, Any], db=Depends(get_db)):
+    try:
+        changes = body.get("entry", [{}])[0].get("changes", [])
+        messages = []
+        for ch in changes:
+            val = ch.get("value", {})
+            msgs = val.get("messages", [])
+            for m in msgs:
+                messages.append(m)
+        for m in messages:
+            contact = m.get("from") or m.get("contact") or "unknown"
+            text = (m.get("text") or {}).get("body") if isinstance(m.get("text"), dict) else m.get("text")
+            ts = m.get("timestamp")
+            try:
+                ts_iso = datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat() if ts else now_iso()
+            except Exception:
+                ts_iso = now_iso()
+            conv = await db["whatsapp_conversations"].find_one({"contact": contact})
+            if not conv:
+                conv = {
+                    "id": str(uuid.uuid4()),
+                    "contact": contact,
+                    "last_message_at": ts_iso,
+                    "last_message_text": text or "",
+                    "last_message_dir": "in",
+                    "unread_count": 1,
+                }
+                await db["whatsapp_conversations"].insert_one(conv)
+            else:
+                await db["whatsapp_conversations"].update_one(
+                    {"contact": contact},
+                    {"$set": {"last_message_at": ts_iso, "last_message_text": text or "", "last_message_dir": "in"}, "$inc": {"unread_count": 1}}
+                )
+            msg_doc = {
+                "id": str(uuid.uuid4()),
+                "contact": contact,
+                "direction": "inbound",
+                "type": m.get("type", "text"),
+                "text": text,
+                "timestamp": ts_iso
+            }
+            await db["whatsapp_messages"].insert_one(msg_doc)
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/whatsapp/send")
+async def whatsapp_send(payload: Dict[str, Any], db=Depends(get_db)):
+    to = payload.get("to")
+    text = payload.get("text") or ""
+    ts_iso = now_iso()
+    conv = await db["whatsapp_conversations"].find_one({"contact": to})
+    if not conv:
+        conv = {"id": str(uuid.uuid4()), "contact": to, "last_message_at": ts_iso, "last_message_text": text, "last_message_dir": "out", "unread_count": 0}
+        await db["whatsapp_conversations"].insert_one(conv)
+    else:
+        await db["whatsapp_conversations"].update_one({"contact": to}, {"$set": {"last_message_at": ts_iso, "last_message_text": text, "last_message_dir": "out"}})
+    await db["whatsapp_messages"].insert_one({"id": str(uuid.uuid4()), "contact": to, "direction": "outbound", "type": "text", "text": text, "timestamp": ts_iso})
+    return {"success": True}
+
+@app.post("/api/whatsapp/send_template")
+async def whatsapp_send_template(payload: Dict[str, Any], db=Depends(get_db)):
+    to = payload.get("to")
+    template_name = payload.get("template_name", "template")
+    text = f"[TEMPLATE:{template_name}]"
+    return await whatsapp_send({"to": to, "text": text}, db)
+
+@app.post("/api/whatsapp/send_media")
+async def whatsapp_send_media(payload: Dict[str, Any], db=Depends(get_db)):
+    to = payload.get("to")
+    media_url = payload.get("media_url")
+    media_type = payload.get("media_type", "image")
+    ts_iso = now_iso()
+    conv = await db["whatsapp_conversations"].find_one({"contact": to})
+    if not conv:
+        conv = {"id": str(uuid.uuid4()), "contact": to, "last_message_at": ts_iso, "last_message_text": f"{media_type}:{media_url}", "last_message_dir": "out", "unread_count": 0}
+        await db["whatsapp_conversations"].insert_one(conv)
+    else:
+        await db["whatsapp_conversations"].update_one({"contact": to}, {"$set": {"last_message_at": ts_iso, "last_message_text": f"{media_type}:{media_url}", "last_message_dir": "out"}})
+    await db["whatsapp_messages"].insert_one({"id": str(uuid.uuid4()), "contact": to, "direction": "outbound", "type": media_type, "media_url": media_url, "timestamp": ts_iso})
+    return {"success": True}
+
+
 # ---- HRMS minimal endpoints ----
 _hrms_state: Dict[str, Any] = {"today": {"checked_in": False, "checkin_time": None, "checkout_time": None}}
 
