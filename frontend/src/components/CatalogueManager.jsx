@@ -47,6 +47,8 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
   const updateJob = (job) => {
     setJobs(prev=>{
       const next = prev.map(j=> j.id===job.id ? {...j, ...job} : j)
+      if (!albumId && session.album_id) setAlbumId(session.album_id)
+
       jobsRef.current = next
       return next
     })
