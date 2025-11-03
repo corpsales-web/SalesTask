@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import ProjectSelector from './ProjectSelector'
+import AlbumSelector from './AlbumSelector'
 
 const API = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL
 
