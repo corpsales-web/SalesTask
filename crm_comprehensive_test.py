@@ -1151,7 +1151,7 @@ class CRMComprehensiveTester:
         
         # Critical tests that must pass
         critical_tests = [
-            "Health Check",
+            "Backend Connectivity",
             "Catalogue Upload Complete",
             "Catalogue File Download",  # KEY: /api/files/catalogue/*
             "Training Upload", 
