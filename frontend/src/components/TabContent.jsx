@@ -5,9 +5,13 @@ import VisualUpgradeStudio from './VisualUpgradeStudio';
 import WhatsAppInbox from './WhatsAppInbox';
 import TaskDelegationPanel from './TaskDelegationPanel';
 import CatalogueManager from './CatalogueManager';
-import ProjectSelector from './ProjectSelector';
 import OptimizedLeadCreationForm from './OptimizedLeadCreationForm';
 import EnhancedLeadEditModal from './EnhancedLeadEditModal';
+import ProjectSelector from './ProjectSelector';
+import PipelineKanban from './PipelineKanban';
+import HRMSPanel from './HRMSPanel';
+import TrainingCenter from './TrainingCenter';
+import AdminSettings from './AdminSettings';
 
 const API = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
 
@@ -17,14 +21,13 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
   const { activeTab, setActiveTab } = useTab();
   const [leadForStudio, setLeadForStudio] = useState(null);
   const [pastUpgrades, setPastUpgrades] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState('')
 
   // AI Add Lead auto-open + chain to edit modal
   const [showAIModal, setShowAIModal] = useState(false);
   const [postConvertLeadId, setPostConvertLeadId] = useState(null);
   const [leadEditOpen, setLeadEditOpen] = useState(false);
   const [leadEditData, setLeadEditData] = useState(null);
-  // Guard against infinite re-opens
-  // Note: do NOT early-return at component top level to avoid breaking renders
 
   // Listen for deterministic triggers
   useEffect(() => {
@@ -37,7 +40,6 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
         if (flag === '1') {
           setPostConvertLeadId(id || null);
           if (!openedRef.current) { setShowAIModal(true); openedRef.current = true; }
-          // Ensure Leads tab active
           setActiveTab('leads');
         }
       } catch {}
@@ -53,31 +55,18 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
     try {
       const chain = localStorage.getItem('POST_CONVERT_CHAIN');
       const id = localStorage.getItem('POST_CONVERT_LEAD_ID');
-      // clear flag so it doesn't reopen
       localStorage.removeItem('OPEN_AI_ADD_LEAD');
-      // Open edit modal for the converted lead
       if (chain === 'open_edit_after_ai' && id) {
         const found = (leads || []).find(l => l.id === id);
         if (found) {
           setLeadEditData(found);
           setLeadEditOpen(true);
-        } else {
-          // As a fallback, try to fetch fresh data quickly
-          fetch(`${API}/api/leads/${encodeURIComponent(id)}`)
-            .then(r => r.json())
-            .then(d => {
-              const lead = d?.lead || null;
-              if (lead) { setLeadEditData(lead); setLeadEditOpen(true); }
-            })
-            .catch(() => {});
         }
       }
     } catch {}
-    // clean hash
     try { if (window.location.hash === '#open_ai_add_lead') window.location.hash = ''; } catch {}
   };
 
-  // Preload lead for studio
   useEffect(()=>{
     const preload = typeof window !== 'undefined' ? localStorage.getItem('VISUAL_STUDIO_LEAD_ID') : null;
     if (activeTab === 'erp') {
@@ -91,7 +80,6 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
     }
   }, [activeTab, leads]);
 
-  // Load past upgrades when lead changes
   useEffect(()=>{
     const load = async()=>{
       try{
@@ -135,6 +123,7 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
                   <div>
                     <div className="font-semibold">{ld.name}</div>
                     <div className="text-xs text-gray-600">{ld.phone || ''} • {ld.email || ''}</div>
+                    <div className="text-xs text-gray-500">Status: {ld.status || 'New'}</div>
                   </div>
                   <div className="flex gap-2">
                     <button className="ghost" onClick={()=>{ try { localStorage.setItem('VISUAL_STUDIO_LEAD_ID', ld.id) } catch {}; setActiveTab('erp') }}>Open in Visual Studio</button>
@@ -146,7 +135,7 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
           </div>
         )
       case 'pipeline':
-        return (<div className="p-4">Pipeline coming soon. Track deals through stages.</div>)
+        return (<PipelineKanban />)
       case 'tasks':
         return (
           <div className="space-y-4">
@@ -188,41 +177,28 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
             <div>
               <VisualUpgradeStudio leadId={leadForStudio?.id} />
             </div>
-            <div className="mt-4">
-              <div className="text-sm font-semibold mb-2">Past Upgrades</div>
-              {pastUpgrades.length===0 && (<div className="text-xs text-gray-600">No upgrades yet for this lead.</div>)}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {pastUpgrades.map(up => (
-                  <div key={up.id} className="border rounded p-2">
-                    <div className="text-xs text-gray-600 truncate" title={up.prompt}>{up.prompt}</div>
-                    <div className="mt-1 border rounded overflow-hidden">
-                      <img src={up.result?.url} alt="Upgrade" className="w-full h-auto" />
-                    </div>
-                    <div className="flex gap-2 mt-1">
-                      <a className="underline text-blue-600 text-xs" href={up.result?.url} target="_blank" rel="noreferrer">Open</a>
-                      <a className="underline text-xs" href={up.result?.url} download>Download</a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
             <div className="mt-6">
               <div className="text-sm font-semibold mb-2">Project Catalogue</div>
               <div className="flex items-center gap-2 mb-2">
-                <ProjectSelector />
+                <ProjectSelector value={selectedProjectId} onChange={setSelectedProjectId} />
               </div>
-              <CatalogueManager isEmbeded={true} projectId={leadForStudio?.project_id || null} />
+              <CatalogueManager isEmbeded={true} projectId={selectedProjectId || null} />
             </div>
           </div>
         )
       case 'hrms':
-        return (<div className="p-4">HRMS overview and attendance coming soon.</div>)
+        return (<HRMSPanel />)
       case 'ai':
-        return (<div className="p-4">AI Assistant & automation workflows coming soon.</div>)
+        return (
+          <div className="p-4">
+            <div className="mb-2 text-sm">AI Assistant</div>
+            <div className="border rounded p-3 text-sm">Open the assistant from the floating button or header. The chat now connects to backend endpoints.</div>
+          </div>
+        )
       case 'training':
-        return (<div className="p-4">Training modules and guides coming soon.</div>)
+        return (<TrainingCenter />)
       case 'admin':
-        return (<div className="p-4">Admin tools and configurations coming soon.</div>)
+        return (<AdminSettings />)
       case 'inbox':
         return (<WhatsAppInbox />)
       default:
@@ -230,23 +206,18 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
           <div className="p-4">Active tab: {activeTab}</div>
         )
     }
-  }, [activeTab, leads, tasks, leadForStudio, pastUpgrades, dashboardStats])
+  }, [activeTab, leads, tasks, leadForStudio, pastUpgrades, dashboardStats, selectedProjectId])
 
   return (
     <div>
       {content}
-
-      {/* AI Add Lead Modal */}
       <OptimizedLeadCreationForm
         isOpen={showAIModal}
         onClose={handleAIModalClose}
         onLeadCreated={(lead)=>{
-          // If created via AI, optionally open edit directly
           try { localStorage.setItem('POST_CONVERT_LEAD_ID', lead.id) } catch {}
         }}
       />
-
-      {/* Lead Edit Modal */}
       {leadEditData && (
         <EnhancedLeadEditModal
           isOpen={leadEditOpen}

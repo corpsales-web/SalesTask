@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import ProjectSelector from './ProjectSelector'
 
 const API = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL
 
@@ -8,21 +9,23 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
   const [selectedFiles, setSelectedFiles] = useState([]) // FileList -> Array<File>
   const [uploadCategory, setUploadCategory] = useState('general')
   const [uploadTags, setUploadTags] = useState('')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [jobs, setJobs] = useState([]) // per file jobs
   const controllersRef = useRef({}) // key: jobId -> AbortController
+  const [projectId, setProjectId] = useState(externalProjectId)
+  const jobsRef = useRef([])
 
-  const load = async()=>{
   useEffect(()=>{ setProjectId(externalProjectId) }, [externalProjectId])
 
+  const load = async()=>{
     try{
       const res = await fetch(`${API}/api/uploads/catalogue/list${projectId? ('?project_id='+encodeURIComponent(projectId)) : ''}`)
       const data = await res.json()
       setCatalogues(Array.isArray(data.catalogues) ? data.catalogues : [])
     }catch(e){ console.error('catalogue list', e) }
   }
-  const [projectId, setProjectId] = useState(externalProjectId)
-
-  useEffect(()=>{ load() },[])
+  useEffect(()=>{ load() },[projectId])
 
   const createJob = (file)=>({
     id: `${file.name}-${file.size}-${Date.now()}`,
@@ -36,6 +39,14 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
     chunkSize: 1024*1024,
     lastUpdated: Date.now()
   })
+
+  const updateJob = (job) => {
+    setJobs(prev=>{
+      const next = prev.map(j=> j.id===job.id ? {...j, ...job} : j)
+      jobsRef.current = next
+      return next
+    })
+  }
 
   const startUpload = async (job) => {
     const file = job.file
@@ -66,7 +77,6 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
       job.total = total
 
       for(let i=stateParts; i<total; i++){
-        // check paused/canceled
         const currJob = jobsRef.current.find(j=>j.id===job.id)
         if (!currJob || currJob.status === 'paused' || currJob.status === 'canceled' || currJob.status === 'error') break
 
@@ -89,16 +99,15 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
         updateJob(job)
       }
 
-      // if fully sent and not canceled/paused, complete
       const finalJob = jobsRef.current.find(j=>j.id===job.id)
       if (finalJob && finalJob.sent === finalJob.total && finalJob.status === 'uploading'){
-        const compRes = await fetch(`${API}/api/uploads/catalogue/complete`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ upload_id: uploadId, filename: file.name, category: uploadCategory, tags: uploadTags, project_id: projectId, title: file.name, description: '' }) })
+        const compRes = await fetch(`${API}/api/uploads/catalogue/complete`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ upload_id: uploadId, filename: file.name, category: uploadCategory, tags: uploadTags, project_id: projectId, title: title || file.name, description: description || '' }) })
         if(!compRes.ok) throw new Error('complete failed')
         const out = await compRes.json()
         finalJob.status = 'completed'
         finalJob.progress = 100
         updateJob(finalJob)
-        alert(`Uploaded ${out.file?.original_name || file.name}`)
+        try{ window.dispatchEvent(new CustomEvent('crm:notify', { detail: { title:'Upload Complete', message: out?.file?.filename || file.name, type: 'system', priority:'low', channel:['push'] } })) }catch{}
         await load()
       }
 
@@ -108,15 +117,6 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
       job.error = e.message || 'Upload failed'
       updateJob(job)
     }
-  }
-
-  const jobsRef = useRef([])
-  const updateJob = (job) => {
-    setJobs(prev=>{
-      const next = prev.map(j=> j.id===job.id ? {...j, ...job} : j)
-      jobsRef.current = next
-      return next
-    })
   }
 
   const pauseJob = (jobId) => {
@@ -139,7 +139,6 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
   const cancelJob = async (jobId) => {
     const job = jobsRef.current.find(j=>j.id===jobId)
     if (!job) return
-    // abort any inflight
     const controller = controllersRef.current[jobId]
     if (controller) { try{ controller.abort() }catch{} }
     try{
@@ -155,55 +154,49 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
 
   const beginUploads = async()=>{
     if (!selectedFiles || selectedFiles.length===0){ alert('Select files'); return }
-    // create jobs
     const newJobs = Array.from(selectedFiles).map(f=> createJob(f))
     setJobs(prev=>{
       const next = [...prev, ...newJobs]
       jobsRef.current = next
       return next
     })
-    // sequentially start to reduce load; still allows multiple queued
-    for(const j of newJobs){
-      await startUpload(j)
-    }
+    for(const j of newJobs){ await startUpload(j) }
   }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-3">
         <div className="text-lg font-semibold">Catalogue</div>
-        <button className="bg-emerald-600 text-white px-3 py-1 rounded" onClick={()=>setUploadModalOpen(true)}>Upload</button>
+        <div className="flex items-center gap-2">
+          <ProjectSelector value={projectId||''} onChange={(v)=>setProjectId(v||null)} />
+          <button className="bg-emerald-600 text-white px-3 py-1 rounded" onClick={()=>setUploadModalOpen(true)}>Upload</button>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {catalogues.map((c)=>(
           <div key={c.id} className="border rounded p-3">
-            <div className="font-medium truncate" title={c.original_name}>{c.original_name}</div>
-            <div className="text-xs text-gray-600">{c.category} • {new Date(c.uploaded_at).toLocaleString()}</div>
+            <div className="font-medium truncate" title={c.title || c.filename}>{c.title || c.filename}</div>
+            <div className="text-xs text-gray-600">{c.category || 'general'} • {new Date(c.created_at).toLocaleString()}</div>
+            {c.description && <div className="text-xs mt-1 text-gray-700 line-clamp-3">{c.description}</div>}
             <div className="mt-2 flex gap-2">
-              <a className="text-blue-600 underline text-sm" href={c.url} target="_blank" rel="noreferrer">Open</a>
-              <button className="text-sm underline" onClick={()=>{
-                const to = prompt('Enter recipient mobile (+91xxxxxxxxxx)')
-                if(to){
-                  const mediaType = (c.url||'').toLowerCase().match(/\.pdf|\.docx|\.doc$/) ? 'document' : 'image'
-                  fetch(`${API}/api/whatsapp/send_media`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ to, media_url: c.url, media_type: mediaType }) })
-                    .then(r=>{ if(!r.ok) return r.text().then(t=>{throw new Error(t)}) })
-                    .then(()=> alert('Shared via WhatsApp (stub/live based on config)'))
-                    .catch(err=> alert('Share failed: '+ (err.message||err)))
-                }
-              }}>Share via WhatsApp</button>
+              {c.url && <a className="text-blue-600 underline text-sm" href={c.url} target="_blank" rel="noreferrer">Open</a>}
             </div>
           </div>
         ))}
+        {catalogues.length===0 && <div className="text-sm text-gray-600">No files for selected project.</div>}
       </div>
 
       {uploadModalOpen && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded shadow w-full max-w-2xl">
             <div className="font-semibold mb-2">Upload Catalogue</div>
+            <div className="mb-2"><ProjectSelector value={projectId||''} onChange={(v)=>setProjectId(v||null)} /></div>
             <input multiple type="file" onChange={(e)=> setSelectedFiles(Array.from(e.target.files||[]))} className="mb-2" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+              <input value={title} onChange={(e)=>setTitle(e.target.value)} placeholder="Title" className="border rounded px-2 py-1 w-full" />
               <input value={uploadCategory} onChange={(e)=>setUploadCategory(e.target.value)} placeholder="Category" className="border rounded px-2 py-1 w-full" />
               <input value={uploadTags} onChange={(e)=>setUploadTags(e.target.value)} placeholder="Tags (comma separated)" className="border rounded px-2 py-1 w-full" />
+              <input value={description} onChange={(e)=>setDescription(e.target.value)} placeholder="Description" className="border rounded px-2 py-1 w-full" />
             </div>
 
             {/* Jobs List */}
