@@ -198,6 +198,49 @@
 ##         -agent: "main"
 ##         -comment: "Created .env file with REACT_APP_BACKEND_URL pointing to backend ingress external URL per platform rules. API client uses env var and auto-prefixes '/api'. Will wire to DMM once deployed."
 
+
+## backend:
+##   - task: "CRM Backend Comprehensive QA - Uploads/Downloads/Files"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Prepare end-to-end verification for all upload/download endpoints: Visual Upgrades save & list, Catalogue chunked upload with project/album, /api/files/* static access, Training PDF upload, and WhatsApp media send."
+##   - task: "CRM Backend Comprehensive QA - Leads/WhatsApp/AI Chat/HRMS/Admin"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Verify Leads CRUD + search; WhatsApp webhook, conversations, send, send_media, link_lead; AI chat endpoints /api/ai/specialized-chat, /api/aavana2/*; HRMS today/checkin/checkout/summary; Admin settings and roles endpoints."
+
+## test_plan:
+##   current_focus:
+##     - "Backend uploads/downloads and static files under /api/files"
+##     - "Catalogue chunked upload with project and album metadata"
+##     - "Training PDF upload and list by feature"
+##     - "WhatsApp webhook → conversations list; send text/media; link_lead"
+##     - "Leads CRUD and search; Visual Upgrades render & list"
+##     - "AI chat endpoints return valid JSON"
+##     - "HRMS and Admin endpoints"
+##   stuck_tasks:
+##     - "AI Add Lead modal auto-open loop needs revalidation in frontend"
+##   test_all: true
+##   test_priority: "high_first"
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Please run BACKEND comprehensive QA now. Validate: 1) Visual Upgrades: POST /api/visual-upgrades/render with image (and optional mask) → should store base/result and return upgrade, then GET /api/visual-upgrades/list?lead_id=... shows items. 2) Catalogue: Create project + album; init upload with project_id & album_id; POST chunk (1MB pieces); GET state; POST complete with title/description; GET /api/uploads/catalogue/list?project_id=...&album_id=... shows uploaded file with URL accessible via /api/files/catalogue/*. 3) Training: POST /api/training/upload (pdf) and GET modules with feature filter; ensure URL is /api/files/training/* and downloadable (200). 4) WhatsApp stub: POST /api/whatsapp/webhook (demo payload) → GET /api/whatsapp/conversations has item with age_sec/unread_count; POST /api/whatsapp/send and send_media update conversation; POST conversations/{contact}/link_lead after creating a lead; GET contact_messages returns last 3. 5) Leads: full CRUD and /api/leads/search; phone last10 matching works. 6) AI Chat: /api/ai/specialized-chat, /api/aavana2/enhanced-chat, /api/aavana2/chat return {message}. 7) HRMS today/checkin/checkout/summary; Admin settings GET/PUT and roles. Ensure all responses have no _id leakage and correct schemas. Provide failures and logs."
+
 ## frontend:
 ##   - task: "Catalogue resumable uploads (pause/resume/cancel + multi-file)"
 ##     implemented: true
