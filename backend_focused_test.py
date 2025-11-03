@@ -576,16 +576,26 @@ startxref
                     pdf_url = test_module.get("url")
                     
                     if pdf_url:
+                        # Try HTTPS version first, then HTTP if 301 redirect
+                        https_url = pdf_url.replace('http://', 'https://')
+                        
                         # Make a HEAD request to check if URL is accessible
-                        head_response = self.session.head(pdf_url, timeout=30)
+                        head_response = self.session.head(https_url, timeout=30, allow_redirects=True)
                         
                         if head_response.status_code == 200:
                             self.log_test("Training URL Accessibility", True, 
-                                        f"PDF URL accessible: {pdf_url}")
+                                        f"PDF URL accessible: {https_url}")
                             return True
                         else:
-                            self.log_test("Training URL Accessibility", False, 
-                                        f"PDF URL not accessible: {pdf_url}, HTTP {head_response.status_code}")
+                            # Try original URL if HTTPS fails
+                            head_response2 = self.session.head(pdf_url, timeout=30, allow_redirects=True)
+                            if head_response2.status_code == 200:
+                                self.log_test("Training URL Accessibility", True, 
+                                            f"PDF URL accessible: {pdf_url}")
+                                return True
+                            else:
+                                self.log_test("Training URL Accessibility", False, 
+                                            f"PDF URL not accessible: {pdf_url} (HTTP {head_response2.status_code}), HTTPS: {https_url} (HTTP {head_response.status_code})")
                     else:
                         self.log_test("Training URL Accessibility", False, "No URL found in module")
                 else:
