@@ -1038,10 +1038,10 @@ class CRMComprehensiveTester:
         print("🔍 Focus: File access via /api/files/* for Training and Catalogue downloads")
         print("=" * 70)
         
-        # Test 1: Health Check
-        print("\n1️⃣ Testing Health Endpoint...")
-        if not self.test_health_endpoint():
-            print("❌ Health check failed - aborting tests")
+        # Test 1: Backend Connectivity Check
+        print("\n1️⃣ Testing Backend Connectivity...")
+        if not self.test_backend_connectivity():
+            print("❌ Backend connectivity failed - aborting tests")
             return False
         
         # Test 2: Visual Upgrades
