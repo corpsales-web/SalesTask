@@ -507,6 +507,74 @@ async def standard_chat(body: Dict[str, Any]):
     }
 
 
+# ---- HRMS minimal endpoints ----
+_hrms_state: Dict[str, Any] = {"today": {"checked_in": False, "checkin_time": None, "checkout_time": None}}
+
+@app.get("/api/hrms/today")
+async def hrms_today():
+    return _hrms_state["today"]
+
+@app.post("/api/hrms/checkin")
+async def hrms_checkin():
+    _hrms_state["today"]["checked_in"] = True
+    _hrms_state["today"]["checkin_time"] = now_iso()
+    return {"success": True}
+
+@app.post("/api/hrms/checkout")
+async def hrms_checkout():
+    _hrms_state["today"]["checkout_time"] = now_iso()
+    return {"success": True}
+
+@app.get("/api/hrms/summary")
+async def hrms_summary(days: int = 7):
+    from datetime import date, timedelta
+    today = date.today()
+    items = []
+    for i in range(days):
+        d = today - timedelta(days=i)
+        items.append({"date": d.isoformat(), "checked_in": True if i % 2 == 0 else False})
+    return {"items": items}
+
+# ---- Training modules ----
+_training: List[Dict[str, Any]] = []
+
+@app.get("/api/training/modules")
+async def training_list(q: Optional[str] = None):
+    items = _training
+    if q:
+        items = [m for m in items if q.lower() in m.get("title", "").lower()]
+    return {"items": items}
+
+@app.post("/api/training/modules")
+async def training_add(body: Dict[str, Any]):
+    item = {
+        "id": str(uuid.uuid4()),
+        "title": body.get("title"),
+        "type": body.get("type"),
+        "url": body.get("url"),
+        "created_at": now_iso(),
+    }
+    _training.insert(0, item)
+    return {"module": item}
+
+# ---- Admin settings & roles ----
+_admin_settings: Dict[str, Any] = {"sla_minutes": 300, "whatsapp_mode": "stub"}
+_roles: List[Dict[str, Any]] = [{"id": "admin", "name": "Administrator"}, {"id": "sales", "name": "Sales"}]
+
+@app.get("/api/admin/settings")
+async def admin_get_settings():
+    return _admin_settings
+
+@app.put("/api/admin/settings")
+async def admin_put_settings(body: Dict[str, Any]):
+    _admin_settings.update({k: v for k, v in body.items() if v is not None})
+    return {"success": True}
+
+@app.get("/api/admin/roles")
+async def admin_roles():
+    return {"items": _roles}
+
+
 # Filtered list endpoint (project_id)
 @app.get("/api/uploads/catalogue/list")
 async def list_catalogue_items_filtered(request: Request, project_id: Optional[str] = None, db=Depends(get_db)):
