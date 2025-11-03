@@ -15,6 +15,8 @@ export default function CatalogueManager({ isEmbeded=false, projectId: externalP
   const [jobs, setJobs] = useState([]) // per file jobs
   const controllersRef = useRef({}) // key: jobId -> AbortController
   const [projectId, setProjectId] = useState(externalProjectId)
+  const [albumId, setAlbumId] = useState('')
+
   const jobsRef = useRef([])
 
   useEffect(()=>{ setProjectId(externalProjectId) }, [externalProjectId])
