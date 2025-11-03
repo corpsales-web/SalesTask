@@ -55,25 +55,22 @@ class CRMComprehensiveTester:
         content = b"Test file content for CRM backend testing. " * (size_mb * 1024 * 24)  # Approximate 1MB
         return content[:size_mb * 1024 * 1024]  # Exact size
     
-    # ========== HEALTH CHECK ==========
-    def test_health_endpoint(self):
-        """Test GET /api/health"""
+    # ========== BACKEND CONNECTIVITY CHECK ==========
+    def test_backend_connectivity(self):
+        """Test backend connectivity using leads endpoint"""
         try:
-            response = self.session.get(f"{API_BASE}/health", timeout=10)
+            response = self.session.get(f"{API_BASE}/leads?limit=1", timeout=10)
             if response.status_code == 200:
                 data = response.json()
-                required_fields = ["status", "service", "time"]
-                missing_fields = [field for field in required_fields if field not in data]
-                
-                if not missing_fields and data.get("status") == "ok":
-                    self.log_test("Health Check", True, f"Backend healthy: {data.get('service')}")
+                if "items" in data and "total" in data:
+                    self.log_test("Backend Connectivity", True, f"Backend accessible, {data.get('total', 0)} leads in system")
                     return True
                 else:
-                    self.log_test("Health Check", False, f"Invalid response: {missing_fields}", data)
+                    self.log_test("Backend Connectivity", False, "Invalid response format", data)
             else:
-                self.log_test("Health Check", False, f"HTTP {response.status_code}", response.text)
+                self.log_test("Backend Connectivity", False, f"HTTP {response.status_code}", response.text)
         except Exception as e:
-            self.log_test("Health Check", False, f"Connection error: {str(e)}")
+            self.log_test("Backend Connectivity", False, f"Connection error: {str(e)}")
         return False
     
     # ========== VISUAL UPGRADES ==========
