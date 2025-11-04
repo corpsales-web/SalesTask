@@ -37,12 +37,17 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
         const flag = localStorage.getItem('OPEN_AI_ADD_LEAD');
         const id = localStorage.getItem('POST_CONVERT_LEAD_ID');
         const chain = localStorage.getItem('POST_CONVERT_CHAIN');
+        console.debug('[TabContent] checkAndOpen', { flag, id, chain, hash: window.location.hash, opened: openedRef.current })
         if (flag === '1') {
           setPostConvertLeadId(id || null);
-          if (!openedRef.current) { setShowAIModal(true); openedRef.current = true; }
-          setActiveTab('leads');
+          if (!openedRef.current) {
+            console.debug('[TabContent] Opening AI modal')
+            setShowAIModal(true); openedRef.current = true;
+          }
+          // Defer tab activation slightly to avoid render race
+          setTimeout(()=>{ try { setActiveTab('leads'); console.debug('[TabContent] setActiveTab("leads")') } catch(e){ console.warn('[TabContent] setActiveTab failed', e) } }, 10)
         }
-      } catch {}
+      } catch (e) { console.warn('[TabContent] checkAndOpen error', e) }
     };
     checkAndOpen();
     const evt = () => checkAndOpen();
