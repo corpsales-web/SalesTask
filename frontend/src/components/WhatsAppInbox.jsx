@@ -141,11 +141,7 @@ export default function WhatsAppInbox() {
         window.dispatchEvent(new Event('open_ai_add_lead'));
         console.debug('[Inbox] open_ai_add_lead event dispatched')
       } catch(e) { console.warn('[Inbox] Trigger flags error', e) }
-      // Defer tab activation to avoid race
-      setTimeout(()=>{
-        try { setActiveTab('leads'); console.debug('[Inbox] setActiveTab("leads") called') } catch(e) { console.warn('[Inbox] setActiveTab failed', e) }
-        try { window.dispatchEvent(new Event('refresh_leads')); console.debug('[Inbox] refresh_leads dispatched') } catch(e) { console.warn('[Inbox] refresh_leads failed', e) }
-      }, 50)
+      // Do not activate tab here; let TabNavigation/TabContent handle via event/hash to avoid double triggers
       return
     } catch (e) {
       console.error('[Inbox] Convert error', e?.response?.status, e?.response?.data || e)
