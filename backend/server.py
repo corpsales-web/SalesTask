@@ -27,7 +27,23 @@ UPLOAD_ROOT = "/app/uploads"
 os.makedirs(UPLOAD_ROOT, exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_ROOT, "visual"), exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_ROOT, "catalogue"), exist_ok=True)
+os.makedirs(os.path.join(UPLOAD_ROOT, "catalogue_thumbs"), exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_ROOT, "training"), exist_ok=True)
+
+# Generate a simple PDF placeholder thumbnail if missing
+PDF_PLACEHOLDER = os.path.join(UPLOAD_ROOT, "catalogue_thumbs", "pdf_placeholder.png")
+try:
+    if not os.path.exists(PDF_PLACEHOLDER):
+        from PIL import Image, ImageDraw, ImageFont
+        img = Image.new('RGB', (320, 200), color=(240, 240, 240))
+        d = ImageDraw.Draw(img)
+        text = "PDF"
+        w, h = d.textsize(text)
+        d.text(((320-w)/2, (200-h)/2), text, fill=(120, 120, 120))
+        img.save(PDF_PLACEHOLDER, format='PNG')
+except Exception:
+    # Pillow may not be installed yet; thumbnail generation will be best-effort later
+    pass
 
 app = FastAPI(title="CRM Backend", version="1.0.0")
 app.add_middleware(
@@ -123,6 +139,7 @@ class AlbumCreate(BaseModel):
     project_id: str
     name: str
     description: Optional[str] = None
+    category: Optional[str] = None  # balcony, terrace, big_tree, etc.
 
 # Utility
 def normalize_phone(phone: str) -> str:
@@ -139,23 +156,6 @@ def normalize_phone(phone: str) -> str:
         return f"+91{digits[-10:]}" if len(digits) >= 10 else phone
 
 # -------- Leads --------
-# Leads search BEFORE param route to avoid any matching issues
-@app.get("/api/leads/search")
-async def search_leads(q: str, page: int = 1, limit: int = 20, db=Depends(get_db)):
-    try:
-        regex = {"$regex": re.escape(q), "$options": "i"}
-        phone_digits = re.sub(r"\D", "", q)
-        phone_last10 = phone_digits[-10:] if len(phone_digits) >= 4 else None
-        criteria = [{"name": regex}, {"email": regex}]
-        if phone_last10:
-            criteria.append({"phone": {"$regex": phone_last10 + "$"}})
-        cursor = db["leads"].find({"$or": criteria}, {"_id": 0}).skip((page-1)*limit).limit(limit)
-        items = await cursor.to_list(length=limit)
-        total = await db["leads"].count_documents({"$or": criteria})
-        return {"items": items, "page": page, "limit": limit, "total": total}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 @app.get("/api/leads")
 async def list_leads(page: int = 1, limit: int = 50, db=Depends(get_db)):
     cursor = db["leads"].find({}, {"_id": 0}).skip((page-1)*limit).limit(limit)
@@ -175,6 +175,22 @@ async def create_lead(payload: LeadCreate, db=Depends(get_db)):
     await db["leads"].insert_one(lead)
     lead.pop("_id", None)
     return {"lead": lead}
+
+@app.get("/api/leads/search")
+async def search_leads(q: str, page: int = 1, limit: int = 20, db=Depends(get_db)):
+    try:
+        regex = {"$regex": re.escape(q), "$options": "i"}
+        phone_digits = re.sub(r"\D", "", q)
+        phone_last10 = phone_digits[-10:] if len(phone_digits) >= 4 else None
+        criteria = [{"name": regex}, {"email": regex}]
+        if phone_last10:
+            criteria.append({"phone": {"$regex": phone_last10 + "$"}})
+        cursor = db["leads"].find({"$or": criteria}, {"_id": 0}).skip((page-1)*limit).limit(limit)
+        items = await cursor.to_list(length=limit)
+        total = await db["leads"].count_documents({"$or": criteria})
+        return {"items": items, "page": page, "limit": limit, "total": total}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/leads/{lead_id}")
 async def get_lead(lead_id: str, db=Depends(get_db)):
@@ -199,8 +215,6 @@ async def delete_lead(lead_id: str, db=Depends(get_db)):
     res = await db["leads"].delete_one({"id": lead_id})
     return {"deleted": res.deleted_count == 1}
 
-# moved earlier in file
-
 # -------- Tasks --------
 @app.get("/api/tasks")
 async def list_tasks(db=Depends(get_db)):
@@ -218,7 +232,26 @@ async def create_task(payload: TaskCreate, db=Depends(get_db)):
     task.pop("_id", None)
     return {"task": task}
 
-# -------- Visual Upgrades (MVP simulate) --------
+# -------- Helper: Thumbnails --------
+
+def _is_image_ext(filename: str) -> bool:
+    return filename.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))
+
+async def _generate_thumbnail(request: Request, file_path: str, upload_id: str) -> Optional[str]:
+    thumb_dir = os.path.join(UPLOAD_ROOT, "catalogue_thumbs")
+    os.makedirs(thumb_dir, exist_ok=True)
+    try:
+        from PIL import Image
+        im = Image.open(file_path)
+        im.thumbnail((320, 320))
+        thumb_path = os.path.join(thumb_dir, f"{upload_id}_thumb.jpg")
+        im.save(thumb_path, format="JPEG", quality=85)
+        rel = f"/api/files/catalogue_thumbs/{os.path.basename(thumb_path)}"
+        return build_absolute_url(request, rel)
+    except Exception:
+        return None
+
+# -------- Visual Upgrades (MVP simulate remains; full integration in visual_upgrades.py) --------
 @app.post("/api/visual-upgrades/render")
 async def visual_upgrades_render(request: Request, image: UploadFile = File(...), prompt: str = Form(...), size: str = Form("1024x1024"), mask: Optional[UploadFile] = File(None), lead_id: Optional[str] = Form(None), response_format: str = Form("url"), db=Depends(get_db)):
     try:
@@ -296,7 +329,7 @@ async def create_album(payload: AlbumCreate, db=Depends(get_db)):
     alb.pop("_id", None)
     return {"album": alb}
 
-# -------- Catalogue Upload (projects + albums) --------
+# -------- Catalogue Upload (projects + albums) + Thumbnails + Notifications --------
 upload_sessions: Dict[str, Dict[str, Any]] = {}
 
 @app.post("/api/uploads/catalogue/init")
@@ -395,9 +428,31 @@ async def complete_catalogue_upload(request: Request, complete_data: UploadCompl
             "title": complete_data.title,
             "description": complete_data.description,
         }
+        # Thumbnail
+        thumb_url = None
+        if _is_image_ext(final_path):
+            thumb_url = await _generate_thumbnail(request, final_path, upload_id)
+        else:
+            if os.path.exists(PDF_PLACEHOLDER):
+                rel = "/api/files/catalogue_thumbs/" + os.path.basename(PDF_PLACEHOLDER)
+                thumb_url = build_absolute_url(request, rel)
+        if thumb_url:
+            item["thumb_url"] = thumb_url
         await db["catalogue_items"].insert_one(item)
         item.pop("_id", None)
         session["status"] = "completed"
+        # Notification
+        note = {
+            "id": str(uuid.uuid4()),
+            "type": "catalogue",
+            "title": f"New catalogue: {item.get('title') or item['filename']}",
+            "message": item.get('description') or '',
+            "url": item["url"],
+            "thumb_url": item.get("thumb_url"),
+            "created_at": now_iso(),
+            "read": False
+        }
+        await db["notifications"].insert_one(note)
         return {"success": True, "file": item}
     except HTTPException:
         raise
@@ -434,9 +489,41 @@ async def list_catalogue_items(request: Request, project_id: Optional[str] = Non
                 rel = "/api/files/catalogue/" + os.path.basename(it["file_path"]) if it.get("file_path") else None
                 if rel:
                     it["url"] = build_absolute_url(request, rel)
+            # Thumb backfill safety
+            if not it.get("thumb_url"):
+                if it.get("file_path") and _is_image_ext(it["file_path"]):
+                    # best effort generate
+                    try:
+                        it["thumb_url"] = await _generate_thumbnail(request, it["file_path"], it.get("upload_id", str(uuid.uuid4())))
+                    except Exception:
+                        pass
+                else:
+                    if os.path.exists(PDF_PLACEHOLDER):
+                        rel = "/api/files/catalogue_thumbs/" + os.path.basename(PDF_PLACEHOLDER)
+                        it["thumb_url"] = build_absolute_url(request, rel)
         return {"catalogues": items}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# -------- Notifications --------
+@app.get("/api/notifications/list")
+async def notifications_list(since: Optional[str] = None, limit: int = 50, db=Depends(get_db)):
+    q: Dict[str, Any] = {}
+    if since:
+        q["created_at"] = {"$gt": since}
+    items = await db["notifications"].find(q, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(length=limit)
+    return {"items": items}
+
+class MarkReadPayload(BaseModel):
+    ids: List[str]
+
+@app.post("/api/notifications/mark_read")
+async def notifications_mark_read(payload: MarkReadPayload, db=Depends(get_db)):
+    ids = payload.ids or []
+    if not ids:
+        return {"updated": 0}
+    await db["notifications"].update_many({"id": {"$in": ids}}, {"$set": {"read": True}})
+    return {"updated": len(ids)}
 
 # -------- WhatsApp stub helpers + conversations --------
 @app.get("/api/whatsapp/session_status")
@@ -589,7 +676,6 @@ async def training_add(body: Dict[str, Any]):
 @app.post("/api/training/upload")
 async def training_upload(request: Request, file: UploadFile = File(...), title: str = Form(...), feature: str = Form("general")):
     try:
-        # Save PDF
         safe_name = f"{uuid.uuid4()}_{file.filename}"
         rel = f"/api/files/training/{safe_name}"
         path = os.path.join(UPLOAD_ROOT, "training", safe_name)
