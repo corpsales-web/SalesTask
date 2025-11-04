@@ -102,6 +102,7 @@ export default function WhatsAppInbox() {
 
   const handleConvert = async (rawContact) => {
     const contact = normalizePhoneUI(rawContact)
+    console.debug('[Inbox] Convert start for', contact)
     try {
       setConvertBusy(contact)
       const sr = await axios.get(`${API}/api/leads/search`, { params: { q: contact } })
@@ -109,30 +110,45 @@ export default function WhatsAppInbox() {
       const last10 = contact.replace(/\D/g, '').slice(-10)
       const exact = results.find(r => (String(r.phone||'').replace(/\D/g,'').slice(-10) === last10))
       if (exact) {
+        console.debug('[Inbox] Existing lead found', exact.id)
         await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: exact.id })
         await load()
-        // notify
         try{ window.dispatchEvent(new CustomEvent('crm:notify', { detail: { title: 'Conversation Linked', message: `${contact} → ${exact.name}`, type: 'lead', priority:'low', channel:['push'] } })) }catch{}
         return
       }
       const res = await axios.post(`${API}/api/leads`, { name: `WhatsApp Contact ${new Date().toLocaleTimeString()}`, phone: contact, source: 'WhatsApp' })
       const newLead = res.data?.lead
+      console.debug('[Inbox] Lead created response', res.status, newLead)
       if (!newLead?.id) throw new Error('Invalid create lead response')
       await axios.post(`${API}/api/whatsapp/conversations/${encodeURIComponent(contact)}/link_lead`, { lead_id: newLead.id })
+      console.debug('[Inbox] Conversation linked to lead', newLead.id)
       // Notify + trigger AI modal
       try {
         window.dispatchEvent(new CustomEvent('crm:notify', { detail: { title: 'Lead Created', message: `${newLead.name} (${newLead.phone})`, type: 'lead', priority:'high', channel:['push'] } }))
+        const ts = String(Date.now())
         localStorage.setItem('OPEN_AI_ADD_LEAD','1');
         localStorage.setItem('POST_CONVERT_LEAD_ID', newLead.id);
         localStorage.setItem('POST_CONVERT_CHAIN', 'open_edit_after_ai');
-        localStorage.setItem('POST_CONVERT_TS', String(Date.now()));
+        localStorage.setItem('POST_CONVERT_TS', ts);
+        console.debug('[Inbox] Flags set', {
+          OPEN_AI_ADD_LEAD: localStorage.getItem('OPEN_AI_ADD_LEAD'),
+          POST_CONVERT_LEAD_ID: localStorage.getItem('POST_CONVERT_LEAD_ID'),
+          POST_CONVERT_CHAIN: localStorage.getItem('POST_CONVERT_CHAIN'),
+          POST_CONVERT_TS: localStorage.getItem('POST_CONVERT_TS')
+        })
         window.location.hash = '#open_ai_add_lead';
+        console.debug('[Inbox] Hash set to', window.location.hash)
         window.dispatchEvent(new Event('open_ai_add_lead'));
-      } catch(e) {}
-      try { setActiveTab('leads') } catch {}
-      try { window.dispatchEvent(new Event('refresh_leads')) } catch {}
+        console.debug('[Inbox] open_ai_add_lead event dispatched')
+      } catch(e) { console.warn('[Inbox] Trigger flags error', e) }
+      // Defer tab activation to avoid race
+      setTimeout(()=>{
+        try { setActiveTab('leads'); console.debug('[Inbox] setActiveTab("leads") called') } catch(e) { console.warn('[Inbox] setActiveTab failed', e) }
+        try { window.dispatchEvent(new Event('refresh_leads')); console.debug('[Inbox] refresh_leads dispatched') } catch(e) { console.warn('[Inbox] refresh_leads failed', e) }
+      }, 50)
       return
     } catch (e) {
+      console.error('[Inbox] Convert error', e?.response?.status, e?.response?.data || e)
     } finally { setConvertBusy('') }
   }
 
