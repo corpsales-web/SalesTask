@@ -61,6 +61,7 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
   }, [setActiveTab]);
 
   const handleAIModalClose = () => {
+    console.debug('[TabContent] AI modal close')
     setShowAIModal(false);
     try {
       const chain = localStorage.getItem('POST_CONVERT_CHAIN');
@@ -69,11 +70,14 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
       if (chain === 'open_edit_after_ai' && id) {
         const found = (leads || []).find(l => l.id === id);
         if (found) {
+          console.debug('[TabContent] Opening lead edit for', id)
           setLeadEditData(found);
           setLeadEditOpen(true);
+        } else {
+          console.debug('[TabContent] Lead not found in list for', id)
         }
       }
-    } catch {}
+    } catch (e) { console.warn('[TabContent] handleAIModalClose error', e) }
     try { if (window.location.hash === '#open_ai_add_lead') window.location.hash = ''; } catch {}
   };
 
