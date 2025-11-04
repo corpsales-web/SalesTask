@@ -10,8 +10,9 @@ const TabNavigation = () => {
     const handler = () => {
       const hash = window.location.hash
       if (hash === '#open_ai_add_lead') {
-        setActiveTab('leads')
-        setTimeout(() => window.dispatchEvent(new Event('open_ai_add_lead')), 100)
+        console.debug('[TabNav] hash trigger detected, scheduling open_ai_add_lead')
+        // Do not setActiveTab here to avoid re-entrant loops; TabContent will set on open
+        requestAnimationFrame(() => window.dispatchEvent(new Event('open_ai_add_lead')))
       }
     }
     handler()
