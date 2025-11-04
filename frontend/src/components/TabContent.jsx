@@ -31,9 +31,10 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
   const [leadEditOpen, setLeadEditOpen] = useState(false);
   const [leadEditData, setLeadEditData] = useState(null);
 
-  // Listen for deterministic triggers
+  // Listen for deterministic triggers – single run guarded effect
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    let rafId = null
     const checkAndOpen = () => {
       try {
         const flag = localStorage.getItem('OPEN_AI_ADD_LEAD');
@@ -49,16 +50,19 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
             console.debug('[TabContent] Opening AI modal')
             setShowAIModal(true); openedRef.current = true;
           }
-          // Defer tab activation slightly to avoid render race
-          setTimeout(()=>{ if (!lockRef.current) { lockRef.current = true; try { setActiveTab('leads'); console.debug('[TabContent] setActiveTab("leads")') } catch(e){ console.warn('[TabContent] setActiveTab failed', e) } setTimeout(()=>{ lockRef.current = false }, 100) } }, 30)
+          // Do not set tab here; schedule after paint to avoid recursion
+          rafId = requestAnimationFrame(() => {
+            try { setActiveTab('leads'); console.debug('[TabContent] setActiveTab("leads") via rAF') } catch(e){ console.warn('[TabContent] setActiveTab failed', e) }
+          })
         }
       } catch (e) { console.warn('[TabContent] checkAndOpen error', e) }
     };
+    // Run once on mount and on event; no dependency on setActiveTab to avoid loop
     checkAndOpen();
     const evt = () => checkAndOpen();
     window.addEventListener('open_ai_add_lead', evt);
-    return () => window.removeEventListener('open_ai_add_lead', evt);
-  }, [setActiveTab]);
+    return () => { window.removeEventListener('open_ai_add_lead', evt); if (rafId) cancelAnimationFrame(rafId) };
+  }, []);
 
   const handleAIModalClose = () => {
     console.debug('[TabContent] AI modal close')
