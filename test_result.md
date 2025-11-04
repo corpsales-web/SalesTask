@@ -430,10 +430,8 @@
 ##         -comment: "Removed DigitalMarketingDashboard imports and usage from CRM TabContent and header. Replaced broken TaskDelegationPanel (undefined default export) with a minimal, stable implementation. This addresses 'Element type is invalid' under TabContent->tasks."
 
 ## test_plan:
-##   current_focus:
-##     - "AI Add Lead modal auto-open after Convert to Lead"
-##   stuck_tasks:
-##     - "AI Add Lead Modal Auto-Open After Convert to Lead"
+##   current_focus: []
+##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"
 
