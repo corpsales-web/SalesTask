@@ -39,15 +39,18 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
         const flag = localStorage.getItem('OPEN_AI_ADD_LEAD');
         const id = localStorage.getItem('POST_CONVERT_LEAD_ID');
         const chain = localStorage.getItem('POST_CONVERT_CHAIN');
-        console.debug('[TabContent] checkAndOpen', { flag, id, chain, hash: window.location.hash, opened: openedRef.current })
+        const ts = localStorage.getItem('POST_CONVERT_TS');
+        console.debug('[TabContent] checkAndOpen', { flag, id, chain, ts, hash: window.location.hash, opened: openedRef.current })
         if (flag === '1') {
+          if (processedTSRef.current === ts) { console.debug('[TabContent] already processed ts, skip'); return }
+          processedTSRef.current = ts || 'na';
           setPostConvertLeadId(id || null);
           if (!openedRef.current) {
             console.debug('[TabContent] Opening AI modal')
             setShowAIModal(true); openedRef.current = true;
           }
           // Defer tab activation slightly to avoid render race
-          setTimeout(()=>{ try { setActiveTab('leads'); console.debug('[TabContent] setActiveTab("leads")') } catch(e){ console.warn('[TabContent] setActiveTab failed', e) } }, 10)
+          setTimeout(()=>{ if (!lockRef.current) { lockRef.current = true; try { setActiveTab('leads'); console.debug('[TabContent] setActiveTab("leads")') } catch(e){ console.warn('[TabContent] setActiveTab failed', e) } setTimeout(()=>{ lockRef.current = false }, 100) } }, 30)
         }
       } catch (e) { console.warn('[TabContent] checkAndOpen error', e) }
     };
