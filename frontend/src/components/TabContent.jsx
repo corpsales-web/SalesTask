@@ -67,19 +67,38 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
   const handleAIModalClose = () => {
     console.debug('[TabContent] AI modal close')
     setShowAIModal(false);
+    const tryOpenEdit = async (leadId, attempt=1) => {
+      try {
+        const found = (leads || []).find(l => l.id === leadId)
+        if (found) {
+          console.debug('[TabContent] Opening lead edit from in-memory list', leadId)
+          setLeadEditData(found); setLeadEditOpen(true); return
+        }
+        // Fetch fallback
+        const res = await fetch(`${API}/api/leads/${encodeURIComponent(leadId)}`)
+        if (res.ok) {
+          const d = await res.json()
+          const lead = d?.lead
+          if (lead) {
+            console.debug('[TabContent] Opening lead edit from fetch', leadId)
+            setLeadEditData(lead); setLeadEditOpen(true); return
+          }
+        }
+        if (attempt < 3) {
+          console.debug('[TabContent] Lead not ready, retrying', { leadId, attempt })
+          try { window.dispatchEvent(new Event('refresh_leads')) } catch {}
+          setTimeout(()=> tryOpenEdit(leadId, attempt+1), 250)
+        } else {
+          console.warn('[TabContent] Failed to open lead edit after retries', leadId)
+        }
+      } catch (e) { console.warn('[TabContent] tryOpenEdit error', e) }
+    }
     try {
       const chain = localStorage.getItem('POST_CONVERT_CHAIN');
       const id = localStorage.getItem('POST_CONVERT_LEAD_ID');
       localStorage.removeItem('OPEN_AI_ADD_LEAD');
       if (chain === 'open_edit_after_ai' && id) {
-        const found = (leads || []).find(l => l.id === id);
-        if (found) {
-          console.debug('[TabContent] Opening lead edit for', id)
-          setLeadEditData(found);
-          setLeadEditOpen(true);
-        } else {
-          console.debug('[TabContent] Lead not found in list for', id)
-        }
+        tryOpenEdit(id)
       }
     } catch (e) { console.warn('[TabContent] handleAIModalClose error', e) }
     try { if (window.location.hash === '#open_ai_add_lead') window.location.hash = ''; } catch {}
