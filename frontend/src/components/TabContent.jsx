@@ -19,6 +19,8 @@ const TabContent = ({ dashboardStats, leads, tasks, selectedLead, setSelectedLea
   const openedRef = React.useRef(false);
 
   const { activeTab, setActiveTab } = useTab();
+  const processedTSRef = React.useRef(null);
+  const lockRef = React.useRef(false);
   const [leadForStudio, setLeadForStudio] = useState(null);
   const [pastUpgrades, setPastUpgrades] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState('')
