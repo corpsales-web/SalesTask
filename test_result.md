@@ -552,6 +552,17 @@
 ##         -working: true
 ##         -agent: "testing"
 ##         -comment: "BACKEND REVIEW REQUEST TESTING COMPLETED: Executed comprehensive automated test suite for all 3 requested focus areas from review request with 100% success rate (16/16 tests passed). ✅ 1) PROJECTS & ALBUMS: Complete workflow functional - POST /api/projects creates projects with UUID/name/description/created_at, POST /api/albums creates albums with project_id association, GET /api/albums?project_id=X correctly filters albums by project (retrieved 1 album for test project), all responses exclude _id fields. ✅ 2) CATALOGUE UPLOAD: Full chunked upload cycle working - POST /api/uploads/catalogue/init with project_id & album_id returns upload_id, POST /api/uploads/catalogue/chunk uploads 1MB chunks successfully (chunks 0 and 1), GET /api/uploads/catalogue/state returns proper status (exists=True, parts=2, status=uploading), POST /api/uploads/catalogue/complete assembles chunks and returns file with URL /api/files/catalogue/*, GET /api/uploads/catalogue/list?project_id=X&album_id=Y correctly filters by both parameters (retrieved 1 item). ✅ 3) TRAINING: PDF upload and filtering operational - POST /api/training/upload successfully uploads PDF files and returns modules with URLs in format /api/files/training/*, GET /api/training/modules?feature=X correctly filters by feature (tested crm, sales, general features), all PDF URLs are accessible via HTTPS (301 redirect from HTTP handled correctly). ✅ CRITICAL REQUIREMENT MET: NO 500 ERRORS detected throughout entire test suite. All requested backend functionality is fully operational and ready for production use."
+##   - task: "Leads Search Route Reorder Fix Verification"
+##     implemented: true
+##     working: true
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: true
+##         -agent: "testing"
+##         -comment: "LEADS SEARCH ROUTE REORDER TESTING COMPLETED: Executed focused test suite for /api/leads/search after route reorder fix as requested in review. ✅ ALL 6 TESTS PASSED (100% success rate): 1) Basic search functionality working - search returns proper {items, page, limit, total} format with 3 results for 'John' query, 2) Phone number search operational - searching '9876543210' finds leads with phone '+919876543210' in 10 results, 3) Empty query handling working - returns 15 results with proper pagination, 4) Get lead by ID still functional - successfully retrieves individual leads by UUID, 5) Route conflict resolved - /api/leads/search correctly returns search format (not single lead format), confirming 'search' is not being interpreted as lead_id, 6) Dashboard stats endpoint properly returns 404 (does not exist) as expected. ✅ KEY FINDINGS: Search endpoint is fully functional (✅ YES), Route conflict has been resolved (✅ YES). ✅ ROUTE REORDER FIX CONFIRMED: The FastAPI route ordering issue has been successfully resolved by moving @app.get('/api/leads/search') before @app.get('/api/leads/{lead_id}') in server.py. The search endpoint no longer returns 404 errors and properly handles all query types including name, phone, and empty queries. Created 3 test leads during testing. Route reorder fix is working correctly and the /api/leads/search endpoint is fully operational."
 
 ## agent_communication:
     -agent: "testing"
