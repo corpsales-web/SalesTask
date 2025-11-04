@@ -139,6 +139,23 @@ def normalize_phone(phone: str) -> str:
         return f"+91{digits[-10:]}" if len(digits) >= 10 else phone
 
 # -------- Leads --------
+# Leads search BEFORE param route to avoid any matching issues
+@app.get("/api/leads/search")
+async def search_leads(q: str, page: int = 1, limit: int = 20, db=Depends(get_db)):
+    try:
+        regex = {"$regex": re.escape(q), "$options": "i"}
+        phone_digits = re.sub(r"\D", "", q)
+        phone_last10 = phone_digits[-10:] if len(phone_digits) >= 4 else None
+        criteria = [{"name": regex}, {"email": regex}]
+        if phone_last10:
+            criteria.append({"phone": {"$regex": phone_last10 + "$"}})
+        cursor = db["leads"].find({"$or": criteria}, {"_id": 0}).skip((page-1)*limit).limit(limit)
+        items = await cursor.to_list(length=limit)
+        total = await db["leads"].count_documents({"$or": criteria})
+        return {"items": items, "page": page, "limit": limit, "total": total}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/leads")
 async def list_leads(page: int = 1, limit: int = 50, db=Depends(get_db)):
     cursor = db["leads"].find({}, {"_id": 0}).skip((page-1)*limit).limit(limit)
