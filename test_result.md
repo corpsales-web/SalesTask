@@ -397,10 +397,8 @@
 
 ## frontend:
 ## test_plan:
-##   current_focus:
-##     - "AI Add Lead Modal Auto-Open After Convert to Lead"
-##   stuck_tasks:
-##     - "AI Add Lead Modal Auto-Open After Convert to Lead"
+##   current_focus: []
+##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"
 ##   backend_testing_complete: true
